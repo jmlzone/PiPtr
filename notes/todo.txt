@@ -1,0 +1,26 @@
+1) (done, untested) signals
+  -- interupt and shut down
+  -- interupt and go interactive
+  import code
+code.interact(local=dict(globals(), **locals()))
+  -- process command
+
+2) IPC from dtmf and ctcss
+
+3) (Done untested) talking clock
+  -- time from python
+  -- pass in prefix string
+4) State as emun
+
+5) Tail message processing
+  -- list of messages
+  -- attributes:
+    - player
+    - is ID
+    - interuptable
+      -- what to do on interrupt
+         -- requeue
+	 -- discard
+	 - alternate message (ie low id)
+
+6) Command processer ideas

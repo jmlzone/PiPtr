@@ -1,0 +1,662 @@
+    1  uptime
+    2  ls /dev/usb
+    3  ls /dev/usb/hiddev0 
+    4  sudo reboot
+    5  echo $AUDIODEV
+    6  ls /dev/dsp
+    7  aplay -1
+    8  aplay -l
+    9  ls /dev
+   10  man aplay
+   11  sudo apt-get update
+   12  sudo apt-get upgrade
+   13  sudo raspi-config
+   14  exit
+   15  which git
+   16  pwd
+   17  cd python
+   18  ls
+   19  git clone git://github.com/swharden/Python-GUI-examples
+   20  ls
+   21  cd Python-GUI-examples/
+   22  ls
+   23  cd 2016-07-37_qt_audio_monitor/
+   24  ls
+   25  python go.py 
+   26  sudo apt-get install PyQt4
+   27  hg clone https://www.riverbankcomputing.com/hg/sip
+   28  which hg
+   29  pip3 install SIP
+   30  wget https://sourceforge.net/projects/pyqt/files/sip/sip-4.18.1/sip-4.18.1.tar.gz
+   31  ls
+   32  tar tfz sip-4.18.1.tar.gz 
+   33  tar xfz sip-4.18.1.tar.gz
+   34  cd sip-4.18.1/
+   35  ls
+   36  more README 
+   37  python build.py prepare
+   38  ls
+   39  more README 
+   40  ls
+   41  more configure.py 
+   42  python configure.py -help
+   43  sudo python configure.py
+   44  ls -ltr
+   45  sudo make
+   46  ls
+   47  more Makefile 
+   48  make 
+   49  pwd
+   50  cd ..
+   51  wget http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.4/PyQt-x11-gpl-4.11.4.tar.gz
+   52  ls
+   53  ls PyQt-x11-gpl-4.11.4.tar.gz 
+   54  tar tfz PyQt-x11-gpl-4.11.4.tar.gz 
+   55  ls
+   56  cd ../
+   57  ls
+   58  cd 2016-07-37_qt_audio_monitor/
+   59  ls
+   60  more ui_main.py 
+   61  ls
+   62  more SWHear.py 
+   63  sudo apt-get install python-dev
+   64  sudo apt-get install -y python-dev --fix-missing
+   65  sudo apt-get update
+   66  sudo apt-get install -y python-dev --fix-missing
+   67  pwd
+   68  ls
+   69  cd sip-4.18.1/
+   70  ls
+   71  make
+   72  make clean
+   73  make
+   74  sudo make installl
+   75  sudo make install
+   76  ls
+   77  cd ../
+   78  ls
+   79  tar xfz PyQt-x11-gpl-4.11.4.tar.gz 
+   80  cd PyQt-x11-gpl-4.11.4
+   81  ls
+   82  more README 
+   83  python configure-ng.py
+   84  sudo apt-get install qt
+   85  sudo apt-get install qt4-dev-tools
+   86  python configure-ng.py
+   87  history
+   88  ls
+   89  more README 
+   90  make 
+   91  sudo make install
+   92  ls
+   93  cd ../
+   94  ls
+   95  python go.py 
+   96  history
+   97  python go.py 
+   98  git clone https://github.com/pyqtgraph/pyqtgraph
+   99  ls
+  100  cd pyqtgraph/
+  101  ls
+  102  python setup.py
+  103  python setup.py -help
+  104  python setup.py --help
+  105  python setup.py build
+  106  sudo python setup.py install
+  107  cd ../
+  108  ls
+  109  python go.py
+  110  hi
+  111  history
+  112  python go.py
+  113  git clone http://people.csail.mit.edu/hubert/git/pyaudio.git
+  114  cd pyaudio/
+  115  ls
+  116  sudo apt-get install python-pyaudio
+  117  python go.py
+  118  pwd
+  119  cd ../
+  120  python go.py
+  121  history
+  122  sudo apt-get install python-matlibplot
+  123  sudo apt-get install matlibplot
+  124  sudo apt-get install matplotlib
+  125  sudo apt-get install python-matplotlib
+  126  python go.py
+  127  sudo apt-get install python-scipy
+  128  python go.py
+  129  xterm &
+  130  emacs 
+  131  cd c
+  132  ls
+  133  cd multimon/
+  134  ls
+  135  ./bin-armv7l/multimon 
+  136  ./bin-armv7l/multimon scope
+  137  ls
+  138  more unixinput.c 
+  139  ls
+  140  more demod_afsk12.c 
+  141  ls
+  142  more demod_dtmf.c 
+  143  ls
+  144  more mkcostab.c 
+  145  ls
+  146  ls bin-armv7l/mkcostab
+  147  bin-armv7l/mkcostab
+  148  ls -ltr
+  149  more costab.c
+  150  more costabf.c 
+  151  more costabi.c 
+  152  ls
+  153  emacs Makefile
+  154  bg
+  155  ls
+  156  more gen.c 
+  157  ls
+  158  more xdisplay.c 
+  159  ls
+  160  more multimon.h 
+  161  cd python
+  162  ls
+  163  cd Python-GUI-examples/
+  164  ls
+  165  cd 2016-07-37_qt_audio_monitor/
+  166  puthon go.py 
+  167  python go.py 
+  168  pwd
+  169  cd python
+  170  ls
+  171  pwd
+  172  ls
+  173  ls ../
+  174  mv ../gistfile1.py .
+  175  more .
+  176  more gistfile1.py 
+  177  which python
+  178  python gistfile1.py 
+  179  python my_goertzel.py 
+  180  python
+  181  cd pythin
+  182  cd python
+  183  ls
+  184  mroe my_goertzel.py 
+  185  more my_goertzel.py 
+  186  python my_goertzel.py
+  187  ls ~/.ssh
+  188  mkdir ~/.ssh
+  189  ifconfig | more
+  190  ls -l ~/.ssh
+  191  python my_goertzel.py
+  192  python setup.py build_ext -- inplace
+  193  python setup.py build_ext --inplace
+  194  pip instal Cython
+  195  sudo pip install Cython
+  196  python setup.py build_ext --inplace
+  197  ls -ltr
+  198  python my_goertzel.py
+  199  cd ../
+  200  mkdir c
+  201  cd d
+  202  cd c
+  203  ls
+  204  cc -o alsa_listen alsa_listen.c
+  205  ls /usr/lib/alsa
+  206  ls /usr/lib
+  207  sudo apt-get install libasound2-dev
+  208  sudo apt-get -y install libasound2-dev
+  209  cc -o alsa_listen alsa_listen.c
+  210  cc -o alsa_listen alsa_listen.c -lasound
+  211  ls
+  212  ./alsa_listen 
+  213  which xgps
+  214  sudo apt-get install gpsd gpsd-clients python-gps
+  215  sudo lsusb
+  216  ls /dev/tty*
+  217  sudo gpsd /dev/ttyUSB0 -F /var/run/gpsd.sock
+  218  cgps -s
+  219  xgps
+  220  sudo lsusb
+  221  cgps
+  222  sudo reboot
+  223  sudo lsusb
+  224  ls /dev/tty*
+  225  man gpsd
+  226  gpsd /dev/ttyUSB0
+  227  cgps
+  228  mau gpsd
+  229  man gpsd
+  230  gpsd /dev/ttyUSB0 -D2
+  231  ps -auxww | grep gps
+  232  kill 1046
+  233  sudo kill 1046
+  234  ps -auxww | grep gps
+  235  man gpsd
+  236  gpsd -D 2 -N /dev/ttyUSB0 
+  237  minicom /dev/ttyUSB0 
+  238  sudo apt-get install -Y minicom
+  239  sudo apt-get install -y minicom
+  240  minicom
+  241  sudo lsusb
+  242  ls /dev/usb
+  243  ls /dev/usb/hiddev0 
+  244  ls /dev/tty*
+  245  gpsd -D 2 -N /dev/ttyUSB0 
+  246  sudu shutdown -h now
+  247  sudo shutdown -h now
+  248  minicom /dev/ttyUSB0 
+  249  sudo minicom /dev/ttyUSB0 
+  250  ls -l /dev/ttyUSB0 
+  251  sudo chmod a+rw /dev/ttyUSB0
+  252  ls -l /dev/ttyUSB0 
+  253  echo hello >> /dev/ttyUSB0
+  254  man stty
+  255  more .asoundrc
+  256  more /usr/share/alsa/alsa.conf
+  257  more /etc/asound.conf
+  258  aplay /usr/share/sounds/GNUstep/Ping.wav 
+  259  aplay /usr/share/sounds/GNUstep/Ping.wav  -D sysdefault:CARD=Device
+  260  aplay /usr/share/sounds/GNUstep/Pop.wav  -D sysdefault:CARD=Device
+  261  aplay /usr/share/sounds/GNUstep/Pop.wav
+  262  export ALSA_PCM_CARD sysdefault:CARD=Device
+  263  export ALSA_PCM_CARD=sysdefault:CARD=Device
+  264  aplay /usr/share/sounds/GNUstep/Pop.wav
+  265  export ALSA_PCM_CARD=hw:1,0
+  266  aplay /usr/share/sounds/GNUstep/Pop.wav
+  267  export ALSA_PCM_CARD=
+  268  aplay /usr/share/sounds/GNUstep/Pop.wav
+  269  export ALSA_CARD=sysdefault:CARD=Device
+  270  aplay /usr/share/sounds/GNUstep/Pop.wav
+  271  export ALSA_CARD=
+  272  aplay /usr/share/sounds/GNUstep/Pop.wav
+  273  export ALSA_CARD=hw:1,0
+  274  aplay /usr/share/sounds/GNUstep/Pop.wav
+  275  export ALSA_CARD=Device
+  276  aplay /usr/share/sounds/GNUstep/Pop.wav
+  277  say hello
+  278  export ALSA_PCM_CARD=Device
+  279  say hello
+  280  aplay /usr/share/sounds/GNUstep/Pop.wav
+  281  man say
+  282  man GSSpeechServer
+  283  man GNUstep
+  284  ps | grep GS
+  285  ps | grep speech
+  286  say hello
+  287  man GSTest
+  288  GSTest
+  289  say hello this is a much longert test he there boys
+  290  which GSSpeechServer
+  291  GSSpeechServer --help
+  292  ps | grep GSSpeechServer
+  293  ps auxww | grep GSSpeechServer
+  294  date
+  295  kill 21169
+  296  ps auxww | grep GSSpeechServer
+  297  say hello this is a much longert test he there boys
+  298  man say
+  299  sudo apt-get install espeak
+  300  espeak hello world
+  301  espeak "hello world"
+  302  espeak -v pt "hello world"
+  303  man espeak
+  304  espeak -v
+  305  espeak --voices
+  306  espeak -v "hello world"
+  307  espeak -v en "hello world"
+  308  espeak -v en-us "hello world"
+  309  say "hello world"
+  310  history | grep export
+  311  hisotry
+  312  history
+  313  or say hello this is a much longert test he there boys
+  314  say hello this is a much longert test he there boys
+  315  say hello this is a much longert test hey there boys
+  316  say hello this is a much longert test, hey there boys
+  317  say hello this is a much longert test. hey there boys
+  318  say hello this is a much longert test. Hey there boys!
+  319  espeak hello this is a much longert test. Hey there boys!
+  320  espeak "hello this is a much longert test. Hey there boys!"
+  321  espeak -v en-us "hello this is a much longert test. Hey there boys!"
+  322  man espeak
+  323  say hello
+  324  set ALSA_CARD sysdefault:CARD=Device_1
+  325  say hello
+  326  echo $ALSA_CARD
+  327  set ALSA_CARD=sysdefault:CARD=Device_1
+  328  echo $ALSA_CARD
+  329  set ALSA_CARD "sysdefault:CARD=Device_1"
+  330  echo $ALSA_CARD
+  331  ALSA_CARD="sysdefault:CARD=Device_1"
+  332  echo $ALSA_CARD
+  333  say hello
+  334  aplay -l
+  335  ALSA_CARD=Device_1
+  336  say hello
+  337  aplay -vv -D sysdefault:CARD=Device_1 /usr/share/sounds/GNUstep/*.wav
+  338  aplay -vv  /usr/share/sounds/GNUstep/*.wav
+  339  more ~/.asoundrc 
+  340  aplay -vv  /usr/share/sounds/GNUstep/*.wav
+  341  top
+  342  which say
+  343  say --help
+  344  say -h
+  345  man say
+  346  top
+  347  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s ZVEI
+  348  bin-armv7l/multimon sysdefault:CARD=Device
+  349  bin-armv7l/multimon sysdefault:CARD=Device 
+  350  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512 -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s DTMF -s ZVEI -s SCOPE
+  351  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512 -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s DTMF -s ZVEI 
+  352  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512 -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600  -s ZVEI 
+  353  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512 -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600  -s ZVEI -s SCOPE
+  354  ls
+  355  ls  c
+  356  ls -l
+  357  cd
+  358  cd c
+  359  ls
+  360  ls -l
+  361  ./alsa_listen 
+  362  acrecord -l
+  363  cd multimon
+  364  ls
+  365  ls filter
+  366  which aplay
+  367  ls /usr/bin/a*
+  368  arecord -l
+  369  ls
+  370  cd ../
+  371  ls
+  372  more alsa_listen.c 
+  373  amixer
+  374  amixer -l
+  375  amixer -c 0
+  376  amixer -c 1
+  377  amixer -c 2
+  378  ls -l /usr/bin/aplay /usr/bin/arecord
+  379  ls
+  380  cd multimon/
+  381  ls
+  382  make
+  383  grep /dev/dsp *.c *.h
+  384  more unixinput.c 
+  385  ls /usr/share/sounds
+  386  ls /usr/share/sounds/*
+  387  aplay -c 1 /usr/share/sounds/GNUstep/Frog.wav 
+  388  aplay -c 2 /usr/share/sounds/GNUstep/Frog.wav 
+  389  amixer -c 2
+  390  amixer -c 1
+  391  amixer -help
+  392  amixer -c 1 -i
+  393  amixer -c 1 scontrols
+  394  aplay -c 2 /usr/share/sounds/GNUstep/*.wav
+  395  aplay -c 1 /usr/share/sounds/GNUstep/*.wav
+  396  aplay -c 0 /usr/share/sounds/GNUstep/*.wav
+  397  aplay -c 3 /usr/share/sounds/GNUstep/*.wav
+  398  aplay -D 4 /usr/share/sounds/GNUstep/*.wav
+  399  aplay -l
+  400  aplay -L
+  401  aplay -D front:CARD=Device,DEV=0 /usr/share/sounds/GNUstep/*.wav
+  402  aplay -D front:CARD=Device_1,DEV=0 /usr/share/sounds/GNUstep/*.wav
+  403  aplay -D hw:1,0 /usr/share/sounds/GNUstep/*.wav
+  404  aplay -D hw:0,0 /usr/share/sounds/GNUstep/*.wav
+  405  aplay -D"front:CARD=Device_1,DEV=0" /usr/share/sounds/GNUstep/*.wav
+  406  aplay --device front:CARD=Device,DEV=0 /usr/share/sounds/GNUstep/*.wav
+  407  aplay -vv /usr/share/sounds/GNUstep/*.wav
+  408  alsamixer
+  409  aplay -vv -c 1 /usr/share/sounds/GNUstep/*.wav
+  410  aplay -vv -c 9 /usr/share/sounds/GNUstep/*.wav
+  411  aplay -vv -D 1 /usr/share/sounds/GNUstep/*.wav
+  412  aplay -
+  413  aplay -L
+  414  aplay -vv -D sysdefault:CARD=Device_1 /usr/share/sounds/GNUstep/*.wav
+  415  aplay -L
+  416  aplay -vv -D sysdefault:CARD=Device /usr/share/sounds/GNUstep/*.wav
+  417  aplay -vv -D sysdefault:CARD=Device_1 /usr/share/sounds/GNUstep/*.wav
+  418  aplay -L
+  419  hi
+  420  history
+  421  history | grep cc
+  422  cd ../
+  423  cc -o alsa_listen alsa_listen.c -lasound
+  424  ./alsa_listen 
+  425  ./alsa_listen sysdefault:CARD=Device
+  426  ./alsa_listen sysdefault:CARD=Device_1
+  427  cc -o alsa_listen alsa_listen.c -lasound
+  428  ./alsa_listen sysdefault:CARD=Device
+  429  ls -ltr
+  430  cd multimon/
+  431  ls -ltr
+  432  moe filter.h
+  433  more filter.h
+  434  ls
+  435  ifconfig
+  436  history | grep aplay
+  437  aplay -vv -D sysdefault:CARD=Device_1 /usr/share/sounds/GNUstep/*.wav
+  438  aplay -vv -D sysdefault:CARD=Device /usr/share/sounds/GNUstep/*.wav
+  439  aplay -vv -c hw:1,0 /usr/share/sounds/GNUstep/*.wav
+  440  aplay -vv -D hw:1,0 /usr/share/sounds/GNUstep/*.wav
+  441  aplay -vv -D hw:0,0 /usr/share/sounds/GNUstep/*.wav
+  442  aplay -vv -D hw:1,0 /usr/share/sounds/GNUstep/*.wav
+  443  aplay -vv -D hw:2,0 /usr/share/sounds/GNUstep/*.wav
+  444  aplay -L
+  445  aplay -l
+  446  aplay -vv -D hw:2,1 /usr/share/sounds/GNUstep/*.wav
+  447  aplay -vv -D hw:1,1 /usr/share/sounds/GNUstep/*.wav
+  448  aplay -vv -D hw:1,0 /usr/share/sounds/GNUstep/*.wav
+  449  aplay -h
+  450  aplay -vv -D hw:1,0 /usr/share/sounds/GNUstep/*.wav
+  451  sudo shutdown -h now
+  452  pwd
+  453  cd ../
+  454  ls
+  455  emacs alsa_listen.c 
+  456  bg
+  457  history
+  458  ./alsa_listen sysdefault:CARD=Device_1
+  459  ./alsa_listen sysdefault:CARD=Device
+  460  ls -ltr
+  461  gdb ysdefault:CARD=Device
+  462  fdb ./alsa_listen sysdefault:CARD=Device
+  463  gdb ./alsa_listen sysdefault:CARD=Device
+  464  cc -o alsa_listen alsa_listen.c
+  465  history | grep cc
+  466  cc -o alsa_listen alsa_listen.c -lasound
+  467  ./alsa_listen sysdefault:CARD=Device
+  468  cc -o alsa_listen alsa_listen.c -lasound
+  469  ./alsa_listen sysdefault:CARD=Device
+  470  cc -o alsa_listen alsa_listen.c -lasound
+  471  ./alsa_listen sysdefault:CARD=Device
+  472  ./alsa_listen sysdefault:CARD=ALSA
+  473  ./alsa_listen sysdefault:CARD=Device
+  474  cc -o alsa_listen alsa_listen.c -lasound
+  475  ./alsa_listen sysdefault:CARD=Device
+  476  cc -o alsa_listen alsa_listen.c -lasound
+  477  ./alsa_listen sysdefault:CARD=Device
+  478  pwd
+  479  cd multimon/
+  480  make
+  481  grep input_sound *
+  482  make
+  483  ls -ltr
+  484  ls bin-armv7l/
+  485  ls ltr bin-armv7l/
+  486  ls -ltr bin-armv7l/
+  487  bin-armv7l/multimon 
+  488  bin-armv7l/multimon -t sysdefault:CARD=ALSA
+  489  bin-armv7l/multimon sysdefault:CARD=ALSA
+  490  bin-armv7l/multimon sysdefault:CARD=Device
+  491  bin-armv7l/multimon sysdefault:CARD=Device -s 
+  492  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600
+  493  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s SCOPE -s ZVIE
+  494  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s SCOPE -s ZVEI
+  495  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s ZVEI
+  496  make
+  497  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s ZVEI
+  498  make
+  499  bin-armv7l/multimon sysdefault:CARD=Device -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s ZVEI
+  500  bin-armv7l/multimon sysdefault:CARD=Device_1 -s POCSAG512  -s POCSAG1200 -s POCSAG2400 -s AFSK2400 -s AFSK2400_2 -s HAPN4800 -s FSK9600 -s ZVEI
+  501  make
+  502  bin-armv7l/multimon 
+  503  bin-armv7l/multimon -h
+  504  bin-armv7l/multimon sysdefault:CARD=Device
+  505  bin-armv7l/multimon sysdefault:CARD=Device_1
+  506  ls
+  507  d python
+  508  cd python
+  509  ls
+  510  cd rpt
+  511  ls
+  512  ls -ltr
+  513  sudo python radio.py 
+  514  jobs 
+  515  top
+  516  jobs
+  517  kill %1
+  518  ls
+  519  ls /usr/share
+  520  ls /usr/share/sounds/
+  521  ls /usr/share/sounds/GNUstep/
+  522  ls
+  523  lsc
+  524  ls c
+  525  pwd
+  526  ls
+  527  cd ../
+  528  ls
+  529  cd ../
+  530  ls
+  531  cd c
+  532  ls
+  533  which speakertest
+  534  which speaker-test
+  535  file /usr/bin/speaker-test
+  536  more alsa_listen.c
+  537  pwd
+  538  ls
+  539  cd ../
+  540  ls
+  541  cd python
+  542  ls
+  543  locate playwav.py
+  544  ls
+  545  cd rpt
+  546  ls
+  547  pwd
+  548  ls-ltr
+  549  ls -ltr
+  550  pwd
+  551  ls
+  552  ls /usr/share/sounds/GNUstep/Tink.wav 
+  553  sudo python playwav.py /usr/share/sounds/GNUstep/Tink.wav
+  554  sudo python playwav.py /usr/share/sounds/GNUstep/Tink.wav -c Device
+  555  sudo python playwav.py /usr/share/sounds/GNUstep/Tink.wav -c Device_1
+  556  sudo python playwav.py /usr/share/sounds/GNUstep/Tink.wav -c Device_2
+  557  sudo python playwav.py -c Device /usr/share/sounds/GNUstep/Tink.wav
+  558  sudo python playwav.py -c Device_2 /usr/share/sounds/GNUstep/Tink.wav
+  559  sudo python playwav.py -c Device_1 /usr/share/sounds/GNUstep/Tink.wav
+  560  pwd
+  561  ls
+  562  cd c
+  563  ls
+  564  cc -o alsaOut alsaOut.c -lasound
+  565  more alsa_listen.c
+  566  cc -o alsaOut alsaOut.c -lasound
+  567  ./alsaOut
+  568  cc -o alsaOut alsaOut.c -lasound
+  569  ./alsaOut
+  570  ./alsaOut CARD=Device
+  571  ./alsaOut Device
+  572  aplay -l
+  573  aplay -L
+  574  ./alsaOut sysdefault:CARD=Device
+  575  cd c
+  576  ls
+  577  cc mout.c multimon/costabi.c -lasound -o mout
+  578  man strtoint
+  579  man str2int
+  580  cc mout.c multimon/costabi.c -lasound -o mout
+  581  mout sysdefault:CARD=Device 13 440  1000
+  582  ls -ltr
+  583  ./mout sysdefault:CARD=Device 13 440  1000
+  584  ./mout sysdefault:CARD=Device 18 800  1000
+  585  ./mout sysdefault:CARD=Device 18 800  100
+  586  ./mout sysdefault:CARD=Device 18 800  10000
+  587  cc mout.c multimon/costabi.c -lasound -o mout
+  588  ./mout sysdefault:CARD=Device 18 800  10000
+  589  ./mout sysdefault:CARD=Device 18 660  10000
+  590  ./mout sysdefault:CARD=Device 18 660  1000
+  591  ./mout sysdefault:CARD=Device 18 660  16500
+  592  ./mout sysdefault:CARD=Device 18 660  1000
+  593  cc mout.c multimon/costabi.c -lasound -o mout
+  594  ./mout sysdefault:CARD=Device 18 660  1000
+  595  cc mout.c multimon/costabi.c -lasound -o mout
+  596  ./mout sysdefault:CARD=Device 18 660  1000
+  597  cc mout.c multimon/costabi.c -lasound -o mout
+  598  ./mout sysdefault:CARD=Device 18 660  1000 "de N1ddk/r"
+  599  ./mout sysdefault:CARD=Device 18 660  1000 "rrr de N1ddk/r"
+  600  ./mout sysdefault:CARD=Device 18 660  1000 "rrr de N1ddk/r "
+  601  ./mout sysdefault:CARD=Device 18 660  1000 "de N1ddk/r "
+  602  ./mout sysdefault:CARD=Device 22 660  1000 "de N1ddk/r "
+  603  cc mout.c multimon/costabi.c -lasound -o mout
+  604  ./mout sysdefault:CARD=Device 22 660  1000 "de N1ddk/r "
+  605  cc mout.c multimon/costabi.c -lasound -o mout
+  606  ./mout sysdefault:CARD=Device 22 660  1000 "de N1ddk/r "
+  607  cc mout.c multimon/costabi.c -lasound -o mout
+  608  ./mout sysdefault:CARD=Device 22 660  1000 "de N1ddk/r "
+  609  ./mout sysdefault:CARD=Device 22 660  1000 "de N1ddk/r " fred
+  610  ./mout sysdefault:CARD=Device 22 660  1000 "de N1ddk/r "
+  611  ./mout sysdefault:CARD=Device 22 660  1000 "this is a test of the demo repeater system - de N1ddk/r "
+  612  ./mout sysdefault:CARD=Device 22 660  32000 "this is a test of the demo repeater system - de N1ddk/r "
+  613  ./mout sysdefault:CARD=Device 50 660  32000 "this is a test of the demo repeater system - de N1ddk/r "
+  614  ./mout sysdefault:CARD=Device 30 660  32000 "this is a test of the demo repeater system - de N1ddk/r "
+  615  ./mout sysdefault:CARD=Device 13 660  32000 "this is a test of the demo repeater system - de N1ddk/r "
+  616  cd c
+  617  ls
+  618  cc mout.c multimon/costabi.c -lasound -o mout
+  619  mout sysdefault:CARD=Device 13 440  1000
+  620  ./mout sysdefault:CARD=Device 30 660  32000 "this is a test of the demo repeater system - de N1ddk/r "
+  621  ./mout sysdefault:CARD=Device 30 660  32000 "N1ddk/r"
+  622  ./mout sysdefault:CARD=Device 20 660  32000 "N1ddk/r"
+  623  cd ~/python/rpt
+  624  ls
+  625  lpc stat
+  626  cd c
+  627  ./mout
+  628  ./mout sysdefault:CARD=Device 22 660  1000 "this is a test "
+  629  ./mout sysdefault:CARD=Device 22 440  1000 "this is a test "
+  630  which espeak
+  631  espeak "this is a test"
+  632  espeak -D sysdefault:CARD=Device "this is a test"
+  633  espeak -h
+  634  export ALSA_CARD=Device
+  635  espeak "this is a test"
+  636  espeak "r5=123"
+  637  date
+  638  date | espeak
+  639  export ALSA_PCM_CARD=Device
+  640  date | espeak
+  641  man date
+  642  date %t
+  643  date '%t'
+  644  date +format '%t'
+  645  date +'%t'
+  646  date +%T
+  647  date +"the time is %T"
+  648  date +"the time is %r"
+  649  date +"the time is %r" | espeak
+  650  date +"the time is %I %M" | espeak
+  651  date +"the time is %I %M %A %B %_d" | espeak
+  652  date +"the time is %I %M %p, %A %B %_d" | espeak
+  653  date +"its %I %M %p, %A %B %_d" | espeak
+  654  date +"its %I %M %p, %A %B %_d" | say
+  655  hay hello
+  656  say hello
+  657  date +"its %I %M %p, %A %B %_d" | say
+  658  man say
+  659  date +"its %I %M %p, %A %B %_d" | say -f stdin
+  660  say `date +"its %I %M %p, %A %B %_d"`
+  661  date +"its %I %M %p, %A %B %_d" | espeak
+  662  history > history.txt
