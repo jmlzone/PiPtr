@@ -1,7 +1,7 @@
-This is the README for the Pi Repeater project.  The Goal of this
-project is to develope an inexpensive linking repeater controller
-witha cost of aproximatly $50/port vs current commerical solutions
-which are closer to $160/port.
+This is the README for the Rasberry Pi Ham Hadio Repeater Controller
+project.  The Goal of this project is to develop an inexpensive
+linking repeater controller witha cost of aproximatly $50/port vs
+current commerical solutions which are closer to $160/port.
 
 This is an extensable linkable controller with both local and remote
 linking.
@@ -13,3 +13,6 @@ Most of the code will be in Python, however some of it is in C.
 
 Eventually there will be good documeation and a bug/enhancement
 tracking WIKI or some such thing.
+
+Current state: The tets repeater is stable on the air but mnay many
+things are still to be done.
