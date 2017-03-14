@@ -67,7 +67,7 @@ class tx:
         self.txPinLvl = 1
         if(port == 0) :
             self.pttPin = 12
-            card = 'sysdefault:CARD=Device'
+            self.card = 'sysdefault:CARD=Device'
 
         GPIO.setup(self.pttPin, GPIO.OUT)
         GPIO.output(self.pttPin,(not self.txPinLvl))
@@ -78,10 +78,11 @@ class tx:
         self.politeIdTimer = gpTimer(self.idtime - self.polite)
         self.tailPid=None
         self.idPid=None
-        self.tail_msg = tail.tail_msg(card)
+        self.tail_msg = tail.tail_msg(self.card)
+        self.tailBeepWav = './sounds/Tink.wav'
 
-    def add_tail_msg(self, msg):
-        self.tail_msg.add(msg)
+    def add_tail_msg(self, method,msg,cancelable,isid,requeue,alt):
+        self.tail_msg.add(method,msg,cancelable,isid,requeue,alt)
 
     def tx(self) :
         if( not self.disable) :
@@ -112,12 +113,12 @@ class tx:
         self.TailMessagesDone = True
 
     def sendId(self) :
-        self.idPid = subprocess.Popen(['./bin/mout', 'sysdefault:CARD=Device', '20', '660', '5000', self.id])
+        self.idPid = subprocess.Popen(['./bin/mout', self.card, '20', '660', '5000', self.id])
         self.politeIdTimer.reset()
         self.idTimer.reset()
 
     def tailbeep(self) :
-        beepPid = subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=Device', './sounds/Tink.wav'])
+        beepPid = subprocess.Popen(['/usr/bin/aplay', '-D', self.card, self.tailBeepWav])
 
     def idRunning(self):
         if(self.idPid) :

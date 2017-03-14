@@ -12,22 +12,55 @@ import audioCtl as AC
 import datetime
 import signal, os
 import code
+import re
 from multiprocessing import Process, Value, Array, Queue
 
 
 def hup_handler(signum, frame):
-    print 'Hup interrupt, shutting down', signum
+    print 'Hup interrupt, Going interactive', signum
+    code.interact(local=dict(globals(), **locals()))
+
+def int_handler(signum, frame):
+    print 'Int interrupt, Shutting down', signum
     tx0.down()
     GPIO.cleanup()
     p0.terminate()
     exit(-1)
 
-def int_handler(signum, frame):
-    print 'Hup interrupt, Going interactive', signum
-    code.interact(local=dict(globals(), **locals()))
-
 signal.signal(signal.SIGHUP, hup_handler)
 signal.signal(signal.SIGINT, int_handler)
+
+cmdlist =[("123$","test123"), # the $ at the end forces an exact match
+          ("456","test456"),
+          ("789","test789")]
+cmdlist = cmdlist + [("123(\d+)", "cmdWithArg")] # rexexp type argument needed 1 ore more decimal digits.
+cmdlist = cmdlist + [("DDDDD", "rptDown")]
+cmd0 = ""
+
+def test123():
+    print "test123"
+    tx0.tailBeepWav = './sounds/Tink.wav'
+    sys.stdout.flush()
+
+def test456():
+    print "test456"
+    tx0.tailBeepWav = './sounds/Submarine.wav'
+    sys.stdout.flush()
+
+def test789():
+    print "test789"
+    tx0.tailBeepWav = './sounds/Glass.wav'
+    sys.stdout.flush()
+
+def cmdWithArg(arg):
+    print "command got %d" %arg
+    sys.stdout.flush()
+
+def rptDown():
+    tx0.down()
+    GPIO.cleanup()
+    p0.terminate()
+    exit(-1)
 
 
 def talkingClock(prefix = 'its'):
@@ -43,6 +76,26 @@ def logit(msg) :
     print ds + " - " + msg
     sys.stdout.flush()
 
+def runCmd():
+    global cmd0
+    global cmdlist
+    if(len(cmd0) >0) :
+        found = 0
+        for c in cmdlist :
+            print c
+            (name,func) = c
+            m = re.match(name,cmd0)
+            if(m != None) :
+                found = 1
+                if(len(m.groups()) ==1) :
+                    result = eval(func+"("+match.group(1)+")")
+                else:
+                    result = eval(func+"()")
+                    break
+        if(not found) :
+            print "oops not found" # que no sound
+    cmd0=""
+    
 # main program starts here
 GPIO.setmode(GPIO.BOARD)
 rx0=radio.rx(0,False,103.5,180,600)
@@ -78,16 +131,17 @@ time.sleep(1)
 tx0.down()
 logit("Startup Done.")
 
-
 while(1) :
     time.sleep(0.010)
     # look at received touch tone codes.
     while(not q0.empty()):
-        print q0.get()
-
+        tone = q0.get()
+        cmd0 = cmd0 + tone
+        print tone
     if(state0 != lastState):
         logit(state0)
         lastState = state0
+        runCmd()
     if(state0 == 'idle'):
         if(rx0.active()) :
             rx0.timer.reset()
@@ -96,9 +150,13 @@ while(1) :
             tx0.idTimer.run()
             tx0.politeIdTimer.run()
             state0 = 'rpt'
-        elif(tx0.idTimer.expired or rx0.idleTimer.expired) :
-            rx0.idleTimer.stop()
+        elif(tx0.idTimer.expired) :
             state0 = 'beacon_id'
+        elif(rx0.idleTimer.expired) :
+            rx0.idleTimer.expired = false
+            # method,msg,cancelable,isid,requeue,alt
+            tx0.add_tail_msg(['/usr/bin/aplay', '-D'], './sounds/idle.wav', True, True, False, None)
+                
     elif (state0 == 'rpt'):
         if(rx0.timer.expired) :
             state0 = 'timeoutenter'

@@ -91,3 +91,9 @@ speaker-test -f 1000 -D sysdefault:CARD=Device -c1 -t sine
 amixer -c 1 sset 'Speaker' 100%
 amixer -c 1 sset 'Mic' 0
 amixer -c 1 sset 'Mic' capture 87%
+
+arecord -D sysdefault:CARD=Device_1 -F S16_LE -r 22050 idle.wav
+aplay -D sysdefault:CARD=Device idle.wav
+
+sudo apt-get install realvnc-vnc-server
+(connect using user password, not vnc password)
