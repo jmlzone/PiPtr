@@ -15,6 +15,7 @@ class tail_msg:
         
     def add(self, method,msg,cancelable,isid,requeue,alt):
         self.msglist.append((method,msg,cancelable,isid,requeue,alt))
+        print "added tail message %s " % msg
 
     def play(self) :
         tmplist = self.msglist;
@@ -27,7 +28,13 @@ class tail_msg:
             # run it
             if(not self.cancel or not cancelable) :
                 # realy run it
-                self.pid = subprocess.Popen(method,self.card,msg)
+                args = method + [self.card,msg]
+                print "tail message play: (args)"
+                print args
+                try: 
+                    self.pid = subprocess.Popen(args)
+                except:
+                    print "error could not run the tail message"
                 if(isid and not self.cancel and not cancelable) :
                     id_played = True
             if (self.cancel and requeue ):

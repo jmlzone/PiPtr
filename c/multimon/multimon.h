@@ -106,6 +106,8 @@ struct demod_state {
 			float tenergy[4][16];
 			int blkcount;
 			int lastch;
+		        int mark_cnt;
+		        int space_cnt;
 		} dtmf;
 
 		struct l1_state_zvei {

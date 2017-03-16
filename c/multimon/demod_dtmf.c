@@ -43,6 +43,10 @@
 #define SAMPLE_RATE 22050
 #define BLOCKLEN (SAMPLE_RATE/100)  /* 10ms blocks */
 #define BLOCKNUM 4    /* must match numbers in multimon.h */
+/* to clean-up dtmf decode require at least 2 consecutive blocks (20ms) of valid same value
+   and at least 2 block (20 ms) of no decode between consecutive digits */
+#define MARKREQ 4 /* 2 blocks of mark */
+#define SPACEREQ 4 /* 2 blocks of space */
 
 #define PHINC(x) ((x)*0x10000/SAMPLE_RATE)
 
@@ -119,31 +123,87 @@ static inline int process_block(struct demod_state *s)
 
 /* ---------------------------------------------------------------------- */
 
-static void dtmf_demod(struct demod_state *s, float *buffer, int length)
-{
-	float s_in;
-	int i;
-
-	for (; length > 0; length--, buffer++) {
-		s_in = *buffer;
-		s->l1.dtmf.energy[0] += fsqr(s_in);
-		for (i = 0; i < 8; i++) {
-			s->l1.dtmf.tenergy[0][i] += COS(s->l1.dtmf.ph[i]) * s_in;
-			s->l1.dtmf.tenergy[0][i+8] += SIN(s->l1.dtmf.ph[i]) * s_in;
-			s->l1.dtmf.ph[i] += dtmf_phinc[i];
-		}
-		if ((s->l1.dtmf.blkcount--) <= 0) {
-			s->l1.dtmf.blkcount = BLOCKLEN;
-			i = process_block(s);
-			if (i != s->l1.dtmf.lastch && i >= 0) {
-			  verbprintf(0, "DTMF: %c\n", dtmf_transl[i]);
-			  fflush(stdout);
-			}
-			s->l1.dtmf.lastch = i;
-		}
+static void dtmf_demod(struct demod_state *s, float *buffer, int length){
+  float s_in;
+  int i;
+  
+  for (; length > 0; length--, buffer++) {
+    s_in = *buffer;
+    s->l1.dtmf.energy[0] += fsqr(s_in);
+    for (i = 0; i < 8; i++) {
+      s->l1.dtmf.tenergy[0][i] += COS(s->l1.dtmf.ph[i]) * s_in;
+      s->l1.dtmf.tenergy[0][i+8] += SIN(s->l1.dtmf.ph[i]) * s_in;
+      s->l1.dtmf.ph[i] += dtmf_phinc[i];
+    }
+    if ((s->l1.dtmf.blkcount--) <= 0) {
+      s->l1.dtmf.blkcount = BLOCKLEN;
+      i = process_block(s);
+      if(i==-1) {
+	if(s->l1.dtmf.space_cnt <= SPACEREQ) {
+	  s->l1.dtmf.space_cnt++;
 	}
+	if(s->l1.dtmf.space_cnt == SPACEREQ) {
+	  s->l1.dtmf.lastch = -1;
+	  s->l1.dtmf.mark_cnt = 0;
+	}
+      } else { //did not get -1, so valid!
+	if(s->l1.dtmf.lastch == -1) {
+	  if(s->l1.dtmf.space_cnt >= SPACEREQ) {
+	    s->l1.dtmf.lastch = i;
+	    s->l1.dtmf.mark_cnt = 1;
+	    s->l1.dtmf.space_cnt = 0;
+	  } // else the space was too short it might have been drop out and do nothing.
+	} else { // last not -1
+	  if(s->l1.dtmf.lastch == i) { // same as before
+	    s->l1.dtmf.mark_cnt++;
+	    if(s->l1.dtmf.mark_cnt == MARKREQ) {
+	      verbprintf(0, "DTMF: %c\n", dtmf_transl[i]);
+	      fflush(stdout);
+	      s->l1.dtmf.space_cnt=0;
+	    }
+	  } else { // different than before thats bad
+	    s->l1.dtmf.lastch = -1;
+	    s->l1.dtmf.mark_cnt = 0;
+	    s->l1.dtmf.space_cnt = 0;
+	  }
+	}
+      }
+    }
+  }
 }
-				
+
+/* demod pseudo code 
+  if i== lastch !=-1 (none)
+    markcnt++
+    if mark_cnt == mark_req 
+        -> output
+        space_cnt = 0
+  if i== -1 (none)
+    if lastch == -1
+       if space_cnt <= space_req
+         space_cnt++
+       if space_cnt == space_req
+         lastch = -1
+         mark+cnt = 0;
+
+     else // last valid
+       space++ 
+       if space_cnt==SPACEREQ 
+          lastch = -1
+
+if valid and last -1 
+   if(space was valid)
+     lastch = i
+   else // space was not valid
+    null (do nothing?)
+
+if valid and perv was divverent valid // treat like a space
+    last=-1
+    space_cnt=0;
+    mark_cnt=0;
+
+
+ */
 /* ---------------------------------------------------------------------- */
 
 const struct demod_param demod_dtmf = {

@@ -32,6 +32,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <alsa/asoundlib.h>
 
 
@@ -293,6 +294,11 @@ static const char usage_str[] = "multimod\n"
 "or\n"
 "  bin-armv7l/multimon sysdefault:CARD=Device_1\n" ;
 
+void sighandler(int signum){
+  printf("Multimon:: Caught signal %d, stopping...\n", signum);
+  exit(1);
+}
+
 int main(int argc, char *argv[])
 {
 	int c;
@@ -303,6 +309,9 @@ int main(int argc, char *argv[])
 	int sample_rate = -1;
 	unsigned int overlap = 0;
 	char *input_type = "hw";
+	signal(SIGINT, sighandler);
+	signal(SIGTERM, sighandler);
+	signal(SIGPIPE, sighandler);
 
 	fprintf(stdout, "multimod  (C) 1996/1997 by Tom Sailer HB9JNX/AE4WA\n"
 		"Alsa Port 2016 James Lee N1DDK\n"
@@ -412,5 +421,6 @@ int main(int argc, char *argv[])
 		input_file(sample_rate, overlap, argv[i], input_type);
 	exit(0);
 }
+
 
 /* ---------------------------------------------------------------------- */

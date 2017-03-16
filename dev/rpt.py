@@ -21,6 +21,7 @@ def hup_handler(signum, frame):
     code.interact(local=dict(globals(), **locals()))
 
 def int_handler(signum, frame):
+    global p0
     print 'Int interrupt, Shutting down', signum
     tx0.down()
     GPIO.cleanup()
@@ -57,6 +58,8 @@ def cmdWithArg(arg):
     sys.stdout.flush()
 
 def rptDown():
+    global p0
+    print "Shutting down"
     tx0.down()
     GPIO.cleanup()
     p0.terminate()
@@ -88,7 +91,7 @@ def runCmd():
             if(m != None) :
                 found = 1
                 if(len(m.groups()) ==1) :
-                    result = eval(func+"("+match.group(1)+")")
+                    result = eval(func+"("+m.group(1)+")")
                 else:
                     result = eval(func+"()")
                     break
@@ -153,7 +156,7 @@ while(1) :
         elif(tx0.idTimer.expired) :
             state0 = 'beacon_id'
         elif(rx0.idleTimer.expired) :
-            rx0.idleTimer.expired = false
+            rx0.idleTimer.expired = False
             # method,msg,cancelable,isid,requeue,alt
             tx0.add_tail_msg(['/usr/bin/aplay', '-D'], './sounds/idle.wav', True, True, False, None)
                 
