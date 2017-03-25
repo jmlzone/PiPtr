@@ -36,6 +36,7 @@ cmdlist =[("123$","test123"), # the $ at the end forces an exact match
           ("789","test789")]
 cmdlist = cmdlist + [("123(\d+)", "cmdWithArg")] # rexexp type argument needed 1 ore more decimal digits.
 cmdlist = cmdlist + [("DDDDD", "rptDown")]
+cmdlist = cmdlist + [("2337(\d)", "beepMethod")]
 cmd0 = ""
 
 def test123():
@@ -55,6 +56,11 @@ def test789():
 
 def cmdWithArg(arg):
     print "command got %d" %arg
+    sys.stdout.flush()
+
+def beepMethod(arg):
+    tx0.beepMethod = arg
+    print "Tail Method Set to %d" %arg
     sys.stdout.flush()
 
 def rptDown():

@@ -145,9 +145,13 @@ static void dtmf_demod(struct demod_state *s, float *buffer, int length){
 	if(s->l1.dtmf.space_cnt == SPACEREQ) {
 	  s->l1.dtmf.lastch = -1;
 	  s->l1.dtmf.mark_cnt = 0;
+	  verbprintf(0, "UNMUTE:\n");
+	  fflush(stdout);
 	}
       } else { //did not get -1, so valid!
 	if(s->l1.dtmf.lastch == -1) {
+	  verbprintf(0, "MUTE:\n");
+	  fflush(stdout);
 	  if(s->l1.dtmf.space_cnt >= SPACEREQ) {
 	    s->l1.dtmf.lastch = i;
 	    s->l1.dtmf.mark_cnt = 1;

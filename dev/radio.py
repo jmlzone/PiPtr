@@ -79,7 +79,10 @@ class tx:
         self.tailPid=None
         self.idPid=None
         self.tail_msg = tail.tail_msg(self.card)
+        self.beepMethod = 2 # 0=none, 1=tone, 2=wave 3=morse
+        self.beepTone = "660 5000 30 440 5000 30 1000 5000 30"
         self.tailBeepWav = './sounds/Tink.wav'
+        self.beepMorse = "20 440 5000 beep"
 
     def add_tail_msg(self, method,msg,cancelable,isid,requeue,alt):
         self.tail_msg.add(method,msg,cancelable,isid,requeue,alt)
@@ -118,7 +121,18 @@ class tx:
         self.idTimer.reset()
 
     def tailbeep(self) :
-        beepPid = subprocess.Popen(['/usr/bin/aplay', '-D', self.card, self.tailBeepWav])
+        if(self.beepMethod == 1) : # tone
+            args = ['./bin/tout',self.card] + self.beepTone.split()
+            print args
+            beepPid = subprocess.call(args)
+        elif(self.beepMethod == 2) : # wave
+            beepPid = subprocess.Popen(['/usr/bin/aplay', '-D', self.card, self.tailBeepWav])
+        elif(self.beepMethod == 3) : # morse
+            args = ['./bin/mout',self.card] + self.beepMorse.split()
+            print args
+            beepPid = subprocess.call(args)
+        else : # none
+            return
 
     def idRunning(self):
         if(self.idPid) :
