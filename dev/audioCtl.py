@@ -26,13 +26,31 @@ def ReadLoc(loc):
     spi.close()
     return data
 
-def WriteRes(r,val):
+ def WriteRes(r,val):
     if(r <2 ):
         ra=r
     elif (r<4):
         ra=r+4
     else :
         print "Bad resistor number must be 0-3"
+    cmd = ((ra & 0x0f) << 4)
+    val = val & 0x1ff
+    if(val>255) :
+        cmd=cmd+1
+        val=val-256
+    spi.open(0,1)
+    data16 = spi.xfer2([cmd,val])
+    if((data16[0] & 1) == 2) :
+        print "SPI Command Error"
+    spi.close()
+
+def WriteTcon(r,val):
+    if(r == 0 ):
+        ra=4
+    elif (r == 1):
+        ra=10
+    else :
+        print "Bad tcon number must be 0-1"
     cmd = ((ra & 0x0f) << 4)
     val = val & 0x1ff
     if(val>255) :

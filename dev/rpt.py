@@ -98,7 +98,16 @@ def runCmd():
         if(not found) :
             print "oops not found" # que no sound
     cmd0=""
-    
+
+tcon = 0x1ff
+def muterx(onoff) :
+    global tcon
+    if(onoff) : #true = start muting
+        tcon = tcon &  0x1df # bit 5 is b wiper disconnect.
+    else :
+        tcon = tcon | 0x20
+    AC.WriteTcon(0,tcon)
+
 # main program starts here
 GPIO.setmode(GPIO.BOARD)
 rx0=radio.rx(0,False,103.5,180,600)
@@ -115,11 +124,13 @@ state0= 'idle'
 lastState = None
 logit("Startup")
 rx0.idleTimer.reset()
+# audio config 
 AC.WriteRes(0,150)
 AC.WriteRes(1,2)
 AC.WriteRes(2,50)
 AC.WriteRes(3,20)
 AC.WritePGAGain(6)
+#
 tx0.tx()
 time.sleep(1)
 logit("Initial ID")
@@ -185,7 +196,7 @@ while(1) :
         if(tx0.TailMessagesDone and not tx0.idRunning() and not rx0.active()):
             state0 = 'tailreset'
         elif (rx0.active()) :
-            state0 = rpt
+            state0 = 'rpt'
     elif (state0 == 'tailreset'):
         tx0.tailbeep()
         rx0.timer.reset()

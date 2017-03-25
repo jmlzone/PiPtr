@@ -32,7 +32,7 @@ class tail_msg:
                 print "tail message play: (args)"
                 print args
                 try: 
-                    self.pid = subprocess.Popen(args)
+                    self.pid = subprocess.call(args)
                 except:
                     print "error could not run the tail message"
                 if(isid and not self.cancel and not cancelable) :
