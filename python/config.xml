@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<config>
+  <!--configuration dumped on 2017-04-01 14:09:57.908246-->
+  <R0>150</R0>
+  <R1>2</R1>
+  <R2>50</R2>
+  <R3>20</R3>
+  <PGA0>6</PGA0>
+  <TCON0>511</TCON0>
+  <port1>
+    <card>sysdefault:CARD=Device</card>
+    <islink>False</islink>
+    <linkstate>0</linkstate>
+    <tx>
+      <pltone>103.5</pltone>
+      <id>n1ddk</id>
+      <idtime>300</idtime>
+      <polite>30</polite>
+      <timeout>3600</timeout>
+      <taildly>0.5</taildly>
+      <hangtime>1</hangtime>
+      <disable>False</disable>
+      <txupdly>1</txupdly>
+      <txPinLvl>1</txPinLvl>
+      <beepMethod>2</beepMethod>
+      <beepTone>660 5000 30 440 5000 30 1000 5000 30</beepTone>
+      <tailBeepWav>./sounds/Tink.wav</tailBeepWav>
+      <beepMorse>20 440 5000 beep</beepMorse>
+    </tx>
+    <rx>
+      <timeout>180</timeout>
+      <IdleTimeout>600</IdleTimeout>
+      <disabled>False</disabled>
+      <useCtcssPin>True</useCtcssPin>
+      <ctcssPinLvl>0</ctcssPinLvl>
+      <useCorPin>True</useCorPin>
+      <corPinLvl>0</corPinLvl>
+      <useSoftCtcss>False</useSoftCtcss>
+      <softCtcssAllow>[0, 0, 0, 0, 0, 0, 0, 0]</softCtcssAllow>
+      <softCtcssCmd>[0, 0, 0, 0, 0, 0, 0, 0]</softCtcssCmd>
+      <cmdMode>False</cmdMode>
+    </rx>
+  </port1>
+  <port2>
+    <card>sysdefault:CARD=Device_1</card>
+    <islink>False</islink>
+    <linkstate>0</linkstate>
+    <tx>
+      <pltone>100.0</pltone>
+      <id>n0call</id>
+      <idtime>300</idtime>
+      <polite>30</polite>
+      <timeout>3600</timeout>
+      <taildly>0.5</taildly>
+      <hangtime>1</hangtime>
+      <disable>False</disable>
+      <txupdly>1</txupdly>
+      <txPinLvl>1</txPinLvl>
+      <beepMethod>2</beepMethod>
+      <beepTone>660 5000 30 440 5000 30 1000 5000 30</beepTone>
+      <tailBeepWav>./sounds/Tink.wav</tailBeepWav>
+      <beepMorse>20 440 5000 beep</beepMorse>
+    </tx>
+    <rx>
+      <timeout>180</timeout>
+      <IdleTimeout>600</IdleTimeout>
+      <disabled>False</disabled>
+      <useCtcssPin>True</useCtcssPin>
+      <ctcssPinLvl>0</ctcssPinLvl>
+      <useCorPin>True</useCorPin>
+      <corPinLvl>0</corPinLvl>
+      <useSoftCtcss>False</useSoftCtcss>
+      <softCtcssAllow>[0, 0, 0, 0, 0, 0, 0, 0]</softCtcssAllow>
+      <softCtcssCmd>[0, 0, 0, 0, 0, 0, 0, 0]</softCtcssCmd>
+      <cmdMode>False</cmdMode>
+    </rx>
+  </port2>
+</config>
