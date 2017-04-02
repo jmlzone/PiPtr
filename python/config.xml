@@ -11,6 +11,7 @@
     <card>sysdefault:CARD=Device</card>
     <islink>False</islink>
     <linkstate>0</linkstate>
+    <enabled>True</enabled>
     <tx>
       <pltone>103.5</pltone>
       <id>n1ddk</id>
@@ -45,6 +46,7 @@
     <card>sysdefault:CARD=Device_1</card>
     <islink>False</islink>
     <linkstate>0</linkstate>
+    <enabled>False</enabled>
     <tx>
       <pltone>100.0</pltone>
       <id>n0call</id>

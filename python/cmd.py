@@ -6,36 +6,35 @@
 # for commands that should work on the port where they came in...
 # a command can affect the other port....
 
-def test123():
+def test123(port):
     print "test123"
-    port0.tx.tailBeepWav = './sounds/Tink.wav'
+    port.tx.tailBeepWav = './sounds/Tink.wav'
     sys.stdout.flush()
 
-def test456():
+def test456(port):
     print "test456"
-    port0.tx.tailBeepWav = './sounds/Submarine.wav'
+    port.tx.tailBeepWav = './sounds/Submarine.wav'
     sys.stdout.flush()
 
-def test789():
+def test789(port):
     print "test789"
-    port0.tx.tailBeepWav = './sounds/Glass.wav'
+    port.tx.tailBeepWav = './sounds/Glass.wav'
     sys.stdout.flush()
 
-def cmdWithArg(arg):
-    print "command got %d" %arg
+def cmdWithArg(port,arg):
+    print "port %d command got %d" %(port.portnum, arg)
     sys.stdout.flush()
 
-def beepMethod(arg):
-    port0.tx.beepMethod = arg
-    print "Tail Method Set to %d" %arg
+def beepMethod(port,arg):
+    port.tx.beepMethod = arg
+    print "port %d Tail Method Set to %d" %(port.portnum,arg)
     sys.stdout.flush()
 
-def rptDown():
-    global p0
+def rptDown(port):
     print "Shutting down"
-    tx0.down()
+    port1.tx.down()
+    port2.tx.down()
     GPIO.cleanup()
-    p0.terminate()
     exit(-1)
 
 
@@ -56,3 +55,33 @@ cmdlist =[("123$",test123), # the $ at the end forces an exact match
 cmdlist = cmdlist + [("123(\d+)", cmdWithArg)] # rexexp type argument needed 1 or more decimal digits.
 cmdlist = cmdlist + [("DDDDD", rptDown)]
 cmdlist = cmdlist + [("2337(\d)", beepMethod)]
+
+# command processor
+def cmdprocess (q,port) :
+    """ This is a touch tone command processor routine.  There is a queue
+and a process thread for each port it gets the port specific touch
+tone queue and the port for context.  Its up to a command to decide if
+it acts globally or uses port context """
+    while (True) :
+        tone = q.get() # block until somthing is ready
+        if (tone = " ") : # terminator at end of rx
+            if(len(cmd0) >0) :
+                found = 0
+                for c in cmdlist :
+                    print c
+                    (name,func) = c
+                    m = re.match(name,cmd0)
+                    if(m != None) :
+                        found = 1
+                        if(len(m.groups()) ==1) :
+                            result = eval(func+"(port,"+m.group(1)+")")
+                        else:
+                            result = eval(func+"(port)")
+                        break
+                if(not found) :
+                    print "oops not found" # que no sound
+
+            port.cmd = "" # null out the command
+        else :
+            port.cmd = port.cmd + tone
+            print "Port" + str(port.portnum) + ": " + tone

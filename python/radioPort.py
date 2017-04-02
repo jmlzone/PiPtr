@@ -158,7 +158,7 @@ class rx:
     def __init__(self, port, q):
         self.port = port # handle to parent port
         self.q = q
-        self.cor = 0
+        self.rxState = 0
         self.plDet = 0
         self.idle_timer = 0
         self.busy_timer = 0
@@ -223,11 +223,17 @@ class rx:
                     ctcssCmd[i] = True
         if(softCtcss or self.useSoftCtcss == False):
             rx = active()
-        if( rx ) :
-            self.rxActive.set()
-        else :
-            self.rxActive.clear()
-
+        rx = rx and not self.disabled
+        if(rx != self.rxState) :
+            if(rx) :
+                self.rxActive.set()
+                self.timer.reset()
+                self.idleTimer.stop()
+            else :
+                self.rxActive.clear()
+                if (self.port.cmd != "") :
+                    self.q.put(" ")
+            self.rxState = rx
         if(ctcssCmd) :
            self.cmdMode = True
            self.cmdTimer.Reset()
@@ -246,9 +252,13 @@ class rx:
                 q.put(dtmf.group('tone'))
 
     def run(self) :
-        self.sd = threading.Thread(target=self.softdecode, args=(q))
+        self.sd = threading.Thread(target=self.softdecode, args=(self.q))
         self.sd.daemon = True
         self.sd.start()
+        if(self.useCorPin) :
+            GPIO.add_event_detect(self.corPin, GPIO.BOTH, callback=update)
+        if(self.useCtcssPin) :
+            GPIO.add_event_detect(self.ctcssPin, GPIO.BOTH, callback=update)
 
 
 class radioPort :
@@ -271,9 +281,21 @@ class radioPort :
         self.q = q;
         self.rx = rx(self,q) # self passed in is the port instance for parent refences to this data
         self.tx = tx(self)
-        self.xmlvars = ( 'card', 'islink', 'linkstate')
+        self.xmlvars = ( 'card', 'islink', 'linkstate', 'enabled')
+        self.state = 'idle'
+        self.cmd = ""
+        self.enabled = True
 
-        
+    def run(self) :
+        self.rx.run()
+        while(True) :
+            if(self.state = 'idle') :
+                if(self.rx.rxActive.isSet()) :
+                    self.tx.tx()
+                    self.tx.idTimer.run()
+                    self.tx.politeIdTimer.run()
+                    self.state = 'rpt'
+
     
         
 def stopALL(signum, frame):
