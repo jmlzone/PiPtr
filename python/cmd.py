@@ -38,11 +38,11 @@ def rptDown(port):
     exit(-1)
 
 
-def talkingClock(prefix = 'its'):
+def talkingClock(card,prefix = 'its'):
     dt = datetime.datetime.now()
     ds = dt.strftime("%I %M %p, %A %B %_d")
     myTime = prefix + " "+ ds
-    os.environ['ALSA_CARD'] = 'Device'
+    os.environ['ALSA_CARD'] = card
     subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
 
@@ -64,7 +64,7 @@ tone queue and the port for context.  Its up to a command to decide if
 it acts globally or uses port context """
     while (True) :
         tone = q.get() # block until somthing is ready
-        if (tone = " ") : # terminator at end of rx
+        if (tone == " ") : # terminator at end of rx
             if(len(cmd0) >0) :
                 found = 0
                 for c in cmdlist :

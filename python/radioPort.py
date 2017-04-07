@@ -9,56 +9,17 @@ import re
 import signal
 import threading
 #import tail
+import rptFsm
 
 from multiprocessing import Process, Value, Array, Queue
-
-class gpTimer:
-    def __init__(self, timeout, userHandler=None):  # timeout in seconds
-        self.timeout = timeout
-        self.expired = False
-        self.isrunning = False
-        self.handler = userHandler if userHandler is not None else self.defaultHandler
-        self.timer = threading.Timer(self.timeout, self.handler)
-        self.timer.start()
-        self.isrunning = True
-        
-    def reset(self):
-        self.timer.cancel()
-        self.expired = False
-        self.timer = threading.Timer(self.timeout, self.handler)
-        self.timer.start()
-        self.isrunning = True
-        
-    def run(self):
-        if(not self.isrunning) :
-            self.reset()
-
-    def stop(self):
-        self.timer.cancel()
-        self.isrunning = False
-        self.expired = False
-        
-    def defaultHandler(self):
-        self.expired = True
-        self.isrunning = False
-        #print "default handler called"
-        #raise self
-
-
-
 class tx:
     """ class describing a transmitter """
-    """ Has timers 
-            ID timer
-            Time out timer
-            tail delay timer
-            hang timer
-    """
     def __init__(self, port):
         self.port = port # handle to parent
         self.pltone = 100.0
         self.id = "n0call"
-        self.tail =  []
+        self.tailMsgList =  []
+        self.beaconMsgList = []
         self.timeout = 3600 # 1 hour max tx up continously
         self.taildly = 0.5 # seconds
         self.txupdly = 1 # seconds When coming up to beacon, delay bedore sending
@@ -75,69 +36,103 @@ class tx:
 
         GPIO.setup(self.pttPin, GPIO.OUT)
         GPIO.output(self.pttPin,(not self.txPinLvl))
-        self.timeoutTimer = gpTimer(self.timeout)
-        self.tailTimer = gpTimer(self.taildly)
-        self.hangTimer = gpTimer(self.hangtime)
-        self.idTimer = gpTimer(self.idtime)
-        self.politeIdTimer = gpTimer(self.idtime - self.polite)
-        self.tailPid=None
-        self.idPid=None
         #self.tail_msg = tail.tail_msg(self.port.card)
+        self.pid = False
+        self.idPid = False
         self.beepMethod = 2 # 0=none, 1=tone, 2=wave 3=morse
         self.beepTone = "660 5000 30 440 5000 30 1000 5000 30"
-        self.tailBeepWav = './sounds/Tink.wav'
+        self.tailBeepWav = '../sounds/Tink.wav'
         self.beepMorse = "20 440 5000 beep"
         self.xmlvars = ( 'pltone', 'id', 'idtime', 'polite', 'timeout',
                          'taildly', 'hangtime', 'disable', 'txupdly',
                          'txPinLvl', 'beepMethod', 'beepTone',
                          'tailBeepWav', 'beepMorse') # data to store in xml config
 
-    def add_tail_msg(self, method,msg,cancelable,isid,requeue,alt):
-        #self.tail_msg.add(method,msg,cancelable,isid,requeue,alt)
-        False
+    def addTailMsg(self, method,msg,cancelable,isid,requeue,alt):
+        self.tailMsgList.append((method,msg,cancelable,isid,requeue,alt))
+        print "Added tail message %s " % msg
+
+    def addBeaconMsg(self, method,msg,cancelable,isid,requeue,alt):
+        self.beaconMsgList.append((method,msg,cancelable,isid,requeue,alt))
+        print "Added beacon message %s " % msg
+
 
     def tx(self) :
         if( not self.disable) :
             #self.port.startPl(pltone)
             #self.port.tx_enable()
-            self.timeoutTimer.reset()
             GPIO.output(self.pttPin,self.txPinLvl)
+            self.port.gui.updateTxGui(self.port.portnum,True)
+
+    def plGen() :
+        """ Starts this transmitters Pl generator
+
+        not going to worry about the details yet
+        """
+        print "pl gen on"
+    def plStop() :
+        """ Stops this transmitters Pl generator
+
+       not going to worry about the details yet
+       """
+        print "pl gen off"
+        
     def down(self):
         GPIO.output(self.pttPin,(not self.txPinLvl))
-        self.timeoutTimer.stop()
+        self.port.gui.updateTxGui(self.port.portnum,False)
 
- #   def startTailMessages(self) :
- #       self.TailMessagesDone = False
- #       try:
- #           self.tailpid = Process(target=self.runTailMessages)
- #       except:
- #           print "Could not launch tail messages"
- #           self.TailMessagesDone = True            
+    def playMsgs(self,msgList) :
+        self.cancel = False
+        id_played = False
+        i=0;
+        while(i>len(msgList)) :
+            ele = msgList[i]
+            (method,msg,cancelable,isid,requeue,alt) = ele
+            self.cancellable = cancelable
+            # run it
+            if(not self.cancel or not cancelable) :
+                # realy run it
+                args = method + [self.card,msg]
+                print "tail message play: (args)"
+                print args
+                try: 
+                    self.pid = subprocess.Popen(args)
+                    self.pid.wait()
+                except:
+                    print "error could not run the tail message"
+            if(self.cancel and alt and self.pid.returncode() <0) :
+                (method,msg) = alt
+                args = method + [self.card,msg]
+                print "tail message alt play: (args)"
+                print args
+                try: 
+                    self.pid = subprocess.call(args)
+                except:
+                    print "error could not run the alternate message"
+                if(isid and (alt or (not self.cancel and not cancelable))) :
+                    id_played = True
+            if (not requeue):
+                msgList.pop(i)
+            else :
+                i=i+1
+        self.pid = None
+        return (id_played)
  
-    def runTailMessages(self) :
-        self.TailMessagesDone = False
-        #id_played = self.tail_msg.play()
-        if(id_played) :
-            self.politeIdTimer.reset()
-            self.idTimer.reset()
-        if(self.politeIdTimer.expired) :
-            self.sendId()
-        self.TailMessagesDone = True
-
     def sendId(self) :
-        self.idPid = subprocess.Popen(['./bin/mout', self.port.card, '20', '660', '5000', self.id])
-        self.politeIdTimer.reset()
-        self.idTimer.reset()
+        self.idPid = subprocess.Popen(['../bin/mout', self.port.card, '20', '660', '5000', self.id])
+        self.idPid.wait()
+        self.port.fsm.politeIdTimer.reset()
+        self.port.fsm.idTimer.reset()
 
-    def tailbeep(self) :
+    def tailBeep(self) :
         if(self.beepMethod == 1) : # tone
-            args = ['./bin/tout',self.port.card] + self.beepTone.split()
+            args = ['../bin/tout',self.port.card] + self.beepTone.split()
             print args
             beepPid = subprocess.call(args)
         elif(self.beepMethod == 2) : # wave
             beepPid = subprocess.Popen(['/usr/bin/aplay', '-D', self.port.card, self.tailBeepWav])
         elif(self.beepMethod == 3) : # morse
-            args = ['./bin/mout',self.port.card] + self.beepMorse.split()
+            args = ['../bin/mout',self.port.card] + self.beepMorse.split()
             print args
             beepPid = subprocess.call(args)
         else : # none
@@ -189,8 +184,6 @@ class rx:
             
         GPIO.setup(self.ctcssPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.corPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        self.timer = gpTimer(self.timeout)
-        self.idleTimer = gpTimer(self.IdleTimeout)
         self.xmlvars = ('timeout', 'IdleTimeout', 'disabled', 'useCtcssPin',
                      'ctcssPinLvl', 'useCorPin', 'corPinLvl', 'useSoftCtcss',
                      'softCtcssAllow', 'softCtcssCmd', 'cmdMode')
@@ -212,7 +205,7 @@ class rx:
             rx = False
         return(rx)
 
-    def update(self):
+    def update(self,channel): # for when called by GPIO interrupt
         ctcssCmd = False
         softCtcss = False
         if(self.useSoftCtcss) :
@@ -237,28 +230,32 @@ class rx:
         if(ctcssCmd) :
            self.cmdMode = True
            self.cmdTimer.Reset()
+        self.port.fsm.updateRX(rx)
+        self.port.gui.updateRxGui(self.port.portnum,(GPIO.input(self.corPin) == self.corPinLvl),
+                    (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),softCtcss)
 
-    def soft_decode (self,q):
-        p=subprocess.Popen(['./bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
+    def softDecode (self,q):
+        p=subprocess.Popen(['../bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
         time.sleep(1)
         while(True) :
             txt = p.stdout.readline()
             ctcss = re.search(r'CTCSS (?P<state>[DL]): (?P<num>\d)',txt)
             dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
+            mute = re.search(r'MUTE',txt)
             if(ctcss != None) :
                 self.ctcssAct[int(ctcss.group('num'))] = (ctcss.group('state') == 'D')
-                self.update() # update the RX status
+                self.update(False) # update the RX status
             if(dtmf != None) :
                 q.put(dtmf.group('tone'))
 
     def run(self) :
-        self.sd = threading.Thread(target=self.softdecode, args=(self.q))
+        self.sd = threading.Thread(target=self.softDecode, args=(self.q))
         self.sd.daemon = True
         self.sd.start()
         if(self.useCorPin) :
-            GPIO.add_event_detect(self.corPin, GPIO.BOTH, callback=update)
+            GPIO.add_event_detect(self.corPin, GPIO.BOTH, callback=self.update)
         if(self.useCtcssPin) :
-            GPIO.add_event_detect(self.ctcssPin, GPIO.BOTH, callback=update)
+            GPIO.add_event_detect(self.ctcssPin, GPIO.BOTH, callback=self.update)
 
 
 class radioPort :
@@ -267,7 +264,7 @@ class radioPort :
     The soft deode thread runs multimon to decode PL and DTMF
     The ctcss pin and cor pins are handled by interups.
     """
-    def __init__(self, portnum,q) :
+    def __init__(self, portnum,q, gui) :
         self.portnum = portnum
         if(portnum == 1 ) :
             self.card = "sysdefault:CARD=Device"
@@ -277,28 +274,17 @@ class radioPort :
             self.card = "sysdefault"
         
         self.islink = False
-        self.linkstate = 0; 
-        self.q = q;
+        self.linkstate = 0
+        self.q = q
+        self.gui = gui
         self.rx = rx(self,q) # self passed in is the port instance for parent refences to this data
         self.tx = tx(self)
+        self.fsm = rptFsm.rptFsm(self)
         self.xmlvars = ( 'card', 'islink', 'linkstate', 'enabled')
-        self.state = 'idle'
         self.cmd = ""
         self.enabled = True
 
     def run(self) :
-        self.rx.run()
-        while(True) :
-            if(self.state = 'idle') :
-                if(self.rx.rxActive.isSet()) :
-                    self.tx.tx()
-                    self.tx.idTimer.run()
-                    self.tx.politeIdTimer.run()
-                    self.state = 'rpt'
-
-    
-        
-def stopALL(signum, frame):
-    print 'SoftDecode Stoping, Shutting down', signum
-    #p.terminate()
-    sys.exit(1)
+        if(self.enabled) :
+            self.rx.run()
+            self.fsm.startUp()

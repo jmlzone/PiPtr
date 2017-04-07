@@ -75,7 +75,7 @@ def processList(root,hierarchy) :
 
 def loadXml(fileName) :
     rf = open(fileName, "rt")
-    rt = XML.ElementTree.Parse(rf)
+    rt = XML.parse(rf)
     rf.close()
     root = rt.getroot()
     processList(root, "")
