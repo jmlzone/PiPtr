@@ -6,8 +6,8 @@ class gpTimer:
         self.isrunning = False
         self.handler = userHandler if userHandler is not None else self.defaultHandler
         self.timer = threading.Timer(self.timeout, self.handler)
-        self.timer.start()
-        self.isrunning = True
+        #self.timer.start()
+        #self.isrunning = True
         
     def reset(self):
         self.timer.cancel()
