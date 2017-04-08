@@ -26,6 +26,7 @@ import re
 import Queue
 from multiprocessing import Process
 import gui
+from logit import logit
 execfile('xmlio.py')
 execfile('cmd.py')
 
@@ -36,18 +37,12 @@ def hup_handler(signum, frame):
 def int_handler(signum, frame):
     print 'Int interrupt, Shutting down', signum
     port1.tx.down()
-    port1.tx.down()
+    port2.tx.down()
     GPIO.cleanup()
     #p0.terminate()
     exit(-1)
 signal.signal(signal.SIGHUP, hup_handler)
 signal.signal(signal.SIGINT, int_handler)
-
-def logit(msg) :
-    dt = datetime.datetime.now()
-    ds = dt.strftime("%B %d, %Y %I:%M:%S%p")
-    print ds + " - " + msg
-    sys.stdout.flush()
 
 # audio control value defaults (overridden by xml config)
 R0 = 150

@@ -1,4 +1,7 @@
+from logit import logit
 import threading
+import time
+from cmd import talkingClock
 class gpTimer:
     def __init__(self, timeout, userHandler=None):  # timeout in seconds
         self.timeout = timeout
@@ -56,6 +59,7 @@ class rptFsm :
         #rx related
         self.rxTimer = gpTimer(self.port.rx.timeout, userHandler = self.rxTo)
         self.rxIdleTimer = gpTimer(self.port.rx.IdleTimeout)
+        self.cmdTimer = gpTimer(self.port.rx.cmdTimeout)
 
         self.lock = threading.Lock()
 
@@ -90,11 +94,11 @@ class rptFsm :
         self.getLock()
         if(rx) :
             if(self.state == 'idle') :
-                rpt()
+                self.repeat()
             elif (self.state == 'beacon') :
                 self.cancelBeacon()
             elif (self.state == 'tail') :
-                canceltail()
+                self.cancelTail()
         else : # rx inactive
             if(self.state == 'repeat') :
                 self.tail()
@@ -105,6 +109,7 @@ class rptFsm :
     def rxTo(self) :
         self.getLock()
         self.state = 'rxTimeOut'
+        logit("Port %d Rx Time Out" % self.port.portnum)
         # send time out message
         # turn off transmitter (if not linked)
         self.port.tx.down()
@@ -112,6 +117,7 @@ class rptFsm :
 
     def rxTimeOutRelease(self) :
         self.getLock()
+        logit("Port %d Rx Time Out release" % self.port.portnum)
         # queue up the time out reset message
         self.beacon()
         self.releaseLock()
@@ -139,15 +145,18 @@ class rptFsm :
     def idle(self) :
         self.port.tx.down()
         self.state = 'idle'
+        logit("Port %d Idle" % self.port.portnum)
         
     def repeat(self) :
         self.state = 'repeat'
+        logit("Port %d Repeat" % self.port.portnum)
         self.txTimeoutTimer.reset()
         self.port.tx.tx()
         self.port.tx.plGen()
         
     def tail(self) :
         self.state = 'tail'
+        logit("Port %d Tail" % self.port.portnum)
         self.tailTimer.reset()
 
     def tailMessagePlay(self) :
@@ -168,6 +177,7 @@ class rptFsm :
         
     def beacon(self) :
         self.state = 'beacon'
+        logit("Port %d Beacon" % self.port.portnum)
         self.beaconUpTimer.reset()
 
     def beaconRun(self) :

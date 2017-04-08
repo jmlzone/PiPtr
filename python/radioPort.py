@@ -34,6 +34,7 @@ class tx:
         else :
             self.pttPin = 22
 
+        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pttPin, GPIO.OUT)
         GPIO.output(self.pttPin,(not self.txPinLvl))
         #self.tail_msg = tail.tail_msg(self.port.card)
@@ -64,13 +65,13 @@ class tx:
             GPIO.output(self.pttPin,self.txPinLvl)
             self.port.gui.updateTxGui(self.port.portnum,True)
 
-    def plGen() :
+    def plGen(self) :
         """ Starts this transmitters Pl generator
 
         not going to worry about the details yet
         """
         print "pl gen on"
-    def plStop() :
+    def plStop(self) :
         """ Stops this transmitters Pl generator
 
        not going to worry about the details yet
@@ -161,6 +162,7 @@ class rx:
         self.anti_kerchunk = False
         self.timeout = 180     # seconds
         self.IdleTimeout = 600 # seconds
+        self.cmdTimeout = 600 # seconds
         self.disabled = False
         self.expired = False
         self.idle = True
@@ -174,7 +176,6 @@ class rx:
         self.softCtcssAllow = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.softCtcssCmd   = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.cmdMode = False
-
         if(self.port.portnum == 1) :
             self.corPin = 11
             self.ctcssPin = 13
@@ -182,11 +183,12 @@ class rx:
             self.corPin = 16
             self.ctcssPin = 18
             
+        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.ctcssPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.corPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         self.xmlvars = ('timeout', 'IdleTimeout', 'disabled', 'useCtcssPin',
                      'ctcssPinLvl', 'useCorPin', 'corPinLvl', 'useSoftCtcss',
-                     'softCtcssAllow', 'softCtcssCmd', 'cmdMode')
+                        'softCtcssAllow', 'softCtcssCmd', 'cmdMode', 'cmdTimeout')
 
     def ctcss(self):
         if(GPIO.input(self.ctcssPin) == self.ctcssPinLvl) :
@@ -210,18 +212,18 @@ class rx:
         softCtcss = False
         if(self.useSoftCtcss) :
             for i in range(8) :
-                if( softCtcss[i] and self.softCtcssAllow[i] ) :
+                if( self.ctcssAct[i] and self.softCtcssAllow[i] ) :
                      softCtcss = True
-                if( softCtcss[i] and self.softCtcssCmd[i] ) :
+                if( self.ctcssAct[i] and self.softCtcssCmd[i] ) :
                     ctcssCmd[i] = True
         if(softCtcss or self.useSoftCtcss == False):
-            rx = active()
+            rx = self.active()
         rx = rx and not self.disabled
         if(rx != self.rxState) :
             if(rx) :
                 self.rxActive.set()
-                self.timer.reset()
-                self.idleTimer.stop()
+                self.port.fsm.rxTimer.reset()
+                self.port.fsm.rxIdleTimer.stop()
             else :
                 self.rxActive.clear()
                 if (self.port.cmd != "") :
@@ -229,10 +231,10 @@ class rx:
             self.rxState = rx
         if(ctcssCmd) :
            self.cmdMode = True
-           self.cmdTimer.Reset()
-        self.port.fsm.updateRX(rx)
+           self.port.fsm.cmdTimer.reset()
+        self.port.fsm.updateRx(rx)
         self.port.gui.updateRxGui(self.port.portnum,(GPIO.input(self.corPin) == self.corPinLvl),
-                    (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),softCtcss)
+                    (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),self.ctcssAct)
 
     def softDecode (self,q):
         p=subprocess.Popen(['../bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
@@ -249,7 +251,7 @@ class rx:
                 q.put(dtmf.group('tone'))
 
     def run(self) :
-        self.sd = threading.Thread(target=self.softDecode, args=(self.q))
+        self.sd = threading.Thread(target=self.softDecode, args=[self.q])
         self.sd.daemon = True
         self.sd.start()
         if(self.useCorPin) :

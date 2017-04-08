@@ -1,3 +1,10 @@
+import datetime
+import os
+import subprocess
+import re
+import string
+
+
 # This file is the "user level commands" and the mapping from the
 # touch tone codes to the functions.
 
@@ -42,7 +49,8 @@ def talkingClock(card,prefix = 'its'):
     dt = datetime.datetime.now()
     ds = dt.strftime("%I %M %p, %A %B %_d")
     myTime = prefix + " "+ ds
-    os.environ['ALSA_CARD'] = card
+    device = string.replace(card,'sysdefault:CARD=','')
+    os.environ['ALSA_CARD'] = device
     subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
 
