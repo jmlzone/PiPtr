@@ -48,6 +48,7 @@ class tx:
                          'taildly', 'hangtime', 'disable', 'txupdly',
                          'txPinLvl', 'beepMethod', 'beepTone',
                          'tailBeepWav', 'beepMorse') # data to store in xml config
+        self.up = False
 
     def addTailMsg(self, method,msg,cancelable,isid,requeue,alt):
         self.tailMsgList.append((method,msg,cancelable,isid,requeue,alt))
@@ -64,6 +65,7 @@ class tx:
             #self.port.tx_enable()
             GPIO.output(self.pttPin,self.txPinLvl)
             self.port.gui.updateTxGui(self.port.portnum,True)
+            self.up = True
 
     def plGen(self) :
         """ Starts this transmitters Pl generator
@@ -81,6 +83,7 @@ class tx:
     def down(self):
         GPIO.output(self.pttPin,(not self.txPinLvl))
         self.port.gui.updateTxGui(self.port.portnum,False)
+        self.up - False
 
     def playMsgs(self,msgList) :
         self.cancel = False
@@ -122,8 +125,6 @@ class tx:
     def sendId(self) :
         self.idPid = subprocess.Popen(['../bin/mout', self.port.card, '20', '660', '5000', self.id])
         self.idPid.wait()
-        self.port.fsm.politeIdTimer.reset()
-        self.port.fsm.idTimer.reset()
 
     def tailBeep(self) :
         if(self.beepMethod == 1) : # tone
