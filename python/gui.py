@@ -104,8 +104,11 @@ class gui :
         self.txLed = self.c.create_oval(500,310, 530,340, fill="grey")
         x=140
         y=310
+        tone = ["77.0", "88.5", "103.5", "110.9",
+                "114.8", "123.0", "146.2", "165.5" ]
         self.softArr = []
         for i in range (8) :
+            self.c.create_text(x+15,300,text=tone[i],fill="green")
             t=self.c.create_oval(x,y,x+30,y+30, fill="grey")
             self.softArr.append(t)
             x=x+40
