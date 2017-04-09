@@ -106,13 +106,17 @@ class rptFsm :
             elif (self.state == 'tail') :
                 self.cancelTail()
                 self.repeat()
+            elif (self.state == 'repeat') :
+                pass
             else:
                 logit("Port %d Error Rx active again in state %s " % (self.port.portnum, self.state) )
         else : # rx inactive
             if(self.state == 'repeat') :
                 self.tail()
             elif(self.state == 'rxTimeOut') :
-                self.rxTimoutRelease()
+                self.rxTimeoutRelease()
+            elif(self.state == 'idle' or self.state == 'tail') :
+                pass
             else:
                 logit("Port %d Error Rx off again in state %s " % (self.port.portnum, self.state) )
         self.releaseLock()
@@ -122,11 +126,13 @@ class rptFsm :
         self.getLock()
         self.state = 'rxTimeOut'
         logit("Port %d Rx Time Out" % self.port.portnum)
-        self.port.tx.playMsgs([("../bin/mout",[ '20', '660', '5000', "to"],False,False,False,None)])
+        idPlayed = self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "to"],False,False,False,None)])
         # send time out message
         # turn off transmitter (if not linked)
+        self.port.tx.plStop()
         self.port.tx.down()
         self.releaseLock()
+        logit("Port %d Rx Time Out complete" % self.port.portnum)
 
     def txTimeout(self) :
         """ Entered by the TX time out event """
@@ -144,7 +150,7 @@ class rptFsm :
         logit("Port %d idle Time Out queued Idle message" % self.port.portnum)
         self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], '../sounds/idle.wav', True, True, False, None)
 
-    def rxTimeOutRelease(self) :
+    def rxTimeoutRelease(self) :
         """ Entered when the RX goes off when in state rxTimeOut"""
         self.getLock()
         logit("Port %d Rx Time Out release" % self.port.portnum)
@@ -220,6 +226,8 @@ class rptFsm :
         """ if the tail is cancelled, we must have been pulled back into repeat by an active RX"""
         if( not self.port.tx.cancel) :
             self.port.tx.tailBeep()
+            self.port.tx.plStop()
+            self.rxTimer.stop()
             self.hangTimer.reset()
             """ when the hang timer expires, controll will go to tail done then to idle"""
 

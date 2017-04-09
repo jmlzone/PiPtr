@@ -83,30 +83,37 @@ class tx:
     def down(self):
         GPIO.output(self.pttPin,(not self.txPinLvl))
         self.port.gui.updateTxGui(self.port.portnum,False)
-        self.up - False
+        self.up = False
 
     def playMsgs(self,msgList) :
+        print " play messages called"
+        print msgList
         self.cancel = False
         id_played = False
         i=0;
-        while(i>len(msgList)) :
+        while(i<len(msgList)) :
+            print "i = %d" %i
             ele = msgList[i]
+            print "ele ="
+            print ele
             (method,msg,cancelable,isid,requeue,alt) = ele
             self.cancellable = cancelable
             # run it
             if(not self.cancel or not cancelable) :
                 # realy run it
-                args = method + [self.card,msg]
+                args = method + [self.port.card] + msg
                 print "tail message play: (args)"
                 print args
-                try: 
+                try:
+                    print "Play messages Trying"
+                    print args
                     self.pid = subprocess.Popen(args)
                     self.pid.wait()
                 except:
                     print "error could not run the tail message"
             if(self.cancel and alt and self.pid.returncode() <0) :
                 (method,msg) = alt
-                args = method + [self.card,msg]
+                args = method + [self.port.card] + msg
                 print "tail message alt play: (args)"
                 print args
                 try: 
@@ -120,6 +127,7 @@ class tx:
             else :
                 i=i+1
         self.pid = None
+        print "Play messages Exit"
         return (id_played)
  
     def sendId(self) :
@@ -161,7 +169,7 @@ class rx:
         self.busy_timer = 0
         self.kerchunk_timer = 0
         self.anti_kerchunk = False
-        self.timeout = 180     # seconds
+        self.timeout = 10     # seconds
         self.IdleTimeout = 600 # seconds
         self.cmdTimeout = 600 # seconds
         self.disabled = False

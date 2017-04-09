@@ -68,7 +68,7 @@ def processList(root,hierarchy) :
             val = child.text.strip()
             if (not isOK(val) ) :
                 val =  "'"+val+"'"
-            #print hierarchy + child.tag + " = " + val
+            print hierarchy + child.tag + " = " + val
             exec(hierarchy + child.tag + " = " + val)
             
 

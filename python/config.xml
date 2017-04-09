@@ -29,7 +29,7 @@
       <beepMorse>20 440 5000 beep</beepMorse>
     </tx>
     <rx>
-      <timeout>180</timeout>
+      <timeout>18</timeout>
       <IdleTimeout>600</IdleTimeout>
       <disabled>False</disabled>
       <useCtcssPin>True</useCtcssPin>
