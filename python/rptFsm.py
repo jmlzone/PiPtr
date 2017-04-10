@@ -95,8 +95,10 @@ class rptFsm :
         self.releaseLock()
         
     def updateRx(self, rx) :
+        logit("Update RX state is " + self.state + str(rx))
         # will need to be smarter about the link state
         self.getLock()
+        logit("Update RX state got lock " + self.state)
         if(rx) :
             if(self.state == 'idle') :
                 self.repeat()
@@ -126,12 +128,18 @@ class rptFsm :
         self.getLock()
         self.state = 'rxTimeOut'
         logit("Port %d Rx Time Out" % self.port.portnum)
+        tot = threading.Thread(target=self.rxToThread)
+        tot.daemon = True
+        tot.start()
+        self.releaseLock()
+
+    def rxToThread(self) :
+        logit("Port %d Rx Time Out Thread" % self.port.portnum)
         idPlayed = self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "to"],False,False,False,None)])
         # send time out message
         # turn off transmitter (if not linked)
         self.port.tx.plStop()
         self.port.tx.down()
-        self.releaseLock()
         logit("Port %d Rx Time Out complete" % self.port.portnum)
 
     def txTimeout(self) :
@@ -148,16 +156,14 @@ class rptFsm :
 
     def idleTimeout(self) :
         logit("Port %d idle Time Out queued Idle message" % self.port.portnum)
-        self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], '../sounds/idle.wav', True, True, False, None)
+        self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], ['../sounds/idle.wav'], True, True, False, None)
 
     def rxTimeoutRelease(self) :
         """ Entered when the RX goes off when in state rxTimeOut"""
-        self.getLock()
         logit("Port %d Rx Time Out release" % self.port.portnum)
         # queue up the time out reset message
-        self.port.tx.addBeaconMsg("../bin/mout",[ '20', '660', '5000', "to rst"],False,False,False,None)
+        self.port.tx.addBeaconMsg(["../bin/mout"],[ '20', '660', '5000', "to rst"],False,False,False,None)
         self.beacon()
-        self.releaseLock()
 
     def tailDone(self):
         """Entered When the hang timer expires"""

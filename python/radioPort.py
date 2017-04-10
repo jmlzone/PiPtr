@@ -169,7 +169,7 @@ class rx:
         self.busy_timer = 0
         self.kerchunk_timer = 0
         self.anti_kerchunk = False
-        self.timeout = 10     # seconds
+        self.timeout = 180     # seconds
         self.IdleTimeout = 600 # seconds
         self.cmdTimeout = 600 # seconds
         self.disabled = False
