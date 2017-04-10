@@ -15,17 +15,17 @@ import string
 
 def test123(port):
     print "test123"
-    port.tx.tailBeepWav = './sounds/Tink.wav'
+    port.tx.tailBeepWav = '../sounds/Tink.wav'
     sys.stdout.flush()
 
 def test456(port):
     print "test456"
-    port.tx.tailBeepWav = './sounds/Submarine.wav'
+    port.tx.tailBeepWav = '../sounds/Submarine.wav'
     sys.stdout.flush()
 
 def test789(port):
     print "test789"
-    port.tx.tailBeepWav = './sounds/Glass.wav'
+    port.tx.tailBeepWav = '../sounds/Glass.wav'
     sys.stdout.flush()
 
 def cmdWithArg(port,arg):
@@ -57,12 +57,12 @@ def talkingClock(card,prefix = 'its'):
 # command table.
 # the command table can be in the format of the long list or you can add things like shown at the end.
 #
-cmdlist =[("123$",test123), # the $ at the end forces an exact match
-          ("456",test456),
-          ("789",test789)]
-cmdlist = cmdlist + [("123(\d+)", cmdWithArg)] # rexexp type argument needed 1 or more decimal digits.
-cmdlist = cmdlist + [("DDDDD", rptDown)]
-cmdlist = cmdlist + [("2337(\d)", beepMethod)]
+cmdlist =[("123$","test123"), # the $ at the end forces an exact match
+          ("456","test456"),
+          ("789","test789")]
+cmdlist = cmdlist + [("123(\d+)", "cmdWithArg")] # rexexp type argument needed 1 or more decimal digits.
+cmdlist = cmdlist + [("DDDDD", "rptDown")]
+cmdlist = cmdlist + [("2337(\d)", "beepMethod")]
 
 # command processor
 def cmdprocess (q,port) :
@@ -73,12 +73,12 @@ it acts globally or uses port context """
     while (True) :
         tone = q.get() # block until somthing is ready
         if (tone == " ") : # terminator at end of rx
-            if(len(cmd0) >0) :
+            if(len(port.cmd) >0) :
                 found = 0
                 for c in cmdlist :
                     print c
                     (name,func) = c
-                    m = re.match(name,cmd0)
+                    m = re.match(name,port.cmd)
                     if(m != None) :
                         found = 1
                         if(len(m.groups()) ==1) :

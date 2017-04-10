@@ -79,6 +79,8 @@ if(port2.enabled) :
     d2 = threading.Thread(target=cmdprocess, args=(q2,port2))
     d2.daemon = True
     d2.start()
-gui.run()
 
-    
+#g = threading.Thread(target=gui.run)
+#g.daemon = True
+#g.start()
+gui.run()

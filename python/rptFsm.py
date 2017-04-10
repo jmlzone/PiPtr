@@ -63,7 +63,25 @@ class rptFsm :
 
         self.lock = threading.Lock()
 
-    """ Input event functions here
+    def updateTimers(self) :
+        """Since the timers are create very early and the times are updated by
+           the XML load or commands to change the timing we need a function to
+           update them.
+        """
+        # Tx related
+        self.txTimeoutTimer.timeout = self.port.tx.timeout
+        self.tailTimer.timeout = self.port.tx.taildly
+        self.hangTimer.timeout = self.port.tx.hangtime
+        self.idTimer.timeout = self.port.tx.idtime
+        self.politeIdTimer.timeout = self.port.tx.idtime - self.port.tx.polite
+        self.beaconUpTimer.timeout = self.port.tx.txupdly
+
+        #rx related
+        self.rxTimer.timeout = self.port.rx.timeout
+        self.rxIdleTimer.timeout = self.port.rx.IdleTimeout
+        self.cmdTimer.timeout = self.port.rx.cmdTimeout
+
+        """ Input event functions here
         they need to
         1) acquire the lock
         2) do the next state
@@ -72,6 +90,7 @@ class rptFsm :
     def startUp(self) :
         logit("Port %d startup" % self.port.portnum)
         time.sleep(5 * self.port.portnum)
+        self.updateTimers()
         self.getLock()
         self.port.tx.tx()
         time.sleep(1)
@@ -91,6 +110,7 @@ class rptFsm :
         """
         self.getLock()
         self.idTimer.expired = True
+        self.idTimer.isrunning = False
         self.beacon()
         self.releaseLock()
         
@@ -124,17 +144,14 @@ class rptFsm :
         self.releaseLock()
                 
     def rxTo(self) :
-        """ Entered by the RX time out event """
+        """ Entered by the RX time out event 
+            Entered into from a timer threadf so no need to be quick.
+            Needs to get the lock before changing any state information
+        """
         self.getLock()
         self.state = 'rxTimeOut'
         logit("Port %d Rx Time Out" % self.port.portnum)
-        tot = threading.Thread(target=self.rxToThread)
-        tot.daemon = True
-        tot.start()
         self.releaseLock()
-
-    def rxToThread(self) :
-        logit("Port %d Rx Time Out Thread" % self.port.portnum)
         idPlayed = self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "to"],False,False,False,None)])
         # send time out message
         # turn off transmitter (if not linked)
@@ -147,7 +164,7 @@ class rptFsm :
         self.getLock()
         self.state = 'TxTimeOut'
         logit("Port %d Tx Time Out" % self.port.portnum)
-        self.port.tx.playMsgs([("../bin/mout",[ '20', '660', '5000', "TX to"],False,False,False,None)])
+        self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "TX to"],False,False,False,None)])
         # send time out message
         # turn off transmitter (if not linked)
         self.port.tx.down()
@@ -159,7 +176,9 @@ class rptFsm :
         self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], ['../sounds/idle.wav'], True, True, False, None)
 
     def rxTimeoutRelease(self) :
-        """ Entered when the RX goes off when in state rxTimeOut"""
+        """ Entered when the RX goes off when in state rxTimeOut
+            Entered from teh RX state cchange code so it needs to be short
+        """
         logit("Port %d Rx Time Out release" % self.port.portnum)
         # queue up the time out reset message
         self.port.tx.addBeaconMsg(["../bin/mout"],[ '20', '660', '5000', "to rst"],False,False,False,None)
@@ -193,6 +212,7 @@ class rptFsm :
             * beaconRun
         """
         self.port.tx.down()
+        self.txTimeoutTimer.stop()
         self.state = 'idle'
         logit("Port %d Idle" % self.port.portnum)
         self.rxIdleTimer.reset()
@@ -200,6 +220,8 @@ class rptFsm :
     def repeat(self) :
         """ Entered when the RX goes active """
         self.rxIdleTimer.stop()
+        self.idTimer.run()     # start or run the ID timers since they may be stopped
+        self.politeIdTimer.run()
         self.state = 'repeat'
         logit("Port %d Repeat" % self.port.portnum)
         if (not self.port.tx.up) :
@@ -252,6 +274,8 @@ class rptFsm :
         """ This state can be used to beacon out an ID if needed or other messages that are queued"""
         """ entered from beaconId or RX time out """
         self.state = 'beacon'
+        self.port.tx.plGen()
+        self.port.tx.tx()
         logit("Port %d Beacon" % self.port.portnum)
         self.beaconUpTimer.reset()
         """ When the beacon up (tx delay) timer expires Control moves to beaconRun """
@@ -260,19 +284,21 @@ class rptFsm :
         """ Will run on the beaconUp Timers Thread """
         if (self.idTimer.expired) :
             self.port.tx.sendId()
+            self.idTimer.expired = False
             if(self.state != 'beacon' ) : # due to cancel
                 self.idTimer.reset()
                 self.politeIdTimer.reset()
         self.port.tx.playMsgs(self.port.tx.beaconMsgList)
         self.port.tx.pid = False
         if( not self.port.tx.cancel) :
+            self.port.tx.plStop()
             self.getLock()
             self.idle()
             self.releaseLock()
 
     def cancelBeacon(self) :
         """ if the beacon is cancelled stop the messages and let this tread end
-            Whoever cancelled the beacon (RX) shoudl set the correct next state
+            Whoever cancelled the beacon (RX) should set the correct next state
         """
         self.beaconUpTimer.stop()
         self.port.tx.cancel = True

@@ -23,7 +23,7 @@
       <disable>False</disable>
       <txupdly>1</txupdly>
       <txPinLvl>1</txPinLvl>
-      <beepMethod>2</beepMethod>
+      <beepMethod>1</beepMethod>
       <beepTone>660 5000 30 440 5000 30 1000 5000 30</beepTone>
       <tailBeepWav>../sounds/Tink.wav</tailBeepWav>
       <beepMorse>20 440 5000 beep</beepMorse>
