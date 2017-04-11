@@ -115,10 +115,10 @@ class rptFsm :
         self.releaseLock()
         
     def updateRx(self, rx) :
-        logit("Update RX state is " + self.state + str(rx))
+        #logit("Update RX state is " + self.state + str(rx))
         # will need to be smarter about the link state
         self.getLock()
-        logit("Update RX state got lock " + self.state)
+        #logit("Update RX state got lock " + self.state)
         if(rx) :
             if(self.state == 'idle') :
                 self.repeat()
@@ -244,7 +244,7 @@ class rptFsm :
         if (self.politeIdTimer.expired) :
             self.port.tx.sendId()
             self.politeIdTimer.reset()
-            self.IdTimer.reset()
+            self.idTimer.reset()
         idPlayed = self.port.tx.playMsgs(self.port.tx.tailMsgList)
         if(idPlayed) : # a message that counts as an ID
             logit("Port %d Played a tail message that counted for an ID " % self.port.portnum )
