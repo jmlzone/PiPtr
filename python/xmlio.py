@@ -1,33 +1,36 @@
 from xml.etree import ElementTree as XML
 from xml.dom import minidom
+import datetime
+
 # at some point some effort should be make to name the xml file something specific to the node
 
-def dumpXml() :
+def dumpXml(top,fn) :
     generated_on = str(datetime.datetime.now())
     config = XML.Element('config')
     comment = XML.Comment("configuration dumped on " + generated_on)
     config.append(comment)
-    for v in xmlvars :
+    for v in top.xmlvars :
         ve = XML.SubElement(config,v)
         vv = eval(v)
         ve.text=str(vv)
-    for p in ('port1', 'port2') :
-        portvars = eval(p + ".xmlvars")
+    for p in ('hwio', 'port1', 'port2') :
+        portvars = eval("top." + p + ".xmlvars")
         port = XML.SubElement(config, p)
         for pi in portvars :
             pe = XML.SubElement(port,pi)
-            pev = eval(p + "." + pi)
+            pev = eval("top." + p + "." + pi)
             pe.text = str(pev)
-        for tr in ('tx', 'rx') :
-            tre = XML.SubElement(port,tr)
-            trl = eval(p + "." + tr + ".xmlvars")
-            for tri in trl :
-                triv = XML.SubElement(tre,tri)
-                trv = eval(p + "." + tr + "." + tri)
-                triv.text = str(trv)
+        if(not p.find("port")) :  # backwards logic, find returns 0 for finding at the front
+            for tr in ('tx', 'rx') :
+                tre = XML.SubElement(port,tr)
+                trl = eval("top." + p + "." + tr + ".xmlvars")
+                for tri in trl :
+                    triv = XML.SubElement(tre,tri)
+                    trv = eval("top." + p + "." + tr + "." + tri)
+                    triv.text = str(trv)
                 
 
-    f = open("config.xml", "w")
+    f = open(fn, "w")
     f.write(minidom.parseString(XML.tostring(config)).toprettyxml(indent = "  "))
     f.close()
     
@@ -60,24 +63,24 @@ def isOK(v):
     else :
         return False
 
-def processList(root,hierarchy) :
+def processList(top,root,hierarchy) :
     for child in root :
         if ( list(child) ) :
-            processList (child, hierarchy + child.tag + ".")
+            processList (top, child, hierarchy + child.tag + ".")
         else :
             val = child.text.strip()
             if (not isOK(val) ) :
                 val =  "'"+val+"'"
-            print hierarchy + child.tag + " = " + val
-            exec(hierarchy + child.tag + " = " + val)
+            print "top" + "." + hierarchy + child.tag + " = " + val
+            exec("top" + "." + hierarchy + child.tag + " = " + val)
             
 
 
-def loadXml(fileName) :
+def loadXml(top,fileName) :
     rf = open(fileName, "rt")
     rt = XML.parse(rf)
     rf.close()
     root = rt.getroot()
-    processList(root, "")
+    processList(top,root, "")
 
     

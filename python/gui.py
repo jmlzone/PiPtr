@@ -2,12 +2,17 @@
 import threading
 import time
 from Tkinter import *
+import socket
+import os
+import sys
+from xmlio import dumpXml
 class gui :
-    def __init__(self) :
+    def __init__(self,top) :
         self.tk=Tk()
         self.c = Canvas(self.tk,bg="black",height = 350, width = 550)
         self.c.place(x=0, y=0, height = 350, width = 550)
         self.c.pack() # extends window to fit.
+        self.top = top
 
     def mytriangle (self,canvas,x,y,text) :
         """ draw a horizontal triangle centered starting at startxy """
@@ -62,6 +67,18 @@ class gui :
             points = points + (cx,cy)
         return(canvas.create_line(points ,fill="white"))
 
+    def guiSave(self) :
+        host = socket.gethostname()
+        path = os.path.dirname(os.path.realpath(__file__))
+        abspath = os.path.abspath(path + "/../" + host)
+        f = os.path.abspath(abspath + "/" + host + ".xml")
+        if not os.path.exists(abspath) :
+            print "Warning Local host specific directory %s does not exist, creating" % abspath
+            os.makedirs(abspath)
+        dumpXml(self.top,f)
+        print "Wrote config file %s" % f
+
+
     def init(self) :
         self.mytriangle (self.c,60,70,"RX Main")
         self.mytriangle (self.c,270,70,"PGA")
@@ -112,6 +129,9 @@ class gui :
             t=self.c.create_oval(x,y,x+30,y+30, fill="grey")
             self.softArr.append(t)
             x=x+40
+        SaveButton = Button(self.tk,text="Save",command=self.guiSave)
+        SaveButton.place(x=20,y=240, height = 30, width = 40)
+
 
     def updateRxGui(self, port,cor,ctcss,softCtcss) :
         if(cor) :

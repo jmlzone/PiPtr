@@ -30,7 +30,7 @@ class tx:
         self.TailMessagesDone = False
         self.txPinLvl = 1
         if(self.port.portnum == 1) :
-            self.pttPin = 12
+            self.pttPin = 15
         else :
             self.pttPin = 22
 

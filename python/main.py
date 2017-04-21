@@ -25,9 +25,19 @@ import code
 import re
 import Queue
 from multiprocessing import Process
+class top:
+    def __init__ (self) :
+        self.host = socket.gethostname()
+        self.installPath = os.path.dirname(os.path.realpath(__file__))
+        self.localPath = os.path.abspath(self.installPath + "/../" + self.host)
+        self.xmlvars = []
+top = top()
+sys.path.insert(0,top.localPath)
 import gui
 from logit import logit
-execfile('xmlio.py')
+import xmlio
+import hwio
+
 execfile('cmd.py')
 
 def hup_handler(signum, frame):
@@ -56,13 +66,25 @@ xmlvars = ( 'R0', 'R1', 'R2', 'R3', 'PGA0', 'TCON0' )
 GPIO.setmode(GPIO.BOARD)
 q1 = Queue.Queue()
 q2 = Queue.Queue()
-gui = gui.gui()
+gui = gui.gui(top)
 port1 = radioPort.radioPort(1, q1, gui)
 port2 = radioPort.radioPort(2, q2, gui)
-
+port1.other = port2
+port2.other = port1
+hwio = hwio.hwio(top)
+port1.hwio = hwio
+port2.hwio = hwio
 # load the config
+top.port1 = port1
+top.port2 = port2
+top.gui=gui
+top.hwio=hwio
 logit("Load XML config")
-loadXml('config.xml')
+for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", top.installPath +"/config.xml"] :
+    if os.path.isfile(f) :
+        logit("Load XML config : " + f )
+        xmlio.loadXml(top,f)
+        break
 logit("Load XML Done")
 gui.init()
 if(port1.enabled) :

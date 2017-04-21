@@ -182,6 +182,8 @@ class rptFsm :
         self.rxState = 'rxTimeOut'
         logit("Port %d Rx Time Out" % self.port.portnum)
         self.releaseLock()
+        self.rxTimer.expired = True
+        self.rxTimer.isrunning = False
         idPlayed = self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "to"],False,False,False,None)])
         # send time out message
         # turn off transmitter (if not linked)
