@@ -47,7 +47,9 @@ class rptFsm :
 
     def __init__(self,port) :
         self.port = port
-        self.state = 'idle'
+        self.rxState = 'idle'
+        self.rptState = 'idle'
+        self.linkActive = False
         # Tx related
         self.txTimeoutTimer = gpTimer(self.port.tx.timeout, userHandler = self.txTimeout )
         self.tailTimer = gpTimer(self.port.tx.taildly, userHandler = self.tailMessagePlay)
@@ -115,41 +117,69 @@ class rptFsm :
         self.releaseLock()
         
     def updateRx(self, rx) :
-        #logit("Update RX state is " + self.state + str(rx))
+        #logit("Update RX state is " + self.rxState + str(rx))
         # will need to be smarter about the link state
         self.getLock()
-        #logit("Update RX state got lock " + self.state)
+        #logit("Update RX state got lock " + self.rxState)
         if(rx) :
-            if(self.state == 'idle') :
-                self.repeat()
-            elif (self.state == 'beacon') :
-                self.cancelBeacon()
-                self.repeat()
-            elif (self.state == 'tail') :
-                self.cancelTail()
-                self.repeat()
-            elif (self.state == 'repeat') :
+            if(self.rxState == 'idle') :
+                self.rxUp()
+            elif (self.rxState == 'rx') :
                 pass
             else:
-                logit("Port %d Error Rx active again in state %s " % (self.port.portnum, self.state) )
+                logit("Port %d Error Rx active again in rxState %s " % (self.port.portnum, self.rxState) )
         else : # rx inactive
-            if(self.state == 'repeat') :
+            if(self.rxState == 'rx') :
                 self.tail()
-            elif(self.state == 'rxTimeOut') :
+            elif(self.rxState == 'rxTimeOut') :
                 self.rxTimeoutRelease()
-            elif(self.state == 'idle' or self.state == 'tail') :
+            elif(self.rxState == 'idle') :
                 pass
             else:
-                logit("Port %d Error Rx off again in state %s " % (self.port.portnum, self.state) )
+                logit("Port %d Error Rx off again in rxState %s " % (self.port.portnum, self.rxState) )
         self.releaseLock()
-                
+    def rxUp(self) : # part of rx state machine
+        self.rxState = 'rx'
+        self.rxTimer.run()
+        if(self.rptState == 'idle') :
+            self.repeat()
+        elif (self.rptState == 'beacon') :
+            self.cancelBeacon()
+            self.repeat()
+        elif (self.rptState == 'tail') :
+            self.cancelTail()
+            self.repeat()
+        elif (self.rptState == 'repeat') :
+            pass
+        else:
+            logit("Port %d Error Rx active again in state %s " % (self.port.portnum, self.rxState) )
+    def rxDown(self) : # part of rx state machine
+        # self.rxTimer.stop() ## can do this here its done in tail, but if the link is holding it up?
+        if(self.rptState == 'repeat') :
+            self.rxIdle()
+            if(self.port.isLink) :
+                self.idle()
+            else :
+                self.tail()
+        elif(self.rxState == 'rxTimeOut') :
+            self.rxTimeoutRelease()
+        elif(self.rxState == 'idle' or self.rptState == 'idle') :
+            pass
+        else:
+            logit("Port %d Error Rx off again in state %s " % (self.port.portnum, self.rptState) )
+        
+    def rxIdle(self) :
+        self.rxState = 'idle'
+        
     def rxTo(self) :
         """ Entered by the RX time out event 
             Entered into from a timer threadf so no need to be quick.
             Needs to get the lock before changing any state information
         """
+        self.rxTimer.expired=True
+        self.rxTimer.isRunning=False
         self.getLock()
-        self.state = 'rxTimeOut'
+        self.rxState = 'rxTimeOut'
         logit("Port %d Rx Time Out" % self.port.portnum)
         self.releaseLock()
         idPlayed = self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "to"],False,False,False,None)])
@@ -162,7 +192,7 @@ class rptFsm :
     def txTimeout(self) :
         """ Entered by the TX time out event """
         self.getLock()
-        self.state = 'TxTimeOut'
+        self.rptState = 'TxTimeOut'
         logit("Port %d Tx Time Out" % self.port.portnum)
         self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "TX to"],False,False,False,None)])
         # send time out message
@@ -172,22 +202,31 @@ class rptFsm :
         self.releaseLock()
 
     def idleTimeout(self) :
-        logit("Port %d idle Time Out queued Idle message" % self.port.portnum)
-        self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], ['../sounds/idle.wav'], True, True, False, None)
+        if(self.port.isLink) :
+            pass
+        else :
+            logit("Port %d idle Time Out queued Idle message" % self.port.portnum)
+            self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], ['../sounds/idle.wav'], True, True, False, None)
 
     def rxTimeoutRelease(self) :
         """ Entered when the RX goes off when in state rxTimeOut
             Entered from teh RX state cchange code so it needs to be short
         """
         logit("Port %d Rx Time Out release" % self.port.portnum)
+        self.rxIdle()
         # queue up the time out reset message
         self.port.tx.addBeaconMsg(["../bin/mout"],[ '20', '660', '5000', "to rst"],False,False,False,None)
         self.beacon()
 
     def tailDone(self):
-        """Entered When the hang timer expires"""
+        """Entered When the hang timer expires.
+        if the link is active we stay up, otherwise we ca go idle.
+        """
         self.getLock()
-        self.idle()
+        if (self.linkActive) :
+            self.repeat()
+        else :
+            self.idle()
         self.releaseLock()
 
 
@@ -213,7 +252,7 @@ class rptFsm :
         """
         self.port.tx.down()
         self.txTimeoutTimer.stop()
-        self.state = 'idle'
+        self.rptState = 'idle'
         logit("Port %d Idle" % self.port.portnum)
         self.rxIdleTimer.reset()
         
@@ -222,7 +261,7 @@ class rptFsm :
         self.rxIdleTimer.stop()
         self.idTimer.run()     # start or run the ID timers since they may be stopped
         self.politeIdTimer.run()
-        self.state = 'repeat'
+        self.rptState = 'repeat'
         logit("Port %d Repeat" % self.port.portnum)
         if (not self.port.tx.up) :
             self.txTimeoutTimer.reset()
@@ -232,7 +271,7 @@ class rptFsm :
         
     def tail(self) :
         """ Entered when the RX goes in active and in the repeat state"""
-        self.state = 'tail'
+        self.rptState = 'tail'
         logit("Port %d Tail" % self.port.portnum)
         self.tailTimer.reset()
         """ when the tail timer expires (tail delay) The tail messages play state is entered """
@@ -273,7 +312,7 @@ class rptFsm :
     def beacon(self) :
         """ This state can be used to beacon out an ID if needed or other messages that are queued"""
         """ entered from beaconId or RX time out """
-        self.state = 'beacon'
+        self.rptState = 'beacon'
         self.port.tx.plGen()
         self.port.tx.tx()
         logit("Port %d Beacon" % self.port.portnum)
@@ -285,7 +324,7 @@ class rptFsm :
         if (self.idTimer.expired) :
             self.port.tx.sendId()
             self.idTimer.expired = False
-            if(self.state != 'beacon' ) : # due to cancel
+            if(self.rptState != 'beacon' ) : # due to cancel
                 self.idTimer.reset()
                 self.politeIdTimer.reset()
         self.port.tx.playMsgs(self.port.tx.beaconMsgList)

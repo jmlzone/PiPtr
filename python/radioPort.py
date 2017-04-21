@@ -284,8 +284,8 @@ class radioPort :
         else :
             self.card = "sysdefault"
         
-        self.islink = False
-        self.linkstate = 0
+        self.isLink = False
+        self.linkState = 0
         self.q = q
         self.gui = gui
         self.rx = rx(self,q) # self passed in is the port instance for parent refences to this data
