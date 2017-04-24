@@ -97,3 +97,6 @@ aplay -D sysdefault:CARD=Device idle.wav
 
 sudo apt-get install realvnc-vnc-server
 (connect using user password, not vnc password)
+
+sudo apt-get install -y python-smbus i2c-tools
+sudo raspi-config ... advanced ... enable i2c

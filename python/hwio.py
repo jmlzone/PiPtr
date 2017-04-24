@@ -4,6 +4,7 @@
 # Import all the libraries we need to run
 import spidev
 import RPi.GPIO as GPIO
+import smbus
 class hwio :
     def __init__ (self,top) :
         self.top = top
@@ -17,6 +18,8 @@ class hwio :
         # Open SELF.SPI bus
         self.spi = spidev.SpiDev()
         self.xmlvars = ['vals','tcon', 'gain']
+        self.i2cBus = smbus.SMBus(1)
+        self.i2cAddr = 0x20
 
     def splitBits(self,val) :
         v0 = val & 1
