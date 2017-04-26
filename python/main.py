@@ -87,6 +87,7 @@ for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", 
         break
 logit("Load XML Done")
 gui.init()
+hwio.init_all()
 if(port1.enabled) :
     p1 = threading.Thread(target=port1.run)
     p1.daemon = True

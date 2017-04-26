@@ -5,40 +5,41 @@
 import spidev
 import RPi.GPIO as GPIO
 import smbus
-IODIRA   =  0  """ 1 = input, 0 = output """
+IODIRA   =  0  # 1 = input, 0 = output
 IODIRB   =  1
-IPOLA    =  2  """ 1 = Interrupt inverted from IO state """
+IPOLA    =  2  # 1 = Interrupt inverted from IO state
 IPOLB    =  3
-GPINTENA =  4  """ Interupt on change """
+GPINTENA =  4  # Interupt on change
 GPINTENB =  5
-DEFVALA  =  6  """ Default value for interupt on change compare"""
+DEFVALA  =  6  # Default value for interupt on change compare
 DEFVALB  =  7
-INTCONA  =  8  """ 1 = comare aginst def val, 0= compare against previous value """
+INTCONA  =  8  # 1 = compare aginst def val, 0= compare against previous value
 INTCONB  =  9
 IOCON    = 10
 IOCONB   = 11
-GPPUA    = 12 """ Enables Pullups """
+GPPUA    = 12 # Enables Pullups
 CPPUB    = 13
-INTFA    = 14 """ Intereupt flags """
+INTFA    = 14 # Intereupt flags
 INTFB    = 15
-INTCAPA =  16  """ Captured values when an interup occurs """
+INTCAPA =  16 # Captured values when an interup occurs
 INTCAPB =  17
-GPIOA   =  18 """ IO Values """
+GPIOA   =  18 # IO Values
 GPIOB   =  19
-OLATA   =  20 """ read back written value """
+OLATA   =  20 # read back written value
 OLATB   =  21
 MCP23017BASE = 32
 GPIOEX1 = MCP23017BASE +1
 GPIOEX2 = MCP23017BASE +2
 GPIOEX3 = MCP23017BASE +3
-INTPOL = 1<<1 """ Interupt polarity, 1 = active high """
-ODR    = 1<<2 """ Open drain for the interupt pins, 1= open drain active low """
-HAEN   = 1<<3 """ used in spi only to ignore the address pins """
-DISSLW = 1<<4 """ disables slew rate control when 1 """
-SEQOP  = 1<<5 """ automatic address incementing disabled when 1"""
-MIRROR = 1<<6 """ both interpt pins do the same thing """
-BANK   = 1<<7 """ Keep as zero or address map is different """
-""" The MCP23017 base address is the same as the max7314 default used in the kenwoods instrad of proms s
+INTPOL = 1<<1 # Interupt polarity, 1 = active high
+ODR    = 1<<2 # Open drain for the interupt pins, 1= open drain active low
+HAEN   = 1<<3 # used in spi only to ignore the address pins
+DISSLW = 1<<4 # disables slew rate control when 1
+SEQOP  = 1<<5 # automatic address incementing disabled when 1
+MIRROR = 1<<6 # both interpt pins do the same thing
+BANK   = 1<<7 # Keep as zero or address map is different
+""" The MCP23017 base address is the same as the max7314 default used in the kenwoods insteat of PROMs
+"""
 class hwio :
     def __init__ (self,top) :
         self.top = top
@@ -53,8 +54,8 @@ class hwio :
         self.spi = spidev.SpiDev()
         self.xmlvars = ['vals','tcon', 'gain']
         self.i2cBus = smbus.SMBus(1)
-        self.i2Bus.write_byte_data(GPIOEX1, IODIRA, 0) """ port A as output """
-        self.i2Bus.write_byte_data(GPIOEX1, GPIOA, 0) """ port A clear """
+        #self.i2cBus.write_byte_data(GPIOEX1, IODIRA, 0) # port A as output
+        #self.i2cBus.write_byte_data(GPIOEX1, GPIOA, 0) # port A clear
 
     def splitBits(self,val) :
         v0 = val & 1
@@ -165,13 +166,13 @@ class hwio :
 
     def init_all(self) :
         for r in range(20) :
-            self.WriteRes(r,val[r],0)
-            self.WriteTcon(r,tcon[r],0)
+            self.WriteRes(r,self.vals[r],0)
+            self.WriteTcon(r,self.tcon[r],0)
         for p in range(2) :
             if (p==0) :
                 chan = self.top.port1.linkstate
             elif (p==1) :
                 chan = self.top.port2.linkstate
                 
-            WritePGAChan(chan,p+5,0)
-            WritePGAGain(self.gain[p][chan],p+5,0)
+            self.WritePGAChan(chan,p+5,0)
+            self.WritePGAGain(self.gain[p][chan],p+5,0)
