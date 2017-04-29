@@ -38,7 +38,7 @@ from logit import logit
 import xmlio
 import hwio
 
-exec(compile(open('cmd.py').read(), 'cmd.py', 'exec'))
+exec(compile(open('mycmd.py').read(), 'mycmd.py', 'exec'))
 
 def hup_handler(signum, frame):
     print('Hup interrupt, Going interactive', signum)
@@ -50,7 +50,7 @@ def int_handler(signum, frame):
     port2.tx.down()
     GPIO.cleanup()
     #p0.terminate()
-    exit(-1)
+    sys.exit(-1)
 signal.signal(signal.SIGHUP, hup_handler)
 signal.signal(signal.SIGINT, int_handler)
 
