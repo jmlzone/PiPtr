@@ -23,7 +23,7 @@ import datetime
 import signal, os
 import code
 import re
-import Queue
+import queue
 from multiprocessing import Process
 class top:
     def __init__ (self) :
@@ -38,14 +38,14 @@ from logit import logit
 import xmlio
 import hwio
 
-execfile('cmd.py')
+exec(compile(open('cmd.py').read(), 'cmd.py', 'exec'))
 
 def hup_handler(signum, frame):
-    print 'Hup interrupt, Going interactive', signum
+    print('Hup interrupt, Going interactive', signum)
     code.interact(local=dict(globals(), **locals()))
 
 def int_handler(signum, frame):
-    print 'Int interrupt, Shutting down', signum
+    print('Int interrupt, Shutting down', signum)
     port1.tx.down()
     port2.tx.down()
     GPIO.cleanup()
@@ -64,8 +64,8 @@ TCON0 = 0x1ff
 # lists of the data that will be stored in the xml configuration
 xmlvars = ( 'R0', 'R1', 'R2', 'R3', 'PGA0', 'TCON0' )
 GPIO.setmode(GPIO.BOARD)
-q1 = Queue.Queue()
-q2 = Queue.Queue()
+q1 = queue.Queue()
+q2 = queue.Queue()
 gui = gui.gui(top)
 port1 = radioPort.radioPort(1, q1, gui)
 port2 = radioPort.radioPort(2, q2, gui)

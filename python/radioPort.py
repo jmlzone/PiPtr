@@ -52,11 +52,11 @@ class tx:
 
     def addTailMsg(self, method,msg,cancelable,isid,requeue,alt):
         self.tailMsgList.append((method,msg,cancelable,isid,requeue,alt))
-        print "Added tail message %s " % msg
+        print("Added tail message %s " % msg)
 
     def addBeaconMsg(self, method,msg,cancelable,isid,requeue,alt):
         self.beaconMsgList.append((method,msg,cancelable,isid,requeue,alt))
-        print "Added beacon message %s " % msg
+        print("Added beacon message %s " % msg)
 
 
     def tx(self) :
@@ -72,13 +72,13 @@ class tx:
 
         not going to worry about the details yet
         """
-        print "pl gen on"
+        print("pl gen on")
     def plStop(self) :
         """ Stops this transmitters Pl generator
 
        not going to worry about the details yet
        """
-        print "pl gen off"
+        print("pl gen off")
         
     def down(self):
         GPIO.output(self.pttPin,(not self.txPinLvl))
@@ -86,40 +86,40 @@ class tx:
         self.up = False
 
     def playMsgs(self,msgList) :
-        print " play messages called"
-        print msgList
+        print(" play messages called")
+        print(msgList)
         self.cancel = False
         id_played = False
         i=0;
         while(i<len(msgList)) :
-            print "i = %d" %i
+            print("i = %d" %i)
             ele = msgList[i]
-            print "ele ="
-            print ele
+            print("ele =")
+            print(ele)
             (method,msg,cancelable,isid,requeue,alt) = ele
             self.cancellable = cancelable
             # run it
             if(not self.cancel or not cancelable) :
                 # realy run it
                 args = method + [self.port.card] + msg
-                print "tail message play: (args)"
-                print args
+                print("tail message play: (args)")
+                print(args)
                 try:
-                    print "Play messages Trying"
-                    print args
+                    print("Play messages Trying")
+                    print(args)
                     self.pid = subprocess.Popen(args)
                     self.pid.wait()
                 except:
-                    print "error could not run the tail message"
+                    print("error could not run the tail message")
             if(self.cancel and alt and self.pid.returncode() <0) :
                 (method,msg) = alt
                 args = method + [self.port.card] + msg
-                print "tail message alt play: (args)"
-                print args
+                print("tail message alt play: (args)")
+                print(args)
                 try: 
                     self.pid = subprocess.call(args)
                 except:
-                    print "error could not run the alternate message"
+                    print("error could not run the alternate message")
                 if(isid and (alt or (not self.cancel and not cancelable))) :
                     id_played = True
             if (not requeue):
@@ -127,7 +127,7 @@ class tx:
             else :
                 i=i+1
         self.pid = None
-        print "Play messages Exit"
+        print("Play messages Exit")
         return (id_played)
  
     def sendId(self) :
@@ -137,13 +137,13 @@ class tx:
     def tailBeep(self) :
         if(self.beepMethod == 1) : # tone
             args = ['../bin/tout',self.port.card] + self.beepTone.split()
-            print args
+            print(args)
             beepPid = subprocess.call(args)
         elif(self.beepMethod == 2) : # wave
             beepPid = subprocess.Popen(['/usr/bin/aplay', '-D', self.port.card, self.tailBeepWav])
         elif(self.beepMethod == 3) : # morse
             args = ['../bin/mout',self.port.card] + self.beepMorse.split()
-            print args
+            print(args)
             beepPid = subprocess.call(args)
         else : # none
             return

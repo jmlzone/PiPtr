@@ -14,31 +14,31 @@ import string
 # a command can affect the other port....
 
 def test123(port):
-    print "test123"
+    print("test123")
     port.tx.tailBeepWav = '../sounds/Tink.wav'
     sys.stdout.flush()
 
 def test456(port):
-    print "test456"
+    print("test456")
     port.tx.tailBeepWav = '../sounds/Submarine.wav'
     sys.stdout.flush()
 
 def test789(port):
-    print "test789"
+    print("test789")
     port.tx.tailBeepWav = '../sounds/Glass.wav'
     sys.stdout.flush()
 
 def cmdWithArg(port,arg):
-    print "port %d command got %d" %(port.portnum, arg)
+    print("port %d command got %d" %(port.portnum, arg))
     sys.stdout.flush()
 
 def beepMethod(port,arg):
     port.tx.beepMethod = arg
-    print "port %d Tail Method Set to %d" %(port.portnum,arg)
+    print("port %d Tail Method Set to %d" %(port.portnum,arg))
     sys.stdout.flush()
 
 def rptDown(port):
-    print "Shutting down"
+    print("Shutting down")
     port1.tx.down()
     port2.tx.down()
     GPIO.cleanup()
@@ -76,7 +76,7 @@ it acts globally or uses port context """
             if(len(port.cmd) >0) :
                 found = 0
                 for c in cmdlist :
-                    print c
+                    print(c)
                     (name,func) = c
                     m = re.match(name,port.cmd)
                     if(m != None) :
@@ -87,9 +87,9 @@ it acts globally or uses port context """
                             result = eval(func+"(port)")
                         break
                 if(not found) :
-                    print "oops not found" # que no sound
+                    print("oops not found") # que no sound
 
             port.cmd = "" # null out the command
         else :
             port.cmd = port.cmd + tone
-            print "Port" + str(port.portnum) + ": " + tone
+            print("Port" + str(port.portnum) + ": " + tone)
