@@ -246,7 +246,16 @@ class rx:
                     (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),self.ctcssAct)
 
     def softDecode (self,q):
-        p=subprocess.Popen(['../bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
+        try:
+            p=subprocess.Popen(['../bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
+        except:
+            # dummy test wrapper to simulate multimon
+            import io
+            class dummy:
+                def __init__(self):
+                    self.stdout=io.StringIO("DTMF: 1")
+            p=dummy()
+
         time.sleep(1)
         while(True) :
             txt = p.stdout.readline()

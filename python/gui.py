@@ -5,6 +5,7 @@ from tkinter import *
 import socket
 import os
 import sys
+import pdb
 from xmlio import dumpXml
 class gui :
     def __init__(self,top) :
@@ -150,6 +151,7 @@ class gui :
                 self.c.itemconfig(self.softArr[i], fill="grey")
             
     def updateTxGui(self,port,tx) :
+        #pdb.set_trace()
         if(tx) :
             self.c.itemconfig(self.txLed, fill="red")
         else:
