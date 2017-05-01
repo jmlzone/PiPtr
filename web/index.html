@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Pi Radio Repeater System </title>
+
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <style>
+  #eq > span {
+    height:120px; float:left; margin:15px
+  }
+
+  .eq
+  {
+    background: url('./ctrl_panel.png') others;
+  }
+
+  </style>
+  <script>
+  $( function() {
+    // setup master volume
+    $( "#master" ).slider({
+      value: 60,
+      orientation: "horizontal",
+      range: "min",
+      animate: true
+    });
+    // setup graphic EQ
+    $( "#eq > span" ).each(function() {
+      // read initial values from markup and remove that
+      var args = $( this ).text().split(" ")
+      var value = parseInt( args[0], 10 );
+      $( this ).empty().slider({
+        value: value,
+        range: "min",
+        animate: true,
+        orientation: "vertical",
+        create: function() {
+           //this.text( $( this ).slider( "value" ) );
+        },
+        slide: function( event, ui ) {
+           //this.text( ui.value );
+           console.log(ui.value);
+        }
+      });
+    });
+  } );
+  </script>
+</head>
+<body>
+
+<div id="eq"; style="background: url(ctrl_panel.png); height: 350px; width: 550px;";></div>
+ 
+<p class="ui-state-default ui-corner-all ui-helper-clearfix" style="padding:4px;">
+  <span class="ui-icon ui-icon-volume-on" style="float:left; margin:-2px 5px 0 0;"></span>
+  Master volume
+</p>
+ 
+<div id="master" style="width:260px; margin:15px;"></div>
+ 
+<p class="ui-state-default ui-corner-all" style="padding:4px;margin-top:4em;">
+  <span class="ui-icon ui-icon-signal" style="float:left; margin:-2px 5px 0 0;"></span>
+  Graphic EQ
+</p>
+<div id="eq">
+  <span>88</span>
+  <span>77</span>
+  <span>55</span>
+  <span>33</span>
+</div>
+
+<p> 
+<div id=GPIOs>
+<table width=100% border=1><tr>
+<script>
+  function TwiddleGPIO(gpio) {
+    console.log('Twiddle:' + gpio)
+  }
+  function GPIOInput(gpio) {
+    console.log('Input: '+gpio)
+  }
+  var tone = ["77.0", "88.5", "103.5", "110.9", "114.8", "123.0", "146.2", "165.5" ];
+  tone.forEach(function(i) {
+     document.write("<td align=center>"+ i
+	+ "<input type=button id=ButtonGPIO"+ i +" value=0 onclick=\"TwiddleGPIO("+ i +");\">"
+	+ "<input type=button id=BGPIOIn"+ i +" value=In onclick=\"GPIOInput("+ i +");\" class=\"inbutton\">"
+	+ "</td>");
+  })
+</script>
+</tr></table></div>
+
+<p>
+
+
+      <div id="terminal"></div>
+      <link rel="stylesheet" href="https://rawgit.com/sourcelair/xterm.js/master/dist/xterm.css" />
+      <script src="https://rawgit.com/sourcelair/xterm.js/master/dist/xterm.js"></script>
+
+      <script>
+        var term = new Terminal({
+           cursorBlink: false,  // Do not blink the terminal's cursor
+           cols: 120,  // Set the terminal's width to 120 columns
+           rows: 80  // Set the terminal's height to 80 rows
+        });
+        term.open(document.getElementById('#terminal'));
+        term.write('\033[1;3;31m>>>\033[0m ')
+        term.on('data', function(data) {
+            data = data.replace(/\r/g, '\n\r\033[1;3;31m>>>\033[0m ');
+            term.write(data);
+            //ws.send(data);
+        });
+      </script>
+</body>
+</html>

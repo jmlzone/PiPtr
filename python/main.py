@@ -10,13 +10,16 @@
 # 6) start thread for command back ends (daemon) (tdb) 
 # 7) start the threads for the 2 ports by calling their run methods as deamons
 # wait forever
-
+import sys
 import time
 import socket
 import os.path
-import RPi.GPIO as GPIO
+try:
+    import RPi.GPIO as GPIO
+except:
+    sys.path.append('hostsim')
+    import RPi.GPIO as GPIO
 import subprocess
-import sys
 import threading
 import radioPort
 import datetime
