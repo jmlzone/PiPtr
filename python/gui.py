@@ -1,10 +1,11 @@
 #!/usr/bin/python
 import threading
 import time
-from Tkinter import *
+from tkinter import *
 import socket
 import os
 import sys
+import pdb
 from xmlio import dumpXml
 class gui :
     def __init__(self,top) :
@@ -73,10 +74,10 @@ class gui :
         abspath = os.path.abspath(path + "/../" + host)
         f = os.path.abspath(abspath + "/" + host + ".xml")
         if not os.path.exists(abspath) :
-            print "Warning Local host specific directory %s does not exist, creating" % abspath
+            print("Warning Local host specific directory %s does not exist, creating" % abspath)
             os.makedirs(abspath)
         dumpXml(self.top,f)
-        print "Wrote config file %s" % f
+        print("Wrote config file %s" % f)
 
 
     def init(self) :
@@ -150,6 +151,7 @@ class gui :
                 self.c.itemconfig(self.softArr[i], fill="grey")
             
     def updateTxGui(self,port,tx) :
+        #pdb.set_trace()
         if(tx) :
             self.c.itemconfig(self.txLed, fill="red")
         else:

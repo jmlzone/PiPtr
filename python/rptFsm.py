@@ -1,7 +1,7 @@
 from logit import logit
 import threading
 import time
-from cmd import talkingClock
+from mycmd import talkingClock
 class gpTimer:
     def __init__(self, timeout, userHandler=None):  # timeout in seconds
         self.timeout = timeout

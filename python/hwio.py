@@ -76,7 +76,7 @@ class hwio :
         data16 = self.spi.xfer2([cmd,0])
         data = ((data16[0]&1) << 8) + data16[1]
         if((data16[0] & 1) == 2) :
-            print "SPI Command Error"
+            print("SPI Command Error")
         self.spi.close()
         return data
 
@@ -90,7 +90,7 @@ class hwio :
         elif (r<4):
             ra=r+4
         else :
-            print "Bad resistor number must be 0-3"
+            print("Bad resistor number must be 0-3")
         cmd = ((ra & 0x0f) << 4)
         val = val & 0x1ff
         if(val>255) :
@@ -99,7 +99,7 @@ class hwio :
         self.spi.open(0,bus)
         data16 = self.spi.xfer2([cmd,val])
         if((data16[0] & 1) == 2) :
-            print "SPI Command Error"
+            print("SPI Command Error")
         self.spi.close()
 
     def WriteTconPair(self,rn,val,bus):
@@ -111,7 +111,7 @@ class hwio :
         elif (r == 1):
             ra=10
         else :
-            print "Bad tcon number must be 0-1"
+            print("Bad tcon number must be 0-1")
         cmd = ((ra & 0x0f) << 4)
         val = val & 0x1ff
         if(val>255) :
@@ -120,7 +120,7 @@ class hwio :
         self.spi.open(0,bus)
         data16 = self.spi.xfer2([cmd,val])
         if((data16[0] & 1) == 2) :
-            print "SPI Command Error"
+            print("SPI Command Error")
         self.spi.close()
 
     def WriteTcon(self,rn,val,bus) :
@@ -161,7 +161,7 @@ class hwio :
     def ReadAll(self):
         for i in range(11):
             d = self.ReadLoc(i)
-            print "Address %d data %x" % (i,d)
+            print("Address %d data %x" % (i,d))
 
 
     def init_all(self) :

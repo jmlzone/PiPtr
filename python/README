@@ -1,1 +1,10 @@
 This should be the "real" python code!
+
+to run on the host platform:
+ipython 
+>>> import sys
+>>> sys.path.append('hostsim')
+>>> %run main
+
+
+note system commands are not available and hence the crash.

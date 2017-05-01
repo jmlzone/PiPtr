@@ -94,15 +94,15 @@ class kenwoodTK:
 
     def readAll(self) :
         [buf0,buf1] = self.i2cBus.read_i2c_block_data(self.addr,DIN_L,2)
-        print "Din is %x %x" % (buf1,buf0)
+        print("Din is %x %x" % (buf1,buf0))
         [buf0,buf1] = self.i2cBus.read_i2c_block_data(self.addr,CONFIG_L,2)
-        print "IO Config is %x %x" %(buf1,buf0)
+        print("IO Config is %x %x" %(buf1,buf0))
         [buf0,buf1] = self.i2cBus.read_i2c_block_data(self.addr,DOUT_P0_L,2)
-        print "Dout (p0, rx) is %x %x" %(buf1,buf0)
+        print("Dout (p0, rx) is %x %x" %(buf1,buf0))
         [buf0,buf1] = self.i2cBus.read_i2c_block_data(self.addr,DOUT_P1_L,2)
-        print "Dout (p1, tx) is %x %x" %(buf1,buf0)
+        print("Dout (p1, tx) is %x %x" %(buf1,buf0))
         buf0 = self.i2cBus.read_byte_data(self.addr,MASTERO16)
-        print "Master and 016 intensity is %x" % buf0
+        print("Master and 016 intensity is %x" % buf0)
         buf0 = self.i2cBus.read_byte_data(self.addr,CONFIG)
-        print "Configuration is %x" % buf0
+        print("Configuration is %x" % buf0)
 
