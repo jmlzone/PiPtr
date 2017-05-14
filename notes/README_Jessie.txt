@@ -104,4 +104,4 @@ sudo raspi-config ... advanced ... enable i2c
 update to python3
 #!/usr/bin/python3
 
-sudo apt-get install python3-smbus
+sudo apt-get install -y python3-smbus
