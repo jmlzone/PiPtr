@@ -100,3 +100,8 @@ sudo apt-get install realvnc-vnc-server
 
 sudo apt-get install -y python-smbus i2c-tools
 sudo raspi-config ... advanced ... enable i2c
+
+update to python3
+#!/usr/bin/python3
+
+sudo apt-get install python3-smbus
