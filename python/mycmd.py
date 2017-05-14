@@ -49,7 +49,8 @@ def talkingClock(card,prefix = 'its'):
     dt = datetime.datetime.now()
     ds = dt.strftime("%I %M %p, %A %B %_d")
     myTime = prefix + " "+ ds
-    device = string.replace(card,'sysdefault:CARD=','')
+#    device = string.replace(card,'sysdefault:CARD=','')
+    device = card.replace('sysdefault:CARD=','')
     os.environ['ALSA_CARD'] = device
     subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
