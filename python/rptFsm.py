@@ -50,6 +50,7 @@ class rptFsm :
         self.rxState = 'idle'
         self.rptState = 'idle'
         self.linkActive = False
+        self.linkOut = False
         # Tx related
         self.txTimeoutTimer = gpTimer(self.port.tx.timeout, userHandler = self.txTimeout )
         self.tailTimer = gpTimer(self.port.tx.taildly, userHandler = self.tailMessagePlay)

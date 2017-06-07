@@ -28,6 +28,8 @@ import code
 import re
 import queue
 from multiprocessing import Process
+import state
+
 class top:
     def __init__ (self) :
         self.host = socket.gethostname()
@@ -57,31 +59,27 @@ def int_handler(signum, frame):
 signal.signal(signal.SIGHUP, hup_handler)
 signal.signal(signal.SIGINT, int_handler)
 
-# audio control value defaults (overridden by xml config)
-R0 = 150
-R1 = 2
-R2 = 50
-R3 = 20
-PGA0 = 6
-TCON0 = 0x1ff
 # lists of the data that will be stored in the xml configuration
-xmlvars = ( 'R0', 'R1', 'R2', 'R3', 'PGA0', 'TCON0' )
+xmlvars = ( )
 GPIO.setmode(GPIO.BOARD)
 q1 = queue.Queue()
 q2 = queue.Queue()
 gui = gui.gui(top)
-port1 = radioPort.radioPort(1, q1, gui)
-port2 = radioPort.radioPort(2, q2, gui)
+globalState = state.state(gui)
+port1 = radioPort.radioPort(1, q1, globalState)
+port2 = radioPort.radioPort(2, q2, globalState)
 port1.other = port2
 port2.other = port1
 hwio = hwio.hwio(top)
 port1.hwio = hwio
 port2.hwio = hwio
-# load the config
 top.port1 = port1
 top.port2 = port2
 top.gui=gui
 top.hwio=hwio
+top.globalState=globasState
+
+# load the config
 logit("Load XML config")
 for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", top.installPath +"/config.xml"] :
     if os.path.isfile(f) :
@@ -89,7 +87,8 @@ for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", 
         xmlio.loadXml(top,f)
         break
 logit("Load XML Done")
-gui.init()
+if(gui.gui) :
+    gui.init()
 hwio.init_all()
 if(port1.enabled) :
     p1 = threading.Thread(target=port1.run)

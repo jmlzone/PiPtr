@@ -38,7 +38,7 @@ DISSLW = 1<<4 # disables slew rate control when 1
 SEQOP  = 1<<5 # automatic address incementing disabled when 1
 MIRROR = 1<<6 # both interpt pins do the same thing
 BANK   = 1<<7 # Keep as zero or address map is different
-""" The MCP23017 base address is the same as the max7314 default used in the kenwoods insteat of PROMs
+""" The MCP23017 base address is the same as the max7314 default used in the kenwoods instead of PROMs
 """
 class hwio :
     def __init__ (self,top) :

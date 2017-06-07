@@ -30,8 +30,10 @@ class tx:
         self.txPinLvl = 1
         if(self.port.portnum == 1) :
             self.pttPin = 15
+            self.txState=self.port.globalState.tx1.value
         else :
             self.pttPin = 22
+            self.txState=self.port.globalState.tx2.value
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pttPin, GPIO.OUT)
@@ -63,7 +65,8 @@ class tx:
             #self.port.startPl(pltone)
             #self.port.tx_enable()
             GPIO.output(self.pttPin,self.txPinLvl)
-            self.port.gui.updateTxGui(self.port.portnum,True)
+            #self.port.gui.updateTxGui(self.port.portnum,True)
+            self.txState(True)
             self.up = True
 
     def plGen(self) :
@@ -81,7 +84,8 @@ class tx:
         
     def down(self):
         GPIO.output(self.pttPin,(not self.txPinLvl))
-        self.port.gui.updateTxGui(self.port.portnum,False)
+        #self.port.gui.updateTxGui(self.port.portnum,False)
+        self.txState(False)
         self.up = False
 
     def playMsgs(self,msgList) :
@@ -187,9 +191,15 @@ class rx:
         if(self.port.portnum == 1) :
             self.corPin = 11
             self.ctcssPin = 13
+            self.corState=self.port.globalState.cor1.value
+            self.ctcssState=self.port.globalState.ctcss1.value
+            self.softCtcssState=self.port.globalState.softCtcss1.value
         else :
             self.corPin = 16
             self.ctcssPin = 18
+            self.corState=self.port.globalState.cor2.value
+            self.ctcssState=self.port.globalState.ctcss2.value
+            self.softCtcssState=self.port.globalState.softCtcss2.value
             
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.ctcssPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -241,9 +251,11 @@ class rx:
            self.cmdMode = True
            self.port.fsm.cmdTimer.reset()
         self.port.fsm.updateRx(rx)
-        self.port.gui.updateRxGui(self.port.portnum,(GPIO.input(self.corPin) == self.corPinLvl),
-                    (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),self.ctcssAct)
-
+        #self.port.gui.updateRxGui(self.port.portnum,(GPIO.input(self.corPin) == self.corPinLvl),
+        #            (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),self.ctcssAct)
+        self.corState(GPIO.input(self.corPin) == self.corPinLvl)
+        self.ctcssState(GPIO.input(self.ctcssPin) == self.ctcssPinLvl)
+        self.softCtcssState(self.ctcssAct)
     def softDecode (self,q):
         try:
             p=subprocess.Popen(['../bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
@@ -283,7 +295,7 @@ class radioPort :
     The soft deode thread runs multimon to decode PL and DTMF
     The ctcss pin and cor pins are handled by interups.
     """
-    def __init__(self, portnum,q, gui) :
+    def __init__(self, portnum,q, globalState) :
         self.portnum = portnum
         if(portnum == 1 ) :
             self.card = "sysdefault:CARD=Device"
@@ -295,7 +307,7 @@ class radioPort :
         self.isLink = False
         self.linkState = 0
         self.q = q
-        self.gui = gui
+        self.globalState = globalState
         self.rx = rx(self,q) # self passed in is the port instance for parent refences to this data
         self.tx = tx(self)
         self.fsm = rptFsm.rptFsm(self)

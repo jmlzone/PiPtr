@@ -9,10 +9,14 @@ import pdb
 from xmlio import dumpXml
 class gui :
     def __init__(self,top) :
-        self.tk=Tk()
-        self.c = Canvas(self.tk,bg="black",height = 350, width = 550)
-        self.c.place(x=0, y=0, height = 350, width = 550)
-        self.c.pack() # extends window to fit.
+        try: 
+            self.tk=Tk()
+            self.c = Canvas(self.tk,bg="black",height = 400, width = 550)
+            self.c.place(x=0, y=0, height = 400, width = 550)
+            self.c.pack() # extends window to fit.
+            self.gui = True
+        except:
+            self.gui = False
         self.top = top
 
     def mytriangle (self,canvas,x,y,text) :
@@ -81,6 +85,7 @@ class gui :
 
 
     def init(self) :
+        self.ref = {}
         self.mytriangle (self.c,60,70,"RX Main")
         self.mytriangle (self.c,270,70,"PGA")
         self.mytriangle (self.c,390,70,"TX Sum")
@@ -117,46 +122,46 @@ class gui :
         self.c.create_text(35,300,text="COR",fill="green")
         self.c.create_text(85,300,text="CTCSS",fill="green")
         self.c.create_text(515,300,text="TX",fill="green")
-        self.corLed = self.c.create_oval(20,310, 50,340, fill="grey")
-        self.ctcssLed = self.c.create_oval(70,310, 100,340, fill="grey")
-        self.txLed = self.c.create_oval(500,310, 530,340, fill="grey")
+        self.ref['cor1'] = self.c.create_oval(20,310, 50,340, fill="grey")
+        self.ref['ctcss1'] = self.c.create_oval(70,310, 100,340, fill="grey")
+        self.ref['tx1'] = self.c.create_oval(500,310, 530,340, fill="grey")
+        self.ref['cor2'] = self.c.create_oval(20,360, 50,390, fill="grey")
+        self.ref['ctcss2'] = self.c.create_oval(70,360, 100,390, fill="grey")
+        self.ref['tx2'] = self.c.create_oval(500,360, 530,390, fill="grey")
         x=140
-        y=310
+        y1=310
+        y2=360
         tone = ["77.0", "88.5", "103.5", "110.9",
                 "114.8", "123.0", "146.2", "165.5" ]
-        self.softArr = []
+        self.ref['softCtcss1'] = []
+        self.ref['softCtCss2'] = []
         for i in range (8) :
             self.c.create_text(x+15,300,text=tone[i],fill="green")
-            t=self.c.create_oval(x,y,x+30,y+30, fill="grey")
-            self.softArr.append(t)
+            t=self.c.create_oval(x,y1,x+30,y1+30, fill="grey")
+            self.ref['softCtcss1'].append(t)
+            t=self.c.create_oval(x,y2,x+30,y2+30, fill="grey")
+            self.ref['softCtcss2'].append(t)
             x=x+40
         SaveButton = Button(self.tk,text="Save",command=self.guiSave)
         SaveButton.place(x=20,y=240, height = 30, width = 40)
 
 
-    def updateRxGui(self, port,cor,ctcss,softCtcss) :
-        if(cor) :
-            self.c.itemconfig(self.corLed, fill="green")
-        else:
-            self.c.itemconfig(self.corLed, fill="grey")
-        if(ctcss) :
-            self.c.itemconfig(self.ctcssLed, fill="green")
-        else:
-            self.c.itemconfig(self.ctcssLed, fill="grey")
+    def updateItem(self,name,value):
+        if(self.gui) :
+            if(value) :
+                self.c.itemconfig(self.ref[name], fill="green")
+            else :
+                self.c.itemconfig(self.ref[name], fill="grey")
 
-        for i in range (8) :
-            if (softCtcss[i]) :
-                self.c.itemconfig(self.softArr[i], fill="green")
-            else:
-                self.c.itemconfig(self.softArr[i], fill="grey")
-            
-    def updateTxGui(self,port,tx) :
-        #pdb.set_trace()
-        if(tx) :
-            self.c.itemconfig(self.txLed, fill="red")
-        else:
-            self.c.itemconfig(self.txLed, fill="grey")
+    def updateArray(self,name,value):
+        if(self.gui) :
+            for i in range (8) :
+                if (value[i]) :
+                    self.c.itemconfig(self.ref[name][i], fill="green")
+                else:
+                    self.c.itemconfig(self.ref[name][i], fill="grey")
 
     def run(self) :
-        self.tk.mainloop()
+        if(self.gui) :
+            self.tk.mainloop()
 
