@@ -105,3 +105,16 @@ update to python3
 #!/usr/bin/python3
 
 sudo apt-get install -y python3-smbus
+
+
+
+------
+as a distraction installed ng spice
+ git clone git://ngspice.git.sourceforge.net/gitroot/ngspice/ngspice
+cd ngspice/
+sudo apt-get install -y autoconf libtool automake bison flex libx11-dev libxaw7 libxaw7-dev libreadline-dev libxt-dev libxaw7-dev
+./autogen.sh
+
+mkdir release
+cd release
+../configure --with-x --enable-xspice --disable-debug --enable-cider --with-readline=yes --enable-openmp

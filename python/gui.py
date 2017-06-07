@@ -134,7 +134,7 @@ class gui :
         tone = ["77.0", "88.5", "103.5", "110.9",
                 "114.8", "123.0", "146.2", "165.5" ]
         self.ref['softCtcss1'] = []
-        self.ref['softCtCss2'] = []
+        self.ref['softCtcss2'] = []
         for i in range (8) :
             self.c.create_text(x+15,300,text=tone[i],fill="green")
             t=self.c.create_oval(x,y1,x+30,y1+30, fill="grey")

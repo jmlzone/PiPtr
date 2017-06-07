@@ -65,7 +65,7 @@ GPIO.setmode(GPIO.BOARD)
 q1 = queue.Queue()
 q2 = queue.Queue()
 gui = gui.gui(top)
-globalState = state.state(gui)
+globalState = state.state(top,gui)
 port1 = radioPort.radioPort(1, q1, globalState)
 port2 = radioPort.radioPort(2, q2, globalState)
 port1.other = port2
@@ -77,7 +77,7 @@ top.port1 = port1
 top.port2 = port2
 top.gui=gui
 top.hwio=hwio
-top.globalState=globasState
+top.globalState=globalState
 
 # load the config
 logit("Load XML config")

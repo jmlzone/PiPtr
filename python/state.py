@@ -19,6 +19,8 @@ class GlobalData(object):
         return(self._value)
     @value.setter
     def value(self,value) :
+        self.setValue(self,value)
+    def setValue(self,value) :
         if(self._value != value) :
             self._value = value
             for callback in self.callbacks:
@@ -31,25 +33,25 @@ class GlobalData(object):
     def rmCallback(self,callback) :
         self.callbacks.remove(callback)
 
-class state(obj):    
-    def __init__(self,top) :
+class state(object):    
+    def __init__(self,top,gui) :
         self.top = top
-        self.cor1 = defStateObj('cor1')
-        self.ctcss1 = stateObj('ctcss1')
-        self.softCtcss1 = stateObj('softCtcss1')
-        self.tx1 = stateObj('tx1')
-        self.cor2 = stateObj('cor2')
-        self.ctcss2 = stateObj('ctcss2')
-        self.softCtcss2 = stateObj('softCtcss2')
-        self.tx2 = stateObj('tx2')
-        self.battVolts('Battvolts')
-        if(self.top.gui.gui) :
-            self.cor1.addCallback(self.top.gui.updateItem)
-            self.ctcss1.addCallback(self.top.gui.updateItem)
-            self.ctcss1.addCallback(self.top.gui.updateArray)
-            self.tx1.addCallback(self.top.gui.updateItem)
-            self.cor2.addCallback(self.top.gui.updateItem)
-            self.ctcss2.addCallback(self.top.gui.updateItem)
-            self.ctcss2.addCallback(self.top.gui.updateArray)
-            self.tx2.addCallback(self.top.gui.updateItem)
+        self.cor1 = GlobalData('cor1')
+        self.ctcss1 = GlobalData('ctcss1')
+        self.softCtcss1 = GlobalData('softCtcss1')
+        self.tx1 = GlobalData('tx1')
+        self.cor2 = GlobalData('cor2')
+        self.ctcss2 = GlobalData('ctcss2')
+        self.softCtcss2 = GlobalData('softCtcss2')
+        self.tx2 = GlobalData('tx2')
+        self.battVolts = GlobalData('Battvolts')
+        if(gui.gui) :
+            self.cor1.addCallback(gui.updateItem)
+            self.ctcss1.addCallback(gui.updateItem)
+            self.softCtcss1.addCallback(gui.updateArray)
+            self.tx1.addCallback(gui.updateItem)
+            self.cor2.addCallback(gui.updateItem)
+            self.ctcss2.addCallback(gui.updateItem)
+            self.softCtcss2.addCallback(gui.updateArray)
+            self.tx2.addCallback(gui.updateItem)
 

@@ -30,10 +30,10 @@ class tx:
         self.txPinLvl = 1
         if(self.port.portnum == 1) :
             self.pttPin = 15
-            self.txState=self.port.globalState.tx1.value
+            self.txState=self.port.globalState.tx1.setValue
         else :
             self.pttPin = 22
-            self.txState=self.port.globalState.tx2.value
+            self.txState=self.port.globalState.tx2.setValue
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pttPin, GPIO.OUT)
@@ -191,15 +191,15 @@ class rx:
         if(self.port.portnum == 1) :
             self.corPin = 11
             self.ctcssPin = 13
-            self.corState=self.port.globalState.cor1.value
-            self.ctcssState=self.port.globalState.ctcss1.value
-            self.softCtcssState=self.port.globalState.softCtcss1.value
+            self.corState=self.port.globalState.cor1.setValue
+            self.ctcssState=self.port.globalState.ctcss1.setValue
+            self.softCtcssState=self.port.globalState.softCtcss1.setValue
         else :
             self.corPin = 16
             self.ctcssPin = 18
-            self.corState=self.port.globalState.cor2.value
-            self.ctcssState=self.port.globalState.ctcss2.value
-            self.softCtcssState=self.port.globalState.softCtcss2.value
+            self.corState=self.port.globalState.cor2.setValue
+            self.ctcssState=self.port.globalState.ctcss2.setValue
+            self.softCtcssState=self.port.globalState.softCtcss2.setValue
             
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.ctcssPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
