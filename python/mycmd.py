@@ -44,7 +44,15 @@ def rptDown(port):
     GPIO.cleanup()
     exit(-1)
 
+def setLinkState(port,arg) :
+    port.linkState = arg # should probably queue some message
+    if(arg == 0) :
+        port.linkVotes = 0
 
+def linkBoth(port,arg) :
+    setLinkState(port,arg)
+    setLinkState(port.other,arg)
+    
 def talkingClock(card,prefix = 'its'):
     dt = datetime.datetime.now()
     ds = dt.strftime("%I %M %p, %A %B %_d")

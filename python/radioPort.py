@@ -173,6 +173,7 @@ class rx:
         self.kerchunk_timer = 0
         self.anti_kerchunk = False
         self.timeout = 180     # seconds
+        self.resetTimeout = 1 # seconds
         self.IdleTimeout = 600 # seconds
         self.cmdTimeout = 600 # seconds
         self.disabled = False
@@ -200,13 +201,13 @@ class rx:
             self.corState=self.port.globalState.cor2.setValue
             self.ctcssState=self.port.globalState.ctcss2.setValue
             self.softCtcssState=self.port.globalState.softCtcss2.setValue
-            
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.ctcssPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.corPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        self.xmlvars = ('timeout', 'IdleTimeout', 'disabled', 'useCtcssPin',
-                     'ctcssPinLvl', 'useCorPin', 'corPinLvl', 'useSoftCtcss',
-                        'softCtcssAllow', 'softCtcssCmd', 'cmdMode', 'cmdTimeout')
+        self.xmlvars = ('timeout', 'resetTimeout', 'IdleTimeout', 'disabled',
+                        'useCtcssPin', 'ctcssPinLvl', 'useCorPin', 'corPinLvl',
+                        'useSoftCtcss', 'softCtcssAllow', 'softCtcssCmd',
+                        'cmdMode', 'cmdTimeout')
 
     def ctcss(self):
         if(GPIO.input(self.ctcssPin) == self.ctcssPinLvl) :
@@ -311,9 +312,10 @@ class radioPort :
         self.rx = rx(self,q) # self passed in is the port instance for parent refences to this data
         self.tx = tx(self)
         self.fsm = rptFsm.rptFsm(self)
-        self.xmlvars = ( 'card', 'islink', 'linkstate', 'enabled')
+        self.xmlvars = ( 'card', 'islink', 'linkstate', 'enabled', 'idleWav')
         self.cmd = ""
         self.enabled = True
+        self.idleWav = '../sounds/idle.wav'
 
     def run(self) :
         if(self.enabled) :

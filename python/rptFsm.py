@@ -49,8 +49,6 @@ class rptFsm :
         self.port = port
         self.rxState = 'idle'
         self.rptState = 'idle'
-        self.linkActive = False
-        self.linkOut = False
         # Tx related
         self.txTimeoutTimer = gpTimer(self.port.tx.timeout, userHandler = self.txTimeout )
         self.tailTimer = gpTimer(self.port.tx.taildly, userHandler = self.tailMessagePlay)
@@ -61,11 +59,22 @@ class rptFsm :
 
         #rx related
         self.rxTimer = gpTimer(self.port.rx.timeout, userHandler = self.rxTo)
+        self.rxResetTimer = gpTimer(self.port.rx.resetTimeout, userHandler = self.rxTimerStop)
         self.rxIdleTimer = gpTimer(self.port.rx.IdleTimeout, userHandler = self.idleTimeout)
         self.cmdTimer = gpTimer(self.port.rx.cmdTimeout)
+        self.linkVotes = 0
 
         self.lock = threading.Lock()
 
+    def setLinkRx(self,linkNum) :
+        oldVotes = self.linkVotes
+        self.linkVotes = oldVotes | (1<<linkNum)
+        if(oldVotes == 0) : # coming up based on this vote update fsm RX entry is: self.port.fsm.updateRx(rx)
+            self.rxUpAny()
+    def clrLinkRx(self,linkNum) :
+        self.linkVotes = self.linkVotes &  ~(1<<linkNum)
+        if(self.linkVotes == 0) : # going down based on this vote update fsm. rx entry is: self.port.fsm.updateRx(rx)
+            self.rxDownAll()
     def updateTimers(self) :
         """Since the timers are create very early and the times are updated by
            the XML load or commands to change the timing we need a function to
@@ -81,6 +90,7 @@ class rptFsm :
 
         #rx related
         self.rxTimer.timeout = self.port.rx.timeout
+        self.rxResetTimer.timeout = self.port.rx.resetTimeout
         self.rxIdleTimer.timeout = self.port.rx.IdleTimeout
         self.cmdTimer.timeout = self.port.rx.cmdTimeout
 
@@ -142,6 +152,14 @@ class rptFsm :
     def rxUp(self) : # part of rx state machine
         self.rxState = 'rx'
         self.rxTimer.run()
+        self.rxResetTimer.stop() 
+        self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, True) #enable audio
+        if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
+            self.port.other.fsm.setLinkRx(1) # port 1 linking is special and software only
+        if(self.port.linkState == 2 || self.port.linkState == 3) :
+            self.port.hwio.linkVoteSet(self.port.portnum, self.port.linkState)
+        self.rxUpAny()
+    def rxUpAny(self):
         if(self.rptState == 'idle') :
             self.repeat()
         elif (self.rptState == 'beacon') :
@@ -155,15 +173,23 @@ class rptFsm :
         else:
             logit("Port %d Error Rx active again in state %s " % (self.port.portnum, self.rxState) )
     def rxDown(self) : # part of rx state machine
-        # self.rxTimer.stop() ## can do this here its done in tail, but if the link is holding it up?
+        self.rxResetTimer.reset() 
+        self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, False) #mute audio
+        if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
+            self.port.other.fsm.clrLinkRx(1) # port 1 linking is special and software only
+        if(self.port.linkState == 2 || self.port.linkState == 3) :
+            self.port.hwio.linkVoteClr(self.port.portnum, self.port.linkState)
+        if(self.linkVotes==0) :
+            rxDownAll()
+        if(self.rxState == 'rxTimeOut') :
+            self.rxTimeoutRelease()
+    def rxDownAll()
         if(self.rptState == 'repeat') :
             self.rxIdle()
             if(self.port.isLink) :
                 self.idle()
             else :
-                self.tail()
-        elif(self.rxState == 'rxTimeOut') :
-            self.rxTimeoutRelease()
+                    self.tail()
         elif(self.rxState == 'idle' or self.rptState == 'idle') :
             pass
         else:
@@ -192,6 +218,13 @@ class rptFsm :
         self.port.tx.down()
         logit("Port %d Rx Time Out complete" % self.port.portnum)
 
+    def rxTimerStop(self) :
+        """ Called when the RS reset timer expires to de-glitch and ensure a real drop
+        of the RX.
+        Does not do much but here as a holding place for the other call. for logging or debug
+        """
+        self.rxTimer.stop()
+
     def txTimeout(self) :
         """ Entered by the TX time out event """
         self.getLock()
@@ -209,11 +242,11 @@ class rptFsm :
             pass
         else :
             logit("Port %d idle Time Out queued Idle message" % self.port.portnum)
-            self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], ['../sounds/idle.wav'], True, True, False, None)
+            self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], [self.port.idleWav], True, True, False, None)
 
     def rxTimeoutRelease(self) :
         """ Entered when the RX goes off when in state rxTimeOut
-            Entered from teh RX state cchange code so it needs to be short
+            Entered from the RX state cchange code so it needs to be short
         """
         logit("Port %d Rx Time Out release" % self.port.portnum)
         self.rxIdle()
@@ -226,7 +259,7 @@ class rptFsm :
         if the link is active we stay up, otherwise we ca go idle.
         """
         self.getLock()
-        if (self.linkActive) :
+        if (self.linkVotes !=0) :
             self.repeat()
         else :
             self.idle()
@@ -297,7 +330,7 @@ class rptFsm :
         if( not self.port.tx.cancel) :
             self.port.tx.tailBeep()
             self.port.tx.plStop()
-            self.rxTimer.stop()
+            #self.rxTimer.stop() # handle with separate reset timer to allow linking to work
             self.hangTimer.reset()
             """ when the hang timer expires, controll will go to tail done then to idle"""
 
