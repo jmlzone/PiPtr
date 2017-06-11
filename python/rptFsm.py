@@ -156,7 +156,7 @@ class rptFsm :
         self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, True) #enable audio
         if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
             self.port.other.fsm.setLinkRx(1) # port 1 linking is special and software only
-        if(self.port.linkState == 2 || self.port.linkState == 3) :
+        if(self.port.linkState == 2 or self.port.linkState == 3) :
             self.port.hwio.linkVoteSet(self.port.portnum, self.port.linkState)
         self.rxUpAny()
     def rxUpAny(self):
@@ -177,13 +177,14 @@ class rptFsm :
         self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, False) #mute audio
         if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
             self.port.other.fsm.clrLinkRx(1) # port 1 linking is special and software only
-        if(self.port.linkState == 2 || self.port.linkState == 3) :
+        if(self.port.linkState == 2 or self.port.linkState == 3) :
             self.port.hwio.linkVoteClr(self.port.portnum, self.port.linkState)
         if(self.linkVotes==0) :
-            rxDownAll()
+            self.rxDownAll()
         if(self.rxState == 'rxTimeOut') :
             self.rxTimeoutRelease()
-    def rxDownAll()
+
+    def rxDownAll(self):
         if(self.rptState == 'repeat') :
             self.rxIdle()
             if(self.port.isLink) :

@@ -181,7 +181,7 @@ class hwio :
         self.i2cBus.write_byte_data(GPIOEX1, GPIOA, self.GPIOEX1A) # port A default values
         self.i2cBus.write_byte_data(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
 
-  def muteUnmute(self,port,link,en) :
+    def muteUnmute(self,port,link,en) :
       maskbit = 1<< port
       if(port == 1) :
           if (en) :

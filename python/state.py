@@ -20,11 +20,15 @@ class GlobalData(object):
     @value.setter
     def value(self,value) :
         self.setValue(self,value)
-    def setValue(self,value) :
+    def setValue(self,value,color=None) :
         if(self._value != value) :
             self._value = value
+            self._color = color
             for callback in self.callbacks:
-                callback(self.name,self.value)
+                if(color == None) :
+                    callback(self.name,self.value)
+                else :
+                    callback(self.name,self.value,color)
     def addCallback(self,callback):
         if callable(callback):
             self.callbacks.append(callback)

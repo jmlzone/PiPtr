@@ -146,10 +146,13 @@ class gui :
         SaveButton.place(x=20,y=240, height = 30, width = 40)
 
 
-    def updateItem(self,name,value):
+    def updateItem(self,name,value,color=None):
         if(self.gui) :
             if(value) :
-                self.c.itemconfig(self.ref[name], fill="green")
+                if(color == None):
+                    self.c.itemconfig(self.ref[name], fill="green")
+                else :
+                    self.c.itemconfig(self.ref[name], fill=color)
             else :
                 self.c.itemconfig(self.ref[name], fill="grey")
 

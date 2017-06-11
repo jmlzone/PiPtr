@@ -66,7 +66,7 @@ class tx:
             #self.port.tx_enable()
             GPIO.output(self.pttPin,self.txPinLvl)
             #self.port.gui.updateTxGui(self.port.portnum,True)
-            self.txState(True)
+            self.txState(True,'red')
             self.up = True
 
     def plGen(self) :
@@ -270,10 +270,10 @@ class rx:
 
         time.sleep(1)
         while(True) :
-            txt = p.stdout.readline()
-            ctcss = re.search(b'CTCSS (?P<state>[DL]): (?P<num>\d)',txt)
-            dtmf = re.search(b'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
-            mute = re.search(b'MUTE',txt)
+            txt = str(p.stdout.readline())
+            ctcss = re.search(r'CTCSS (?P<state>[DL]): (?P<num>\d)',txt)
+            dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
+            mute = re.search(r'MUTE',txt)
             if(ctcss != None) :
                 self.ctcssAct[int(ctcss.group('num'))] = (ctcss.group('state') == 'D')
                 self.update(False) # update the RX status

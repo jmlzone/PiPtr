@@ -72,6 +72,7 @@ cmdlist =[("123$","test123"), # the $ at the end forces an exact match
 cmdlist = cmdlist + [("123(\d+)", "cmdWithArg")] # rexexp type argument needed 1 or more decimal digits.
 cmdlist = cmdlist + [("DDDDD", "rptDown")]
 cmdlist = cmdlist + [("2337(\d)", "beepMethod")]
+cmdlist = cmdlist + [("5465(\d)", "linkBoth")]
 
 # command processor
 def cmdprocess (q,port) :
@@ -80,7 +81,7 @@ and a process thread for each port it gets the port specific touch
 tone queue and the port for context.  Its up to a command to decide if
 it acts globally or uses port context """
     while (True) :
-        tone = q.get() # block until somthing is ready
+        tone = str(q.get()) # block until somthing is ready
         if (tone == " ") : # terminator at end of rx
             if(len(port.cmd) >0) :
                 found = 0
