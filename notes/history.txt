@@ -660,3 +660,8 @@
   660  say `date +"its %I %M %p, %A %B %_d"`
   661  date +"its %I %M %p, %A %B %_d" | espeak
   662  history > history.txt
+
+
+PCB sources
+http://www.basicpcb.com/?utm_source=FACEBOOK&utm_campaign=FB-ADS-VIDEO&utm_medium=ADS
+https://www.seeedstudio.com/fusion_pcb.html
