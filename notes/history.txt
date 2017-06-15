@@ -670,3 +670,8 @@ sudo apt-get install -y python-dev swig
 python ./setup.py build
 sudo python3 ./setup.py install
 
+
+PCB sources
+http://www.basicpcb.com/?utm_source=FACEBOOK&utm_campaign=FB-ADS-VIDEO&utm_medium=ADS
+https://www.seeedstudio.com/fusion_pcb.html
+
