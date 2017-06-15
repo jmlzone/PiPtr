@@ -19,7 +19,7 @@ class fpPixels :
         self.strip.begin()
         self.state=state
         self.leds = {'cor1':0, 'ctcss1':1, 'softCtcss1':2, 'tx1':10,
-                     'cor1':12, 'ctcss1':13, 'softCtcss1':14, 'tx2':22}
+                     'cor2':12, 'ctcss2':13, 'softCtcss2':14, 'tx2':22}
     def clear (self) :
         for i in range(LED_COUNT) :
             self.strip.setPixelColor(i,0)
