@@ -29,6 +29,7 @@ import re
 import queue
 from multiprocessing import Process
 import state
+import fpPixels
 
 class top:
     def __init__ (self) :
@@ -78,7 +79,7 @@ top.port2 = port2
 top.gui=gui
 top.hwio=hwio
 top.globalState=globalState
-
+fp = fpPixels.fpPixels(top.globalState)
 # load the config
 logit("Load XML config")
 for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", top.installPath +"/config.xml"] :
@@ -90,6 +91,7 @@ logit("Load XML Done")
 if(gui.gui) :
     gui.init()
 hwio.init_all()
+fp.connect()
 if(port1.enabled) :
     p1 = threading.Thread(target=port1.run)
     p1.daemon = True
