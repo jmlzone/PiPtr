@@ -1,6 +1,7 @@
 """Front Panel LED's implemented as neopixels
 """
 from neopixel import *
+import re
 # LED strip configuration:
 LED_COUNT      = 60      # Number of LED pixels.
 LED_PIN        = 21      # GPIO pin connected to the pixels (18 uses PWM!).
@@ -20,13 +21,30 @@ class fpPixels :
         self.state=state
         self.leds = {'cor1':0, 'ctcss1':1, 'softCtcss1':2, 'tx1':10,
                      'cor2':12, 'ctcss2':13, 'softCtcss2':14, 'tx2':22}
+        fi = "/usr/share/X11/rgb.txt"
+        rgbExp = re.compile('\s*(\d+)\s+(\d+)\s+(\d+)\s+(.*)')
+        f = open(fi,'r')
+        self.rgbDict = {}
+        for line in f:
+            (r,g,b,name) = rgbExp.match(line).groups()
+            lname = name.lower()
+            cname = lname.replace(" ","")
+            rgb = (int(r)<<16) + (int(g)<<8) + int(b)
+            #print name + " -> " + lname  + " -> " + cname + r + " " + g + " " + b +" %X) % rgb
+            if not cname in self.rgbDict :
+                self.rgbDict[cname] = rgb
+        f.close()
     def clear (self) :
         for i in range(LED_COUNT) :
             self.strip.setPixelColor(i,0)
         self.strip.show()
 
     def setColorByName (self,led,name) :
-        pass
+        cname = name.lower().replace(" ","")
+        if cname in self.rgbDict :
+            self.setColorByValue(led,self.rgbDict[cname])
+        else:
+            self.setColorByValue(led,self.rgbDict['pink'])
     def setColorByValue (self,led,value) :
         self.strip.setPixelColor(led,value)
         self.strip.show()
