@@ -26,13 +26,15 @@ class fpPixels :
         f = open(fi,'r')
         self.rgbDict = {}
         for line in f:
-            (r,g,b,name) = rgbExp.match(line).groups()
-            lname = name.lower()
-            cname = lname.replace(" ","")
-            rgb = (int(r)<<16) + (int(g)<<8) + int(b)
-            #print name + " -> " + lname  + " -> " + cname + r + " " + g + " " + b +" %X) % rgb
-            if not cname in self.rgbDict :
-                self.rgbDict[cname] = rgb
+            match = rgbExp.match(line)
+            if(match) :
+                (r,g,b,name) = match.groups()
+                lname = name.lower()
+                cname = lname.replace(" ","")
+                rgb = (int(r)<<16) + (int(g)<<8) + int(b)
+                print( name + " -> " + lname  + " -> " + cname + r + " " + g + " " + b +" %X" % rgb)
+                if not cname in self.rgbDict :
+                    self.rgbDict[cname] = rgb
         f.close()
     def clear (self) :
         for i in range(LED_COUNT) :
