@@ -1,6 +1,7 @@
 """Front Panel LED's implemented as neopixels
 """
 from neopixel import *
+from rptFsm import gpTimer
 import re
 # LED strip configuration:
 LED_COUNT      = 60      # Number of LED pixels.
@@ -21,6 +22,7 @@ class fpPixels :
         self.state=state
         self.leds = {'cor1':0, 'ctcss1':1, 'softCtcss1':2, 'tx1':10,
                      'cor2':12, 'ctcss2':13, 'softCtcss2':14, 'tx2':22}
+        self.refreshTimer = gpTimer(0.01,self.refresh)
         fi = "/usr/share/X11/rgb.txt"
         rgbExp = re.compile('\s*(\d+)\s+(\d+)\s+(\d+)\s+(.*)')
         f = open(fi,'r')
@@ -49,7 +51,13 @@ class fpPixels :
             self.setColorByValue(led,self.rgbDict['pink'])
     def setColorByValue (self,led,value) :
         self.strip.setPixelColor(led,value)
+        self.refreshTimer.run()
+    def refresh(self) :
+        """ called from timer threah when the timer expires to gater all events in a 10 ms range
+        """
         self.strip.show()
+        self.refreshTimer.expired = True
+        self.refreshTimer.isrunning = False
     def connect(self) :
          self.state.cor1.addCallback(self.updateItem)
          self.state.ctcss1.addCallback(self.updateItem)
@@ -64,7 +72,7 @@ class fpPixels :
             if(color == None):
                 self.setColorByValue(self.leds[name], 127<<8)
             else :
-                self.setColorByValue(self.leds[name], 127<<16)
+                self.setColorByName(self.leds[name], color)
         else :
             self.setColorByValue(self.leds[name], 0)
     def updateArray(self,name,value):
