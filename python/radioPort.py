@@ -256,7 +256,6 @@ class rx:
         #            (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),self.ctcssAct)
         self.corState(GPIO.input(self.corPin) == self.corPinLvl)
         self.ctcssState(GPIO.input(self.ctcssPin) == self.ctcssPinLvl)
-        self.softCtcssState(self.ctcssAct)
     def softDecode (self,q):
         try:
             p=subprocess.Popen(['../bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
@@ -275,8 +274,11 @@ class rx:
             dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
             mute = re.search(r'MUTE',txt)
             if(ctcss != None) :
+                #print( txt )
                 self.ctcssAct[int(ctcss.group('num'))] = (ctcss.group('state') == 'D')
+                #print( self.ctcssAct )
                 self.update(False) # update the RX status
+                self.softCtcssState(self.ctcssAct)
             if(dtmf != None) :
                 q.put(dtmf.group('tone'))
 

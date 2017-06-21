@@ -21,7 +21,7 @@ class GlobalData(object):
     def value(self,value) :
         self.setValue(self,value)
     def setValue(self,value,color=None) :
-        if(self._value != value) :
+        if(self._value != value or True) :
             self._value = value
             self._color = color
             for callback in self.callbacks:

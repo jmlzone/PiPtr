@@ -34,7 +34,7 @@ class fpPixels :
                 lname = name.lower()
                 cname = lname.replace(" ","")
                 rgb = (int(r)<<16) + (int(g)<<8) + int(b)
-                print( name + " -> " + lname  + " -> " + cname + r + " " + g + " " + b +" %X" % rgb)
+                #print( name + " -> " + lname  + " -> " + cname + r + " " + g + " " + b +" %X" % rgb)
                 if not cname in self.rgbDict :
                     self.rgbDict[cname] = rgb
         f.close()
