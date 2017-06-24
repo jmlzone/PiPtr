@@ -141,8 +141,7 @@ class rptFsm :
                 logit("Port %d Error Rx active again in rxState %s " % (self.port.portnum, self.rxState) )
         else : # rx inactive
             if(self.rxState == 'rx') :
-                self.
-                rxDown()
+                self.rxDown()
             elif(self.rxState == 'rxTimeOut') :
                 self.rxTimeoutRelease()
             elif(self.rxState == 'idle') :
