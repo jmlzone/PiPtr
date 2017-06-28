@@ -30,7 +30,7 @@ import queue
 from multiprocessing import Process
 import state
 import fpPixels
-
+import tcpSocketCmd
 class top:
     def __init__ (self) :
         self.host = socket.gethostname()
@@ -80,6 +80,7 @@ top.gui=gui
 top.hwio=hwio
 top.globalState=globalState
 fp = fpPixels.fpPixels(top.globalState)
+cmdSock = tcpSocketCmd.tcpSocketCmd(globals(), q1,q2)
 # load the config
 logit("Load XML config")
 for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", top.installPath +"/config.xml"] :
@@ -110,4 +111,6 @@ if(port2.enabled) :
 #g = threading.Thread(target=gui.run)
 #g.daemon = True
 #g.start()
+cmdSockThread = threading.thread(target=cmdSock)
+cmdSockThread.start()
 gui.run()
