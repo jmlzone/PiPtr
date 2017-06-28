@@ -174,6 +174,7 @@ class rptFsm :
             logit("Port %d Error Rx active again in state %s " % (self.port.portnum, self.rxState) )
     def rxDown(self) : # part of rx state machine
         self.rxResetTimer.reset() 
+        self.rxIdle()
         self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, False) #mute audio
         if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
             self.port.other.fsm.clrLinkRx(1) # port 1 linking is special and software only
@@ -186,7 +187,6 @@ class rptFsm :
 
     def rxDownAll(self):
         if(self.rptState == 'repeat') :
-            self.rxIdle()
             if(self.port.isLink) :
                 self.idle()
             else :
