@@ -11,7 +11,8 @@ class tcpSocketCmd:
 
         # Bind the socket to the address given on the command line
         self.hostname = socket.gethostname()
-        self.server_address = (self.hostname, 10100)
+        #self.server_address = (self.hostname, 10100)
+        self.server_address = ('', 10100)
         print ('starting up on %s port %s' % self.server_address)
         self.sock.bind(self.server_address)
         self.sock.listen(1)
