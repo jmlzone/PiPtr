@@ -11,11 +11,34 @@ class tcpSocketCmd:
 
         # Bind the socket to the address given on the command line
         self.hostname = socket.gethostname()
-        #self.server_address = (self.hostname, 10100)
+        #self.server_address = (self.hostname, 10101)
         self.server_address = ('', 10100)
         print ('starting up on %s port %s' % self.server_address)
         self.sock.bind(self.server_address)
         self.sock.listen(1)
+    def getDict(self,startDict,path) :
+        dict = startDict
+        pathlist = path.split('.')
+        while(len(pathlist) > 1) :
+            dict = dict[pathlist.pop(0)].__dict__
+        return(dict[pathlist.pop(0)])
+
+    def setDict(self,startDict,path,value) :
+        dict = startDict
+        pathlist = path.split('.')
+        while(len(pathlist) > 1) :
+            dict = dict[pathlist.pop(0)].__dict__
+        dict[pathlist.pop(0)] = value
+
+    def isDict(self,startDict,path) :
+        dict = startDict
+        pathlist = path.split('.')
+        while(len(pathlist) > 1) :
+            dict = dict[pathlist.pop(0)].__dict__
+        return(pathlist.pop(0) in dict)
+
+
+
     def run(self):
         while True:
             print ('waiting for a connection')
@@ -28,18 +51,18 @@ class tcpSocketCmd:
                     if data:
                         words = data.split()
                         if(words[0] == 'get') :
-                            if(words[1] in self.dict):
-                                result = self.dict[words[1]]
+                            if(self.isDict(self.dict,words[1])):
+                                result = self.getDict(self.dict,words[1])
                                 response = str(result)
                             else:
                                 response = 'Not Found'
                         elif(words[0] == 'set') : 
-                            if(words[1] in self.dict):
-                                if(result):
-                                    response = 'OK was ' + str(result)
-                                    self.dict[words[1]] = words[2]
-                                else:
-                                    response = 'Not Found'
+                            if(self.isDict(self.dict,words[1])):
+                                result = self.getDict(self.dict,words[1])
+                                response = 'OK was ' + str(result)
+                                self.setDict(self.dict,words[1], words[2])
+                            else:
+                                response = 'Not Found'
                         elif(words[0] == 'tt') : 
                             if(words[1] == '1') :
                                 self.q1.put(words[2] + ' ')
