@@ -18,7 +18,7 @@ def soft_decode (card, n, ctcss_arr, q):
             q.put(dtmf.group('tone'))
 
 def stopALL(signum, frame):
-    print 'SoftDecode Stoping, Shutting down', signum
+    print('SoftDecode Stopping, Shutting down', signum)
     #p.terminate()
     sys.exit(1)
 

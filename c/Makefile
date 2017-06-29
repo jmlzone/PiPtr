@@ -1,17 +1,20 @@
 # Makefile for C programs for Pi Repeater
 BINDIR = ../bin
 
-BINS = mout tout multimon
+BINS = mout tout
 
 all: $(BINDIR) $(addprefix $(BINDIR)/, $(BINS))
 
+COPTS=-O2 -Wall -Wpedantic -Wextra -Warray-bounds
 
-$(BINDIR)/mout: mout.c mout.h multimon/costabi.c
-	cc mout.c multimon/costabi.c -lasound -o $(BINDIR)/mout
+DIST:=$(shell uname -m)
 
-$(BINDIR)/tout: tout.c tout.h multimon/costabi.c
-	cc tout.c multimon/costabi.c -lasound -o $(BINDIR)/tout
 
-$(BINDIR)/multimon:
-	cd multimon; make
-	mv multimon/bin-$(shell uname -m)/multimon $(BINDIR)
+$(BINDIR)/mout: mout.c costabi.c
+	$(CC) $(COPTS) $^ -lasound -o $@
+
+$(BINDIR)/tout:  tout.c costabi.c 
+	$(CC) $(COPTS) $^ -lasound -o $@
+
+clean:
+	$(RM) $(BINDIR)/*
