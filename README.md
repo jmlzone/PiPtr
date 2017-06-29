@@ -16,7 +16,7 @@ things are still to be done.
 
 ## External Programs
 
-[Multimon-NG](https://github.com/EliasOenal/multimon-ng/) is a fork of the 1980's `multimon` by Tom Sailer, with much improved features and style.
+[Multimon-NG](https://github.com/EliasOenal/multimon-ng/) is an established, actively developed fork of the 1980's `multimon` by Tom Sailer, with much improved features and style.
 
 ## What is a Repeater?
 The [MMRA maintains a network of 22 repeaters](http://mmra.org/repeaters/).  
