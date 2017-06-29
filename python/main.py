@@ -111,6 +111,7 @@ if(port2.enabled) :
 #g = threading.Thread(target=gui.run)
 #g.daemon = True
 #g.start()
-cmdSockThread = threading.thread(target=cmdSock)
+cmdSockThread = threading.Thread(target=cmdSock.run)
+cmdSockThread.daemon = True
 cmdSockThread.start()
 gui.run()
