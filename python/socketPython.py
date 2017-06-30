@@ -1,13 +1,13 @@
 import socket
 import sys
 import code
-import StringIO
+from io import StringIO
 import contextlib
 @contextlib.contextmanager
 def stdoutIO(stdout=None):
     old = sys.stdout
     if stdout is None:
-        stdout = StringIO.StringIO()
+        stdout = StringIO()
     sys.stdout = stdout
     yield stdout
     sys.stdout = old
@@ -19,10 +19,10 @@ class sockInt(code.InteractiveConsole):
     def write (self,data) :
         """ send the data out the socket
         """
-        self.connection.sendall(data)
+        self.connection.sendall(bytes(data,'UTF-8'))
     def raw_input(self,prompt) :
         self.write(prompt)
-        return(self.connection.recv(1024).rstrip())
+        return(self.connection.recv(1024).decode("utf-8").rstrip())
     def runcode(self,code) :
         """copied from code.py with a twist to capture the output
         """
@@ -38,6 +38,7 @@ class sockInt(code.InteractiveConsole):
  
 class socketPython:
     def __init__(self,locals) :
+        self.locals = locals
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Bind the socket to the address given on the command line
@@ -45,7 +46,7 @@ class socketPython:
         #server_address = (server_name, 10000)
         self.hostname = socket.gethostname()
         self.server_address = ('', 62222)
-    def run(self);
+    def run(self):
         self.sock.bind(self.server_address)
         self.sock.listen(1)
         while True:

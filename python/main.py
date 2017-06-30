@@ -82,7 +82,7 @@ top.hwio=hwio
 top.globalState=globalState
 fp = fpPixels.fpPixels(top.globalState)
 cmdSock = tcpSocketCmd.tcpSocketCmd(globals(), q1,q2)
-sp = socketPython.sockeyPython((dict(globals(), **locals())))
+sp = socketPython.socketPython((dict(globals(), **locals())))
 # load the config
 logit("Load XML config")
 for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", top.installPath +"/config.xml"] :
