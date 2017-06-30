@@ -31,6 +31,7 @@ from multiprocessing import Process
 import state
 import fpPixels
 import tcpSocketCmd
+import socketPython
 class top:
     def __init__ (self) :
         self.host = socket.gethostname()
@@ -81,6 +82,7 @@ top.hwio=hwio
 top.globalState=globalState
 fp = fpPixels.fpPixels(top.globalState)
 cmdSock = tcpSocketCmd.tcpSocketCmd(globals(), q1,q2)
+sp = socketPython.sockeyPython((dict(globals(), **locals())))
 # load the config
 logit("Load XML config")
 for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", top.installPath +"/config.xml"] :
@@ -114,4 +116,7 @@ if(port2.enabled) :
 cmdSockThread = threading.Thread(target=cmdSock.run)
 cmdSockThread.daemon = True
 cmdSockThread.start()
+spThread = threading.Thread(target=sp.run)
+spThread.daemon = True
+spThread.start()
 gui.run()
