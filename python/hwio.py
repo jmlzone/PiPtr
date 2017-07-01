@@ -55,9 +55,13 @@ class hwio :
         self.xmlvars = ['vals','tcon', 'gain', 'GPIOEX1A', 'GPIOEX1B']
         self.GPIOEX1A = 0
         self.GPIOEX1B = 0
+        self.haveIO = True
         self.i2cBus = smbus.SMBus(1)
-        self.i2cBus.write_byte_data(GPIOEX1, IODIRA, 0) # port A as output
-        self.i2cBus.write_byte_data(GPIOEX1, IODIRB, 0) # port B as output
+        try:
+            self.i2cBus.write_byte_data(GPIOEX1, IODIRA, 0) # port A as output
+            self.i2cBus.write_byte_data(GPIOEX1, IODIRB, 0) # port B as output
+        except:
+            self.haveIO = False
 
     def splitBits(self,val) :
         v0 = val & 1
@@ -178,25 +182,36 @@ class hwio :
                 
             self.WritePGAChan(chan,p+5,0)
             self.WritePGAGain(self.gain[p][chan],p+5,0)
-        self.i2cBus.write_byte_data(GPIOEX1, GPIOA, self.GPIOEX1A) # port A default values
-        self.i2cBus.write_byte_data(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
-
+        if (self.haveIO) :
+            try: 
+                self.i2cBus.write_byte_data(GPIOEX1, GPIOA, self.GPIOEX1A) # port A default values
+                self.i2cBus.write_byte_data(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
+            except:
+                pass
     def muteUnmute(self,port,link,en) :
-      maskbit = 1<< port
-      if(port == 1) :
-          if (en) :
-              self.GPIOEX1A = self.GPIOEX1A | maskbit
-          else:
-              self.GPIOEX1A = self.GPIOEX1A &  ~maskbit
-          self.i2cBus.write_byte_data(GPIOEX1, GPIOA, self.GPIOEX1A)
-      elif (port ==2) :
-          if (en) :
-              self.GPIOEX1B = self.GPIOEX1B | maskbit
-          else:
-              self.GPIOEX1B = self.GPIOEX1B &  ~maskbit
-          self.i2cBus.write_byte_data(GPIOEX1, GPIOB, self.GPIOEX1B)
-      else :
-          print( "Error Bad port number to mute or unmute")
+        maskbit = 1<< port
+        if(port == 1) :
+            if (en) :
+                self.GPIOEX1A = self.GPIOEX1A | maskbit
+            else:
+                self.GPIOEX1A = self.GPIOEX1A &  ~maskbit
+            if (self.haveIO) :
+                try: 
+                    self.i2cBus.write_byte_data(GPIOEX1, GPIOA, self.GPIOEX1A)
+                except:
+                    pass
+        elif (port ==2) :
+            if (en) :
+                self.GPIOEX1B = self.GPIOEX1B | maskbit
+            else:
+                self.GPIOEX1B = self.GPIOEX1B &  ~maskbit
+            if (self.haveIO) :
+                try: 
+                    self.i2cBus.write_byte_data(GPIOEX1, GPIOB, self.GPIOEX1B)
+                except:
+                    pass
+        else :
+            print( "Error Bad port number to mute or unmute")
 
     def linkVoteSet(self, port, link) :
         pass
