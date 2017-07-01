@@ -119,4 +119,8 @@ cmdSockThread.start()
 spThread = threading.Thread(target=sp.run)
 spThread.daemon = True
 spThread.start()
-gui.run()
+if (gui.gui) :
+    gui.run()
+else:
+    while(True) :
+        time.sleep(100)

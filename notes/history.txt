@@ -661,12 +661,14 @@
   661  date +"its %I %M %p, %A %B %_d" | espeak
   662  history > history.txt
 
+# get the python3 smbus module and other needed modules
+sudo apt-get install -y python3-smbus scons python-dev swig
+
+# to set up the neopixel module
 git clone https://github.com/jgarff/rpi_ws281x
 cd rpi_ws281x/
-sudo apt-get install -y scons
 scons
 cd python
-sudo apt-get install -y python-dev swig
 python ./setup.py build
 sudo python3 ./setup.py install
 
