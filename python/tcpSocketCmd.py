@@ -72,6 +72,11 @@ class tcpSocketCmd:
                                 response = 'sent ' + words[2] + ' to port ' + words[1]
                             else:
                                 response = "No such port %s must be either 1 or 2" % words[1]
+                        elif(words[0] == 'save') :
+                            dict['gui'].guiSave()
+                        elif(words[0] == 'bye') :
+                            connection.close()
+                            break
                         else :
                             response = "unknown command: %s"  % data
                         print("sending response: " + response)

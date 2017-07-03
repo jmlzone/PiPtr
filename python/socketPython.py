@@ -55,5 +55,7 @@ class socketPython:
             try:
                 print('client connected:', client_address)
                 interp.interact(banner="Hello Socket Python")
+                connection.close()
+                break
             finally:
                 connection.close()

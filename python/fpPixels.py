@@ -38,6 +38,7 @@ class fpPixels :
                 if not cname in self.rgbDict :
                     self.rgbDict[cname] = rgb
         f.close()
+        self.clear()
     def clear (self) :
         for i in range(LED_COUNT) :
             self.strip.setPixelColor(i,0)
