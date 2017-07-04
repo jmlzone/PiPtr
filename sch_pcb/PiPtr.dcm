@@ -1,0 +1,46 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP 4016
+D Quad Analog Switches
+K CMOS SWITCH
+$ENDCMP
+#
+$CMP 4050
+D Hex Buffer
+K CMOS BUFFER
+$ENDCMP
+#
+$CMP 4066
+D Quad Ananlog Switches
+K CMOS SWITCH
+$ENDCMP
+#
+$CMP 74LCX245WM
+D Octal BUS Transceivers, 3 State out
+K TTL BUS 3State
+$ENDCMP
+#
+$CMP 74LVC4066
+D Quad Analog Switches
+K CMOS SWITCH
+$ENDCMP
+#
+$CMP CD4050B
+D Hex Buffer
+K CMOS BUFFER
+$ENDCMP
+#
+$CMP CD4050B_1piece
+D Hex Buffer
+K CMOS BUFFER
+$ENDCMP
+#
+$CMP IP4234CZ6_USB_ESD_PROTECTOR
+D USB 2.0 ESD protector
+$ENDCMP
+#
+$CMP TPS54302
+D 4.5 - 28V in 3A out switcher
+$ENDCMP
+#
+#End Doc Library
