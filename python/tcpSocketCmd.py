@@ -6,13 +6,13 @@ class tcpSocketCmd:
         self.dict = dict
         self.q1 = q1
         self.q2 = q2
+        self.portNum = 10100
         # Create a TCP/IP socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # Bind the socket to the address given on the command line
         self.hostname = socket.gethostname()
-        #self.server_address = (self.hostname, 10101)
-        self.server_address = ('', 10100)
+        self.server_address = ('', self.portNum)
         print ('starting up on %s port %s' % self.server_address)
         self.sock.bind(self.server_address)
         self.sock.listen(1)
@@ -41,7 +41,7 @@ class tcpSocketCmd:
 
     def run(self):
         while True:
-            print ('waiting for a connection')
+            print ('waiting for a command line connection on port %d' % self.portNum)
             connection, client_address = self.sock.accept()
             try:
                 print('client connected:', client_address)
@@ -73,7 +73,8 @@ class tcpSocketCmd:
                             else:
                                 response = "No such port %s must be either 1 or 2" % words[1]
                         elif(words[0] == 'save') :
-                            dict['gui'].guiSave()
+                            f = self.dict['gui'].guiSave()
+                            response = ("saved: %s" % f) 
                         elif(words[0] == 'bye') :
                             connection.close()
                             break

@@ -82,6 +82,7 @@ class gui :
             os.makedirs(abspath)
         dumpXml(self.top,f)
         print("Wrote config file %s" % f)
+        return(f)
 
 
     def init(self) :
