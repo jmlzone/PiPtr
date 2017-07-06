@@ -35,7 +35,7 @@ EELAYER 25 0
 EELAYER END
 $Descr B 17000 11000
 encoding utf-8
-Sheet 2 4
+Sheet 4 4
 Title "PiPtr Audio"
 Date ""
 Rev ""
@@ -2479,10 +2479,6 @@ Text GLabel 10525 5875 0    60   Input ~ 0
 SCLK_5
 Text GLabel 10525 5975 0    60   Input ~ 0
 MOSI_5
-Text GLabel 12300 5775 2    60   Input ~ 0
-MISO_5
-Wire Wire Line
-	12200 5775 12300 5775
 Wire Wire Line
 	10925 4850 10925 5175
 NoConn ~ 5525 3300
@@ -2702,4 +2698,5 @@ F 3 "" H 10550 9225 50  0001 C CNN
 	1    10550 9225
 	1    0    0    -1  
 $EndComp
+NoConn ~ 12200 5775
 $EndSCHEMATC
