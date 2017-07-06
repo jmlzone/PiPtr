@@ -83,44 +83,74 @@ class gui :
         dumpXml(self.top,f)
         print("Wrote config file %s" % f)
         return(f)
+    def portSelect(self) :
+        val = self.ps.get()
+        if (val == 'port1') :
+            self.RA = self.top.hwio.vals[0]
+            self.RB = self.top.hwio.vals[1]
+            self.RC = self.top.hwio.vals[2]
+            self.RD = self.top.hwio.vals[3]
+        else :
+            self.RA = self.top.hwio.vals[4]
+            self.RB = self.top.hwio.vals[5]
+            self.RC = self.top.hwio.vals[6]
+            self.RD = self.top.hwio.vals[7]
+        self.updateRs()
 
+    def updateRs(self):
+        self.rA.set(self.RA)
+        self.rB.set(self.RB)
+        self.rC.set(self.RC)
+        self.rD.set(self.RD)
 
+    def updateRn(self,val,offset) :
+        port = self.ps.get()
+        if(port == 'port2') :
+            offset = offset + 4
+        self.top.hwio.vals[offset] = int(val)
+        self.top.hwio.WriteRes(offset,int(val),0)
+    def rAcb(self,val) :
+        self.updateRn(val,0)
+    def rBcb(self,val) :
+        self.updateRn(val,1)
+    def rCcb(self,val) :
+        self.updateRn(val,2)
+    def rDcb(self,val) :
+        self.updateRn(val,3)
+    
     def init(self) :
         self.ref = {}
-        self.mytriangle (self.c,60,110,"RX Main")
+        self.mytriangle (self.c,60,100,"RX Main")
         self.mytriangle (self.c,180,70,"PGA")
         self.mytriangle (self.c,300,70,"TX Sum")
         self.mytriangle (self.c,180,200,"Computer")
         #self.myres(self.c,190,30,False)
-        desc = self.c.create_text(5,40,text="Desc\n in",fill="green", anchor=W)
-        rx = self.c.create_text(5,110,text="from\n RX",fill="green", anchor=W)
+        desc = self.c.create_text(5,30,text="Desc\n in",fill="green", anchor=W)
+        rx = self.c.create_text(5,100,text="from\n RX",fill="green", anchor=W)
         tc = self.c.create_text(310,10,text="To Computer",fill="green", anchor=W)
-        l = self.c.create_line(30,110, 60,110,fill="white")
-        l2 = self.c.create_line(160,110, 170,110, 170,10, 400,10, fill="white")
-        l2a = self.c.create_line(190,30, 190,10, fill="white")
+        dci = self.c.create_line(30,30, 50,30,fill="white")
+        #dco = self.c.create_line(150,30, 170,30,fill="white")
+        l = self.c.create_line(30,100, 60,100,fill="white")
+        l2 = self.c.create_line(160,100, 170,100, 170,10, 310,10, fill="white")
+        l2a = self.c.create_line(170,70, 180,70, fill="white")
         l3 = self.c.create_line(280,70, 300,70, fill="white")
         #l3a = self.c.create_line(200,70,270,70, fill="white", arrow=FIRST)
         l4 = self.c.create_line(400,70, 420,70, fill="white")
         l5 = self.c.create_line(280,200, 290,200, 290,70, fill="white")
         rx = self.c.create_text(420,70,text="to\nTX",fill="green", anchor=W)
-        rA = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL)
-        rA.place(x=50,y=160,height=40,width=120)
-        rB = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL)
-        rB.place(x=50,y=20,height=120,width=40)
-        rD = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL)
-        rD.place(x=195,y=120,height=40,width=120)
-        rC = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL)
-        rC.place(x=170,y=250,height=40,width=120)
-        RA = 150
-        RB = 2
-        RC = 50
-        RD = 20
-        rA.set(RA)
-        rB.set(RB)
-        rC.set(RC)
-        rD.set(RD)
+        self.rA = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rAcb)
+        self.rA.place(x=40,y=150,height=40,width=120)
+        self.rB = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rBcb)
+        self.rB.place(x=50,y=10,height=40,width=120)
+        self.rD = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rDcb)
+        self.rD.place(x=295,y=120,height=40,width=120)
+        self.rC = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rCcb)
+        self.rC.place(x=170,y=250,height=40,width=120)
+        self.ps = Spinbox(self.tk,values=('port1','port2'), command=self.portSelect, wrap=True)
+        self.ps.place(x=400,y=30,width=50)
+        self.portSelect()
         co = self.c.create_text(5,200,text="From Computer", anchor=W, fill="green")
-        l6 = self.c.create_line(105,200, 270,200,fill="white")
+        l6 = self.c.create_line(105,200, 180,200,fill="white")
         self.c.create_text(35,300,text="COR",fill="green")
         self.c.create_text(85,300,text="CTCSS",fill="green")
         self.c.create_text(515,300,text="TX",fill="green")
