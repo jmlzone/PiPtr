@@ -103,10 +103,10 @@ class gui :
         self.rC.set(self.RC)
         self.rD.set(self.RD)
 
-    def updateRn(self,val,offset) :
+    def updateRn(self,val,offset,step=4) :
         port = self.ps.get()
         if(port == 'port2') :
-            offset = offset + 4
+            offset = offset + step
         self.top.hwio.vals[offset] = int(val)
         self.top.hwio.WriteRes(offset,int(val),0)
     def rAcb(self,val) :
@@ -117,6 +117,8 @@ class gui :
         self.updateRn(val,2)
     def rDcb(self,val) :
         self.updateRn(val,3)
+    def rEcb(self,val) :
+        self.updateRn(val,8,step=1)
     
     def init(self) :
         self.ref = {}

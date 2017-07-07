@@ -47,8 +47,8 @@ class hwio :
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.selPins, GPIO.OUT)
         GPIO.output(self.selPins, GPIO.LOW)
-        self.vals = [150,2,50,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        self.tcon = [15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15]
+        self.vals = [150,2,50,20,0,0,0,0,0,0,0,0]
+        self.tcon = [15,15,15,15,15,15,15,15,15,15,15,15]
         self.gain = [ [6,6,6,6], [6,6,6,6] ]
         # Open SELF.SPI bus
         self.spi = spidev.SpiDev()
@@ -171,7 +171,7 @@ class hwio :
 
 
     def init_all(self) :
-        for r in range(20) :
+        for r in range(12) :
             self.WriteRes(r,self.vals[r],0)
             self.WriteTcon(r,self.tcon[r],0)
         for p in range(2) :
