@@ -90,11 +90,13 @@ class gui :
             self.RB = self.top.hwio.vals[1]
             self.RC = self.top.hwio.vals[2]
             self.RD = self.top.hwio.vals[3]
+            self.RE = self.top.hwio.vals[8]
         else :
             self.RA = self.top.hwio.vals[4]
             self.RB = self.top.hwio.vals[5]
             self.RC = self.top.hwio.vals[6]
             self.RD = self.top.hwio.vals[7]
+            self.RE = self.top.hwio.vals[9]
         self.updateRs()
 
     def updateRs(self):
@@ -102,6 +104,7 @@ class gui :
         self.rB.set(self.RB)
         self.rC.set(self.RC)
         self.rD.set(self.RD)
+        self.rE.set(self.RE)
 
     def updateRn(self,val,offset,step=4) :
         port = self.ps.get()
