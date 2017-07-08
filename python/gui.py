@@ -92,18 +92,18 @@ class gui :
             self.RC = self.top.hwio.vals[2]
             self.RD = self.top.hwio.vals[3]
             self.RE = self.top.hwio.vals[8]
-            self.deempVal = self.top.port1.deemp
-            self.descEnVal = self.top.port1.descEn
-            self.portDetVal = self.top.port1.portDet
+            self.deempVal = self.top.port1.rx.deemp
+            self.descEnVal = self.top.port1.rx.descEn
+            self.portDetVal = self.top.port1.rx.portDet
         else :
             self.RA = self.top.hwio.vals[4]
             self.RB = self.top.hwio.vals[5]
             self.RC = self.top.hwio.vals[6]
             self.RD = self.top.hwio.vals[7]
             self.RE = self.top.hwio.vals[9]
-            self.deempVal = self.top.port2.deemp
-            self.descEnVal = self.top.port2.descEn
-            self.portDetVal = self.top.port2.portDet
+            self.deempVal = self.top.port2.rx.deemp
+            self.descEnVal = self.top.port2.rx.descEn
+            self.portDetVal = self.top.port2.rx.portDet
         self.updateRs()
         self.updateChecks()
 
@@ -147,35 +147,35 @@ class gui :
         val = True if self.deempVar.get() else False
         port = self.ps.get()
         if(port == 'port1') :
-            self.top.port1.deemp = val
-            self.hwio.GPIOEX1A = self.hwio.getBit(self.hwio.GPIOEX1A,self.top.port1.deemp,4)
-            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.GPIOEX1A)
+            self.top.port1.rx.deemp = val
+            self.top.hwio.GPIOEX1A = self.top.hwio.getBit(self.top.hwio.GPIOEX1A,self.top.port1.rx.deemp,4)
+            self.top.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.top.hwio.GPIOEX1A)
         else:
-            self.top.port2.deemp = val
-            self.hwio.GPIOEX1B = self.hwio.getBit(self.hwio.GPIOEX1B,self.top.port2.deemp,4)
-            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.GPIOEX1B)
+            self.top.port2.rx.deemp = val
+            self.top.hwio.GPIOEX1B = self.top.hwio.getBit(self.top.hwio.GPIOEX1B,self.top.port2.rx.deemp,4)
+            self.top.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.top.hwio.GPIOEX1B)
     def descEnCb(self) :
         val = True if self.descEnVar.get() else False
         port = self.ps.get()
         if(port == 'port1') :
-            self.top.port1.descEn = val
-            self.hwio.GPIOEX1A = self.hwio.getBit(self.hwio.GPIOEX1A,self.top.port1.descEn,5)
-            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.GPIOEX1A)
+            self.top.port1.rx.descEn = val
+            self.top.hwio.GPIOEX1A = self.top.hwio.getBit(self.top.hwio.GPIOEX1A,self.top.port1.rx.descEn,5)
+            self.top.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.top.hwio.GPIOEX1A)
         else:
-            self.top.port2.descEn = val
-            self.hwio.GPIOEX1B = self.hwio.getBit(self.hwio.GPIOEX1B,self.top.port2.descEn,5)
-            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.GPIOEX1B)
+            self.top.port2.rx.descEn = val
+            self.top.hwio.GPIOEX1B = self.top.hwio.getBit(self.top.hwio.GPIOEX1B,self.top.port2.rx.descEn,5)
+            self.top.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.top.hwio.GPIOEX1B)
     def portDetCb(self) :
-        val = True if self.portDet.get() else False
+        val = True if self.portDetVar.get() else False
         port = self.ps.get()
         if(port == 'port1') :
-            self.top.port1.portDet = val
-            self.hwio.GPIOEX1A = self.hwio.getBit(self.hwio.GPIOEX1A,self.top.port1.portDet,6)
-            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.GPIOEX1A)
+            self.top.port1.rx.portDet = val
+            self.top.hwio.GPIOEX1A = self.top.hwio.getBit(self.top.hwio.GPIOEX1A,self.top.port1.rx.portDet,6)
+            self.top.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.top.hwio.GPIOEX1A)
         else:
-            self.top.port2.portDet = val
-            self.hwio.GPIOEX1B = self.hwio.getBit(self.hwio.GPIOEX1B,self.top.port2.portDet,6)
-            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.GPIOEX1B)
+            self.top.port2.rx.portDet = val
+            self.top.hwio.GPIOEX1B = self.top.hwio.getBit(self.top.hwio.GPIOEX1B,self.top.port2.rx.portDet,6)
+            self.top.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.top.hwio.GPIOEX1B)
     def init(self) :
         self.ref = {}
         self.mytriangle (self.c,60,100,"RX Main")
@@ -208,14 +208,14 @@ class gui :
         self.rE = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rEcb)
         self.rE.place(x=295,y=200,height=40,width=120)
         self.deempVar = IntVar()
-        self.deemp = Checkbox(self.tk,text="DeEmphasis", variable=deempVar,command=self.deempCb)
-        self.deemp.place(x=230,y=110,height=20,width=50)
+        self.deemp = Checkbutton(self.tk,text="DeEmphasis", variable=self.deempVar,command=self.deempCb, bg='black', fg='white', bd=0, selectcolor='green')
+        self.deemp.place(x=185,y=125,height=20,width=100)
         self.descEnVar = IntVar()
-        self.descEn = Checkbox(self.tk,text="Desc En", variable=descEnVar,command=self.descEnCb)
-        self.descEn.place(x=30,y=110,height=20,width=50)
+        self.descEn = Checkbutton(self.tk,text="Desc En", variable=self.descEnVar,command=self.descEnCb, bg='black', fg='white', bd=0, selectcolor='green')
+        self.descEn.place(x=225,y=20,height=20,width=75)
         self.portDetVar = IntVar()
-        self.portDet = Checkbox(self.tk,text="Port Detect", variable=portDetVar,command=self.portDetCb) 
-        self.portDet.place(x=350,y=230,height=20,width=50)
+        self.portDet = Checkbutton(self.tk,text="Port Detect", variable=self.portDetVar,command=self.portDetCb, bg='black', fg='white', bd=0, selectcolor='green')
+        self.portDet.place(x=310,y=260,height=20,width=95)
         self.ps = Spinbox(self.tk,values=('port1','port2'), command=self.portSelect, wrap=True)
         self.ps.place(x=400,y=30,width=50)
         self.portSelect()

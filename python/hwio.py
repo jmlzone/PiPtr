@@ -176,7 +176,7 @@ class hwio :
         else:
             outval = baseVal &  ~maskbit & 0xff
         return outval
-    def i2cSafeWrite(busaddr,regaddr,val) :
+    def i2cSafeWrite(self,busaddr,regaddr,val) :
         if (self.haveIO) :
             try: 
                 self.i2cBus.write_byte_data(busaddr, regaddr, val)
@@ -194,12 +194,12 @@ class hwio :
                 
             self.WritePGAChan(chan,p+5,0)
             self.WritePGAGain(self.gain[p][chan],p+5,0)
-        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.deemp,4)
-        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.descEn,5)
-        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.portDet,6)
-        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.deemp,4)
-        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.descEn,5)
-        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.portDet,6)
+        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.rx.deemp,4)
+        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.rx.descEn,5)
+        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.rx.portDet,6)
+        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.rx.deemp,4)
+        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.rx.descEn,5)
+        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.rx.portDet,6)
         self.i2cSafeWrite(GPIOEX1, GPIOA, self.GPIOEX1A) # port A default values
         self.i2cSafeWrite(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
 
