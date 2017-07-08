@@ -204,7 +204,7 @@ class hwio :
         self.i2cSafeWrite(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
 
     def muteUnmute(self,port,link,en) :
-        maskbit = 1<< port
+        maskbit = 1<< link
         if(port == 1) :
             if (en) :
                 self.GPIOEX1A = self.GPIOEX1A | maskbit
