@@ -183,6 +183,9 @@ class rx:
         self.ctcssPinLvl = 0
         self.useCorPin = True
         self.corPinLvl = 0
+        self.deemp = False
+        self.descEn = False
+        self.portDet = False
         self.rxActive = threading.Event()
         self.useSoftCtcss = False
         self.ctcssAct = [ 0, 0, 0, 0, 0, 0, 0, 0]
@@ -206,6 +209,7 @@ class rx:
         GPIO.setup(self.corPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         self.xmlvars = ('timeout', 'resetTimeout', 'IdleTimeout', 'disabled',
                         'useCtcssPin', 'ctcssPinLvl', 'useCorPin', 'corPinLvl',
+                        'deemp', 'descEn', 'portDet',
                         'useSoftCtcss', 'softCtcssAllow', 'softCtcssCmd',
                         'cmdMode', 'cmdTimeout')
 

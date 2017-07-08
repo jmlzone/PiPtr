@@ -7,6 +7,7 @@ import os
 import sys
 import pdb
 from xmlio import dumpXml
+import hwio
 class gui :
     def __init__(self,top) :
         try: 
@@ -91,13 +92,20 @@ class gui :
             self.RC = self.top.hwio.vals[2]
             self.RD = self.top.hwio.vals[3]
             self.RE = self.top.hwio.vals[8]
+            self.deempVal = self.top.port1.deemp
+            self.descEnVal = self.top.port1.descEn
+            self.portDetVal = self.top.port1.portDet
         else :
             self.RA = self.top.hwio.vals[4]
             self.RB = self.top.hwio.vals[5]
             self.RC = self.top.hwio.vals[6]
             self.RD = self.top.hwio.vals[7]
             self.RE = self.top.hwio.vals[9]
+            self.deempVal = self.top.port2.deemp
+            self.descEnVal = self.top.port2.descEn
+            self.portDetVal = self.top.port2.portDet
         self.updateRs()
+        self.updateChecks()
 
     def updateRs(self):
         self.rA.set(self.RA)
@@ -122,7 +130,52 @@ class gui :
         self.updateRn(val,3)
     def rEcb(self,val) :
         self.updateRn(val,8,step=1)
-    
+    def updateChecks(self) :
+        if(self.deempVal) :
+            self.deemp.select()
+        else:
+            self.deemp.deselect()
+        if(self.descEnVal) :
+            self.descEn.select()
+        else:
+            self.descEn.deselect()
+        if(self.portDetVal) :
+            self.portDet.select()
+        else:
+            self.portDet.deselect()
+    def deempCb(self) :
+        val = True if self.deempVar.get() else False
+        port = self.ps.get()
+        if(port == 'port1') :
+            self.top.port1.deemp = val
+            self.hwio.GPIOEX1A = self.hwio.getBit(self.hwio.GPIOEX1A,self.top.port1.deemp,4)
+            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.GPIOEX1A)
+        else:
+            self.top.port2.deemp = val
+            self.hwio.GPIOEX1B = self.hwio.getBit(self.hwio.GPIOEX1B,self.top.port2.deemp,4)
+            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.GPIOEX1B)
+    def descEnCb(self) :
+        val = True if self.descEnVar.get() else False
+        port = self.ps.get()
+        if(port == 'port1') :
+            self.top.port1.descEn = val
+            self.hwio.GPIOEX1A = self.hwio.getBit(self.hwio.GPIOEX1A,self.top.port1.descEn,5)
+            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.GPIOEX1A)
+        else:
+            self.top.port2.descEn = val
+            self.hwio.GPIOEX1B = self.hwio.getBit(self.hwio.GPIOEX1B,self.top.port2.descEn,5)
+            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.GPIOEX1B)
+    def portDetCb(self) :
+        val = True if self.portDet.get() else False
+        port = self.ps.get()
+        if(port == 'port1') :
+            self.top.port1.portDet = val
+            self.hwio.GPIOEX1A = self.hwio.getBit(self.hwio.GPIOEX1A,self.top.port1.portDet,6)
+            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOA, self.GPIOEX1A)
+        else:
+            self.top.port2.portDet = val
+            self.hwio.GPIOEX1B = self.hwio.getBit(self.hwio.GPIOEX1B,self.top.port2.portDet,6)
+            self.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOB, self.GPIOEX1B)
     def init(self) :
         self.ref = {}
         self.mytriangle (self.c,60,100,"RX Main")
@@ -154,6 +207,15 @@ class gui :
         self.rD.place(x=295,y=120,height=40,width=120)
         self.rE = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rEcb)
         self.rE.place(x=295,y=200,height=40,width=120)
+        self.deempVar = IntVar()
+        self.deemp = Checkbox(self.tk,text="DeEmphasis", variable=deempVar,command=self.deempCb)
+        self.deemp.place(x=230,y=110,height=20,width=50)
+        self.descEnVar = IntVar()
+        self.descEn = Checkbox(self.tk,text="Desc En", variable=descEnVar,command=self.descEnCb)
+        self.descEn.place(x=30,y=110,height=20,width=50)
+        self.portDetVar = IntVar()
+        self.portDet = Checkbox(self.tk,text="Port Detect", variable=portDetVar,command=self.portDetCb) 
+        self.portDet.place(x=350,y=230,height=20,width=50)
         self.ps = Spinbox(self.tk,values=('port1','port2'), command=self.portSelect, wrap=True)
         self.ps.place(x=400,y=30,width=50)
         self.portSelect()

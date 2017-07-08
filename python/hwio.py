@@ -169,7 +169,19 @@ class hwio :
             d = self.ReadLoc(i)
             print("Address %d data %x" % (i,d))
 
-
+    def getBit(self,baseVal,bitVal,bitPos) :
+        maskbit = 1<<bitPos
+        if(bitVal) :
+            outval = baseVal | maskbit
+        else:
+            outval = baseVal &  ~maskbit & 0xff
+        return outval
+    def i2cSafeWrite(busaddr,regaddr,val) :
+        if (self.haveIO) :
+            try: 
+                self.i2cBus.write_byte_data(busaddr, regaddr, val)
+            except:
+                pass
     def init_all(self) :
         for r in range(12) :
             self.WriteRes(r,self.vals[r],0)
@@ -182,12 +194,15 @@ class hwio :
                 
             self.WritePGAChan(chan,p+5,0)
             self.WritePGAGain(self.gain[p][chan],p+5,0)
-        if (self.haveIO) :
-            try: 
-                self.i2cBus.write_byte_data(GPIOEX1, GPIOA, self.GPIOEX1A) # port A default values
-                self.i2cBus.write_byte_data(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
-            except:
-                pass
+        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.deemp,4)
+        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.descEn,5)
+        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.portDet,6)
+        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.deemp,4)
+        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.descEn,5)
+        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.portDet,6)
+        self.i2cSafeWrite(GPIOEX1, GPIOA, self.GPIOEX1A) # port A default values
+        self.i2cSafeWrite(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
+
     def muteUnmute(self,port,link,en) :
         maskbit = 1<< port
         if(port == 1) :
@@ -195,21 +210,13 @@ class hwio :
                 self.GPIOEX1A = self.GPIOEX1A | maskbit
             else:
                 self.GPIOEX1A = self.GPIOEX1A &  ~maskbit
-            if (self.haveIO) :
-                try: 
-                    self.i2cBus.write_byte_data(GPIOEX1, GPIOA, self.GPIOEX1A)
-                except:
-                    pass
+            self.i2cSafeWrite(GPIOEX1, GPIOA, self.GPIOEX1A)
         elif (port ==2) :
             if (en) :
                 self.GPIOEX1B = self.GPIOEX1B | maskbit
             else:
                 self.GPIOEX1B = self.GPIOEX1B &  ~maskbit
-            if (self.haveIO) :
-                try: 
-                    self.i2cBus.write_byte_data(GPIOEX1, GPIOB, self.GPIOEX1B)
-                except:
-                    pass
+            self.i2cSafeWrite(GPIOEX1, GPIOB, self.GPIOEX1B)
         else :
             print( "Error Bad port number to mute or unmute")
 
