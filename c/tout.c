@@ -20,7 +20,7 @@ void write_buf(void){
     if ((err = snd_pcm_writei (playback_handle, buf, BUFLEN)) != BUFLEN) {
       fprintf (stderr, "write to audio interface failed (%s)\n",
 	       snd_strerror (err));
-      exit (1);
+      exit(EXIT_FAILURE);
     }
 }
 void send_sample(int sample) {
@@ -41,21 +41,19 @@ void gen_tone(int samples){
   }
 }
 
-main (int argc, char *argv[]) {
+int main (int argc, char *argv[]) {
   int toneFreq;
   int dur;
   int i;
   if(argc < 5 ) {
     printf("must use more  arguments %d given\n", argc);
-    printf("%s         device         freq amplitiude duration [freq amplitude duration...]\n",argv[0]);
-    printf("%s sysdefault:CARD=Device 660  1000 100 \n",argv[0]);
-    printf("%s sysdefault:CARD=Device 660  1000 100 100 0 10 440 900 48\n",argv[0]);
-    exit(-1);
+    printf("%s         device         freq amplitude duration [freq amplitude duration...]\n",argv[0]);
+    printf("%s         default        660  10000     100 \n",argv[0]);
+    printf("%s         default        660  10000     100 100 0 10 440 900 48\n",argv[0]);
+    return EXIT_FAILURE;
   }
-  int sampleRate = SAMPLE_RATE;
+  unsigned int sampleRate = SAMPLE_RATE;
   int err;
-  int buf_rem;
-  int filled;
   snd_pcm_hw_params_t *hw_params;
 
   buf_idx=0; 
@@ -65,7 +63,7 @@ main (int argc, char *argv[]) {
     fprintf (stderr, "cannot open audio device %s (%s)\n", 
 	     argv[1],
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
   //printf("success\n");
 		   
@@ -73,7 +71,7 @@ main (int argc, char *argv[]) {
   if ((err = snd_pcm_hw_params_malloc (&hw_params)) < 0) {
     fprintf (stderr, "cannot allocate hardware parameter structure (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
   //printf("success\n");
 				 
@@ -81,7 +79,7 @@ main (int argc, char *argv[]) {
   if ((err = snd_pcm_hw_params_any (playback_handle, hw_params)) < 0) {
     fprintf (stderr, "cannot initialize hardware parameter structure (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
   //printf("success\n");
   
@@ -89,7 +87,7 @@ main (int argc, char *argv[]) {
   if ((err = snd_pcm_hw_params_set_access (playback_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
     fprintf (stderr, "cannot set access type (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
   //printf("success\n");
 	
@@ -97,25 +95,25 @@ main (int argc, char *argv[]) {
   if ((err = snd_pcm_hw_params_set_format (playback_handle, hw_params, SND_PCM_FORMAT_S16_LE)) < 0) {
     fprintf (stderr, "cannot set sample format (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
 	
   if ((err = snd_pcm_hw_params_set_rate_near (playback_handle, hw_params, &sampleRate, 0)) < 0) {
     fprintf (stderr, "cannot set sample rate (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
 	
   if ((err = snd_pcm_hw_params_set_channels (playback_handle, hw_params, CHAN)) < 0) {
     fprintf (stderr, "cannot set channel count (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
 	
   if ((err = snd_pcm_hw_params (playback_handle, hw_params)) < 0) {
     fprintf (stderr, "cannot set parameters (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
 	
   snd_pcm_hw_params_free (hw_params);
@@ -123,7 +121,7 @@ main (int argc, char *argv[]) {
   if ((err = snd_pcm_prepare (playback_handle)) < 0) {
     fprintf (stderr, "cannot prepare audio interface for use (%s)\n",
 	     snd_strerror (err));
-    exit (1);
+    return EXIT_FAILURE;
   }
 	
   for(i=0; i+4 < argc; i=i+3) { 
@@ -140,6 +138,6 @@ main (int argc, char *argv[]) {
   }
   snd_pcm_drain (playback_handle);
   snd_pcm_close (playback_handle);
-  exit (0);
+  return EXIT_SUCCESS;
   
 }
