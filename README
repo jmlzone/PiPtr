@@ -14,9 +14,17 @@ Most of the code will be in Python, however some of it is in C.
 Eventually there will be good documeation and a bug/enhancement
 tracking WIKI or some such thing.
 
-Current state: The test repeater is stable on the air but mnay many
+Current state: The test repeater is stable on the air but many many
 things are still to be done.
 
+----------------------------------------------------------------------
+Mailing lists for the project
+  Please join one or more of the groups below.
+MMRA-PiPtr-Hardware+subscribe@groups.io
+MMRA-PiPtr-Software+subscribe@groups.io
+MMRA-PiPtr-Documentation+subscribe@groups.io
+
+----------------------------------------------------------------------
 
 As you know the MMRA maintains a network of 22 repeaters.  A repeater
 is basically a receiver, a transmitter and a controller
@@ -63,3 +71,4 @@ Even if you don't know anything about software or repeater controllers you can s
 
 Ready to help?
 Contact James, n1ddk@mmra.org.
+
