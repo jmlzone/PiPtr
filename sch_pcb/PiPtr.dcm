@@ -20,6 +20,14 @@ D Octal BUS Transceivers, 3 State out
 K TTL BUS 3State
 $ENDCMP
 #
+$CMP 74LVC2G125
+D Dual tristate buffer with 5v-tolerant inputs
+$ENDCMP
+#
+$CMP 74LVC2G241
+D Dual tristate buffer with 5v-tolerant inputs
+$ENDCMP
+#
 $CMP 74LVC4066
 D Quad Analog Switches
 K CMOS SWITCH
@@ -33,6 +41,16 @@ $ENDCMP
 $CMP CD4050B_1piece
 D Hex Buffer
 K CMOS BUFFER
+$ENDCMP
+#
+$CMP CONN_02X07
+D Connector, double row, 02x07, pin header
+K connector
+$ENDCMP
+#
+$CMP CONN_02X08
+D Connector, double row, 02x08, pin header
+K connector
 $ENDCMP
 #
 $CMP IP4234CZ6_USB_ESD_PROTECTOR
