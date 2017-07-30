@@ -1,4 +1,4 @@
-update=7/26/2017 5:58:27 PM
+update=7/30/2017 7:19:41 AM
 version=1
 last_client=kicad
 [pcbnew]
@@ -40,3 +40,4 @@ version=1
 LibDir=
 [eeschema/libraries]
 LibName1=PiPtr
+LibName2=conn
