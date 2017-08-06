@@ -53,12 +53,26 @@ D Connector, double row, 02x08, pin header
 K connector
 $ENDCMP
 #
+$CMP CONN_15
+D Symbole general de connexion
+K CONN
+$ENDCMP
+#
+$CMP DE9
+K CONN
+$ENDCMP
+#
 $CMP IP4234CZ6_USB_ESD_PROTECTOR
 D USB 2.0 ESD protector
 $ENDCMP
 #
 $CMP MOUNTING_HOLE
 D Mounting hole, PTH
+$ENDCMP
+#
+$CMP Q_NMOS_GDSD
+D Transistor N-MOSFETwith substrate diode, drain connected to mounting plane (general)
+K NMOS n-mos n-mosfet transistor
 $ENDCMP
 #
 $CMP TPS54302
