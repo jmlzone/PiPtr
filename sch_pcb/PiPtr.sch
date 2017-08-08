@@ -1006,17 +1006,6 @@ Text Label 2100 3775 2    60   ~ 0
 UINTA_33
 Text Label 2100 3875 2    60   ~ 0
 UINTB_33
-$Comp
-L C C110
-U 1 1 5968C303
-P 7050 6275
-F 0 "C110" H 7075 6375 50  0000 L CNN
-F 1 "0.1u" H 7075 6175 50  0000 L CNN
-F 2 "lib:smd0603" H 7088 6125 50  0001 C CNN
-F 3 "" H 7050 6275 50  0001 C CNN
-	1    7050 6275
-	1    0    0    -1  
-$EndComp
 Text Label 6100 6825 2    60   ~ 0
 MISO_33
 Text Notes 5000 7400 2    60   ~ 0
@@ -1053,23 +1042,11 @@ Wire Wire Line
 Wire Wire Line
 	5225 6300 5775 6300
 Wire Wire Line
-	7050 6025 7050 6125
-Wire Wire Line
-	6725 6025 6725 6125
-Connection ~ 6725 6025
-Wire Wire Line
 	6400 6125 6400 6025
 Connection ~ 6400 6025
 Wire Wire Line
 	6400 6425 6400 6525
-Wire Wire Line
-	6400 6475 7050 6475
-Wire Wire Line
-	7050 6475 7050 6425
 Connection ~ 6400 6475
-Wire Wire Line
-	6725 6425 6725 6475
-Connection ~ 6725 6475
 Wire Wire Line
 	4225 6100 4225 6200
 Wire Wire Line
@@ -1600,57 +1577,6 @@ F 3 "" H 7025 1025 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L CONN_01X04 J117
-U 1 1 595CF549
-P 10225 3700
-F 0 "J117" H 10175 3950 50  0000 C CNN
-F 1 "OLED_SSD1306" V 10325 3700 50  0000 C CNN
-F 2 "lib:SIL-4" H 10225 3700 50  0001 C CNN
-F 3 "" H 10225 3700 50  0001 C CNN
-	1    10225 3700
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	10025 3750 9425 3750
-Wire Wire Line
-	10025 3850 9425 3850
-Text Label 9425 3850 0    60   ~ 0
-SDA1_33
-Text Label 9425 3750 0    60   ~ 0
-SCL1_33
-Wire Wire Line
-	10025 3550 9950 3550
-Wire Wire Line
-	9950 3550 9950 3900
-Wire Wire Line
-	10025 3650 9875 3650
-Wire Wire Line
-	9875 3650 9875 3475
-$Comp
-L GND #PWR040
-U 1 1 595D2DC1
-P 9950 3900
-F 0 "#PWR040" H 9950 3650 50  0001 C CNN
-F 1 "GND" H 9950 3750 50  0001 C CNN
-F 2 "" H 9950 3900 50  0001 C CNN
-F 3 "" H 9950 3900 50  0001 C CNN
-	1    9950 3900
-	1    0    0    -1  
-$EndComp
-$Comp
-L +3.3V #PWR041
-U 1 1 595D34C7
-P 9875 3475
-F 0 "#PWR041" H 9875 3325 50  0001 C CNN
-F 1 "+3.3V" H 9875 3615 50  0000 C CNN
-F 2 "" H 9875 3475 50  0001 C CNN
-F 3 "" H 9875 3475 50  0001 C CNN
-	1    9875 3475
-	1    0    0    -1  
-$EndComp
-Text Notes 9275 4225 0    50   ~ 0
-Caution: Watch power polarity
-$Comp
 L TESTPOINT TP102
 U 1 1 595D9A4E
 P 4200 2825
@@ -2136,8 +2062,6 @@ F 3 "" H 725 6500 50  0001 C CNN
 	1    725  6500
 	1    0    0    -1  
 $EndComp
-Text Notes 9825 4125 0    60   ~ 0
-Address: 0x3C
 Text Notes 2875 3175 0    60   ~ 0
 Address 0x21
 $Sheet
@@ -2193,7 +2117,7 @@ Wire Wire Line
 	4225 5750 4225 5800
 Connection ~ 3850 5750
 Wire Wire Line
-	5350 6025 7050 6025
+	5350 6025 6725 6025
 Text Label 7875 3025 0    60   ~ 0
 PIXEL_33
 Wire Wire Line
@@ -2253,7 +2177,7 @@ U 1 1 597E89F0
 P 10200 5000
 F 0 "J103" H 10200 5300 50  0000 C CNN
 F 1 "RTC" V 10300 5000 50  0000 C CNN
-F 2 "" H 10200 4950 50  0001 C CNN
+F 2 "lib:SIL-5" H 10200 4950 50  0001 C CNN
 F 3 "" H 10200 4950 50  0001 C CNN
 	1    10200 5000
 	1    0    0    -1  
@@ -2267,4 +2191,10 @@ Wire Wire Line
 	9950 4800 10000 4800
 Text Notes 9350 5500 0    60   ~ 0
 For optional RTC board
+Wire Wire Line
+	6725 6025 6725 6125
+Wire Wire Line
+	6725 6425 6725 6475
+Wire Wire Line
+	6725 6475 6400 6475
 $EndSCHEMATC
