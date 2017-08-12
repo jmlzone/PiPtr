@@ -44,6 +44,8 @@ class top:
                 if os.path.isfile(f) :
                     return f
         return False
+    def localPath(self,file) :
+        return (os.path.abspath(os.path.join(self.installPath,file)))
 top = top()
 sys.path.insert(0,top.localPath)
 import gui

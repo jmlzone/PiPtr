@@ -44,7 +44,7 @@ class tx:
         self.idPid = False
         self.beepMethod = 2 # 0=none, 1=tone, 2=wave 3=morse
         self.beepTone = "660 5000 30 440 5000 30 1000 5000 30"
-        self.tailBeepWav = '../sounds/Tink.wav'
+        self.tailBeepWav = self.localPath('../sounds/Tink.wav')
         self.beepMorse = "20 440 5000 beep"
         self.xmlvars = ( 'pltone', 'id', 'idtime', 'polite', 'timeout',
                          'taildly', 'hangtime', 'disable', 'txupdly',
