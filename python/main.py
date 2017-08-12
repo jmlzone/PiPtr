@@ -38,9 +38,9 @@ class top:
         self.installPath = os.path.dirname(os.path.realpath(__file__))
         self.localPath = os.path.abspath(self.installPath + "/../" + self.host)
         self.xmlvars = []
-    def findFileOnPath (basenames) :
-        for basename in basenames :
-            for f [os.path.join(self.localPath,basename), os.path.join(self.installPath,basename)] :
+    def findFileOnPath (self,baseNameList) :
+        for basename in baseNameList :
+            for f in [os.path.join(self.localPath,basename), os.path.join(self.installPath,basename)] :
                 if os.path.isfile(f) :
                     return f
         return False
@@ -54,7 +54,7 @@ import hwio
 cmdFile = top.findFileOnPath([top.host + 'Cmd.py', 'mycmd.py'])
 if cmdFile :
     logit("Load command file: " + cmdFile)
-    exec(compile(open(cmdfile).read(), cmdfile, 'exec'))
+    exec(compile(open(cmdFile).read(), cmdFile, 'exec'))
 
 def hup_handler(signum, frame):
     print('Hup interrupt, Going interactive', signum)
@@ -98,11 +98,6 @@ xmlFile = top.findFileOnPath([top.host + '.xml', 'config.xml'])
 if xmlFile :
     logit("Load XML config : " + xmlFile )
     xmlio.loadXml(top,xmlFile)
-#for f in [top.localPath +"/" + top.host +".xml" , top.localPath +"/config.xml", top.installPath +"/config.xml"] :
-#    if os.path.isfile(f) :
-#        logit("Load XML config : " + f )
-#        xmlio.loadXml(top,f)
-#        break
 logit("Load XML Done")
 if(gui.gui) :
     gui.init()

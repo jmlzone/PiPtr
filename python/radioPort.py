@@ -14,6 +14,7 @@ from multiprocessing import Process, Value, Array, Queue
 class tx:
     """ class describing a transmitter """
     def __init__(self, port):
+        self.installPath = os.path.dirname(os.path.realpath(__file__))
         self.port = port # handle to parent
         self.pltone = 100.0
         self.id = "n0call"
@@ -51,6 +52,9 @@ class tx:
                          'tailBeepWav', 'beepMorse') # data to store in xml config
         self.up = False
 
+    def localPath(self,file) :
+        return (os.path.abspath(os.path.join(self.installPath,file)))
+    
     def addTailMsg(self, method,msg,cancelable,isid,requeue,alt):
         self.tailMsgList.append((method,msg,cancelable,isid,requeue,alt))
         print("Added tail message %s " % msg)
@@ -134,18 +138,18 @@ class tx:
         return (id_played)
  
     def sendId(self) :
-        self.idPid = subprocess.Popen(['../bin/mout', self.port.card, '20', '660', '5000', self.id])
+        self.idPid = subprocess.Popen([self.localPath('../bin/mout'), self.port.card, '20', '660', '5000', self.id])
         self.idPid.wait()
 
     def tailBeep(self) :
         if(self.beepMethod == 1) : # tone
-            args = ['../bin/tout',self.port.card] + self.beepTone.split()
+            args = [self.localPath('../bin/tout'),self.port.card] + self.beepTone.split()
             print(args)
             beepPid = subprocess.call(args)
         elif(self.beepMethod == 2) : # wave
             beepPid = subprocess.Popen(['/usr/bin/aplay', '-D', self.port.card, self.tailBeepWav])
         elif(self.beepMethod == 3) : # morse
-            args = ['../bin/mout',self.port.card] + self.beepMorse.split()
+            args = [self.localPath('../bin/mout'),self.port.card] + self.beepMorse.split()
             print(args)
             beepPid = subprocess.call(args)
         else : # none
@@ -262,7 +266,7 @@ class rx:
         self.ctcssState(GPIO.input(self.ctcssPin) == self.ctcssPinLvl)
     def softDecode (self,q):
         try:
-            p=subprocess.Popen(['../bin/multimon', self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
+            p=subprocess.Popen([self.localPath('../bin/multimon'), self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
         except:
             # dummy test wrapper to simulate multimon
             import io
@@ -321,7 +325,7 @@ class radioPort :
         self.xmlvars = ( 'card', 'islink', 'linkstate', 'enabled', 'idleWav')
         self.cmd = ""
         self.enabled = True
-        self.idleWav = '../sounds/idle.wav'
+        self.idleWav = self.tx.localPath('../sounds/idle.wav')
 
     def run(self) :
         if(self.enabled) :
