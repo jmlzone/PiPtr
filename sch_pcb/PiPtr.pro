@@ -1,4 +1,4 @@
-update=8/9/2017 11:47:24 AM
+update=8/21/2017 7:55:28 AM
 version=1
 last_client=kicad
 [pcbnew]
@@ -25,12 +25,6 @@ version=1
 NetIExt=net
 [general]
 version=1
-[eeschema]
-version=1
-LibDir=
-[eeschema/libraries]
-LibName1=PiPtr
-LibName2=conn
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
@@ -41,3 +35,9 @@ NetFmtName=Pcbnew
 SpiceAjustPassiveValues=0
 LabSize=60
 ERC_TestSimilarLabels=1
+[eeschema]
+version=1
+LibDir=
+[eeschema/libraries]
+LibName1=PiPtr
+LibName2=power
