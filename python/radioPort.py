@@ -9,6 +9,7 @@ import signal
 import threading
 #import tail
 import rptFsm
+from logit import logit
 
 from multiprocessing import Process, Value, Array, Queue
 class tx:
@@ -242,9 +243,11 @@ class rx:
                 if( self.ctcssAct[i] and self.softCtcssAllow[i] ) :
                      softCtcss = True
                 if( self.ctcssAct[i] and self.softCtcssCmd[i] ) :
-                    ctcssCmd[i] = True
+                    ctcssCmd = True
         if(softCtcss or self.useSoftCtcss == False):
-            rx = self.active()
+            rx = self.active() or softCtcss
+        else:
+            rx = False
         rx = rx and not self.disabled
         if(rx != self.rxState) :
             if(rx) :
@@ -265,8 +268,10 @@ class rx:
         self.corState(GPIO.input(self.corPin) == self.corPinLvl)
         self.ctcssState(GPIO.input(self.ctcssPin) == self.ctcssPinLvl)
     def softDecode (self,q):
+        mmPath = self.port.tx.localPath('../bin/multimon')
+        logit("Port %d : starting multimon %s" % (self.port.portnum, mmPath)) 
         try:
-            p=subprocess.Popen([self.localPath('../bin/multimon'), self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
+            p=subprocess.Popen([mmPath, self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
         except:
             # dummy test wrapper to simulate multimon
             import io

@@ -57,6 +57,7 @@ cmdFile = top.findFileOnPath([top.host + 'Cmd.py', 'mycmd.py'])
 if cmdFile :
     logit("Load command file: " + cmdFile)
     exec(compile(open(cmdFile).read(), cmdFile, 'exec'))
+    logit("Command file Load done")
 
 def hup_handler(signum, frame):
     print('Hup interrupt, Going interactive', signum)
