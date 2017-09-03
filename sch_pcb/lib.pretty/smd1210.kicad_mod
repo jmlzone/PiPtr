@@ -1,0 +1,18 @@
+(module smd1210 (layer F.Cu) (tedit 5959A8E6)
+  (descr "SMT resistor, 1210")
+  (fp_text reference r_1210 (at 0 -1.7526) (layer F.SilkS)
+    (effects (font (size 0.50038 0.50038) (thickness 0.11938)))
+  )
+  (fp_text value VAL** (at 0 1.7018) (layer F.SilkS) hide
+    (effects (font (size 0.50038 0.50038) (thickness 0.11938)))
+  )
+  (fp_line (start -0.5 1.25) (end 0.5 1.25) (layer F.SilkS) (width 0.1524))
+  (fp_line (start -0.5 -1.25) (end 0.5 -1.25) (layer F.SilkS) (width 0.1524))
+  (pad 1 smd rect (at 1.397 0) (size 1.6002 2.6924) (layers F.Cu F.Paste F.Mask))
+  (pad 2 smd rect (at -1.397 0) (size 1.6002 2.6924) (layers F.Cu F.Paste F.Mask))
+  (model walter/r_1210.wrl
+    (at (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
+)

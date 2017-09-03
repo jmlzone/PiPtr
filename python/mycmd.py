@@ -84,9 +84,10 @@ it acts globally or uses port context """
         tone = str(q.get()) # block until somthing is ready
         if (tone == " ") : # terminator at end of rx
             if(len(port.cmd) >0) :
+                logit("Looking for command: %s on port %d" %( port.cmd, port.portnum))
                 found = 0
                 for c in cmdlist :
-                    print(c)
+                    #print(c)
                     (name,func) = c
                     m = re.match(name,port.cmd)
                     if(m != None) :

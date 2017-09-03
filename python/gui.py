@@ -84,14 +84,22 @@ class gui :
         dumpXml(self.top,f)
         print("Wrote config file %s" % f)
         return(f)
+
+    def getPortNum(self) :
+        val = self.ps.get()
+        if (val == 'port1') :
+            return(0)
+        else :
+            return(1)
+        
     def portSelect(self) :
         val = self.ps.get()
+        pn = self.getPortNum()
         if (val == 'port1') :
             self.RA = self.top.hwio.vals[0]
             self.RB = self.top.hwio.vals[1]
             self.RC = self.top.hwio.vals[2]
             self.RD = self.top.hwio.vals[3]
-            self.RE = self.top.hwio.vals[8]
             self.deempVal = self.top.port1.rx.deemp
             self.descEnVal = self.top.port1.rx.descEn
             self.portDetVal = self.top.port1.rx.portDet
@@ -100,10 +108,11 @@ class gui :
             self.RB = self.top.hwio.vals[5]
             self.RC = self.top.hwio.vals[6]
             self.RD = self.top.hwio.vals[7]
-            self.RE = self.top.hwio.vals[9]
             self.deempVal = self.top.port2.rx.deemp
             self.descEnVal = self.top.port2.rx.descEn
             self.portDetVal = self.top.port2.rx.portDet
+        self.RS = self.top.hwio.speakers[pn]
+        self.RM = self.top.hwio.mics[pn]
         self.updateRs()
         self.updateChecks()
 
@@ -112,7 +121,8 @@ class gui :
         self.rB.set(self.RB)
         self.rC.set(self.RC)
         self.rD.set(self.RD)
-        self.rE.set(self.RE)
+        self.rS.set(self.RS)
+        self.rM.set(self.RM)
 
     def updateRn(self,val,offset,step=4) :
         port = self.ps.get()
@@ -128,8 +138,12 @@ class gui :
         self.updateRn(val,2)
     def rDcb(self,val) :
         self.updateRn(val,3)
-    def rEcb(self,val) :
-        self.updateRn(val,8,step=1)
+    def rScb(self,val) :
+        self.top.hwio.speakers[self.getPortNum()] = int(val)
+        self.top.hwio.setMixerByName(self.getPortNum(), 'Speaker', int(val))
+    def rMcb(self,val) :
+        self.top.hwio.mics[self.getPortNum()] = int(val)
+        self.top.hwio.setMixerByName(self.getPortNum(), 'Mic', int(val))
     def updateChecks(self) :
         if(self.deempVal) :
             self.deemp.select()
@@ -185,11 +199,11 @@ class gui :
         #self.myres(self.c,190,30,False)
         desc = self.c.create_text(5,30,text="Desc\n in",fill="green", anchor=W)
         rx = self.c.create_text(5,100,text="from\n RX",fill="green", anchor=W)
-        tc = self.c.create_text(310,10,text="To Computer",fill="green", anchor=W)
+        tc = self.c.create_text(450,20,text="To\nComputer",fill="green", anchor=W)
         dci = self.c.create_line(30,30, 50,30,fill="white")
         #dco = self.c.create_line(150,30, 170,30,fill="white")
         l = self.c.create_line(30,100, 60,100,fill="white")
-        l2 = self.c.create_line(160,100, 170,100, 170,10, 310,10, fill="white")
+        l2 = self.c.create_line(160,100, 170,100, 170,10, 345,10, fill="white")
         l2a = self.c.create_line(170,70, 180,70, fill="white")
         l3 = self.c.create_line(280,70, 300,70, fill="white")
         #l3a = self.c.create_line(200,70,270,70, fill="white", arrow=FIRST)
@@ -202,24 +216,26 @@ class gui :
         self.rB = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rBcb)
         self.rB.place(x=40,y=10,height=40,width=120)
         self.rC = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rCcb)
-        self.rC.place(x=170,y=250,height=40,width=120)
+        self.rC.place(x=295,y=200,height=40,width=120)
         self.rD = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rDcb)
         self.rD.place(x=295,y=120,height=40,width=120)
-        self.rE = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rEcb)
-        self.rE.place(x=295,y=200,height=40,width=120)
+        self.rS = Scale(self.tk,from_=0, to=100, orient=HORIZONTAL, command=self.rScb)
+        self.rS.place(x=70,y=195,height=40,width=100)
+        self.rM = Scale(self.tk,from_=0, to=100, orient=HORIZONTAL, command=self.rMcb)
+        self.rM.place(x=345,y=5,height=40,width=100)
         self.deempVar = IntVar()
-        self.deemp = Checkbutton(self.tk,text="DeEmphasis", variable=self.deempVar,command=self.deempCb, bg='black', fg='white', bd=0, selectcolor='green')
+        self.deemp = Checkbutton(self.tk,text="DeEmphasis", variable=self.deempVar,command=self.deempCb, bg='black', fg='green', bd=0, selectcolor='black')
         self.deemp.place(x=185,y=125,height=20,width=100)
         self.descEnVar = IntVar()
-        self.descEn = Checkbutton(self.tk,text="Desc En", variable=self.descEnVar,command=self.descEnCb, bg='black', fg='white', bd=0, selectcolor='green')
+        self.descEn = Checkbutton(self.tk,text="Desc En", variable=self.descEnVar,command=self.descEnCb, bg='black', fg='green', bd=0, selectcolor='black')
         self.descEn.place(x=225,y=20,height=20,width=75)
         self.portDetVar = IntVar()
-        self.portDet = Checkbutton(self.tk,text="Port Detect", variable=self.portDetVar,command=self.portDetCb, bg='black', fg='white', bd=0, selectcolor='green')
+        self.portDet = Checkbutton(self.tk,text="Port Detect", variable=self.portDetVar,command=self.portDetCb, bg='black', fg='green', bd=0, selectcolor='black')
         self.portDet.place(x=310,y=260,height=20,width=95)
         self.ps = Spinbox(self.tk,values=('port1','port2'), command=self.portSelect, wrap=True)
-        self.ps.place(x=400,y=30,width=50)
+        self.ps.place(x=490,y=40,width=50)
         self.portSelect()
-        co = self.c.create_text(5,200,text="From Computer", anchor=W, fill="green")
+        co = self.c.create_text(5,215,text="From\nComputer", anchor=W, fill="green")
         l6 = self.c.create_line(105,200, 180,200,fill="white")
         self.c.create_text(35,300,text="COR",fill="green")
         self.c.create_text(85,300,text="CTCSS",fill="green")
@@ -245,7 +261,7 @@ class gui :
             self.ref['softCtcss2'].append(t)
             x=x+40
         SaveButton = Button(self.tk,text="Save",command=self.guiSave)
-        SaveButton.place(x=20,y=240, height = 30, width = 40)
+        SaveButton.place(x=500,y=70, height = 30, width = 40)
 
 
     def updateItem(self,name,value,color=None):

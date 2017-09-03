@@ -1,0 +1,9 @@
+(module MTG_4_40 (layer F.Cu) (tedit 4CACD11D)
+  (fp_text reference MTG_4_40 (at 0.381 -4.445) (layer F.SilkS) hide
+    (effects (font (thickness 0.3048)))
+  )
+  (fp_text value VAL** (at 0.254 4.699) (layer F.SilkS) hide
+    (effects (font (thickness 0.3048)))
+  )
+  (pad 1 thru_hole circle (at 0 0) (size 5.69976 5.69976) (drill 3.35026) (layers *.Cu *.Mask F.SilkS))
+)

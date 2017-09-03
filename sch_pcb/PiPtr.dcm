@@ -20,9 +20,29 @@ D Octal BUS Transceivers, 3 State out
 K TTL BUS 3State
 $ENDCMP
 #
+$CMP 74LVC2G125
+D Dual tristate buffer with 5v-tolerant inputs
+$ENDCMP
+#
+$CMP 74LVC2G241
+D Dual tristate buffer with 5v-tolerant inputs
+$ENDCMP
+#
 $CMP 74LVC4066
 D Quad Analog Switches
 K CMOS SWITCH
+$ENDCMP
+#
+$CMP BSS83P
+D -60V Vds, -0.33A Id, P-Channel MOSFET, SOT-23-3
+K P-Channel MOSFET
+F http://www.farnell.com/datasheets/1835997.pdf
+$ENDCMP
+#
+$CMP BSS84
+D -50V Vds, -0.13A Id, P-Channel MOSFET, SOT-23-3
+K P-Channel MOSFET
+F http://assets.nexperia.com/documents/data-sheet/BSS84.pdf
 $ENDCMP
 #
 $CMP CD4050B
@@ -35,6 +55,25 @@ D Hex Buffer
 K CMOS BUFFER
 $ENDCMP
 #
+$CMP CONN_02X07
+D Connector, double row, 02x07, pin header
+K connector
+$ENDCMP
+#
+$CMP CONN_02X08
+D Connector, double row, 02x08, pin header
+K connector
+$ENDCMP
+#
+$CMP CONN_15
+D Symbole general de connexion
+K CONN
+$ENDCMP
+#
+$CMP DE9
+K CONN
+$ENDCMP
+#
 $CMP IP4234CZ6_USB_ESD_PROTECTOR
 D USB 2.0 ESD protector
 $ENDCMP
@@ -43,8 +82,36 @@ $CMP MOUNTING_HOLE
 D Mounting hole, PTH
 $ENDCMP
 #
+$CMP NTR2101P
+D -8V Vds, -3.7A Id, P-Channel MOSFET, SOT-23-3
+K P-Channel MOSFET
+F http://www.onsemi.com/pub/Collateral/NTR2101P-D.PDF
+$ENDCMP
+#
+$CMP Q_NMOS_GDSD
+D Transistor N-MOSFETwith substrate diode, drain connected to mounting plane (general)
+K NMOS n-mos n-mosfet transistor
+$ENDCMP
+#
+$CMP TP0610T
+D -60V Vds, -0.18A Id, P-Channel MOSFET, SOT-23-3
+K P-Channel MOSFET
+F http://www.vishay.com/docs/70209/70209.pdf
+$ENDCMP
+#
 $CMP TPS54302
 D 4.5 - 28V in 3A out switcher
+$ENDCMP
+#
+$CMP USB_OTG
+D USB mini/micro connector
+K connector USB
+$ENDCMP
+#
+$CMP VP0610T
+D -60V Vds, -0.18A Id, P-Channel MOSFET, SOT-23-3
+K P-Channel MOSFET
+F http://www.vishay.com/docs/70209/70209.pdf
 $ENDCMP
 #
 #End Doc Library

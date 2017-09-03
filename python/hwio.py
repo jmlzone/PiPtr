@@ -5,6 +5,7 @@
 import spidev
 import RPi.GPIO as GPIO
 import smbus
+import alsaaudio
 IODIRA   =  0  # 1 = input, 0 = output
 IODIRB   =  1
 IPOLA    =  2  # 1 = Interrupt inverted from IO state
@@ -47,12 +48,14 @@ class hwio :
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.selPins, GPIO.OUT)
         GPIO.output(self.selPins, GPIO.LOW)
-        self.vals = [150,2,50,20,0,0,0,0,0,0,0,0]
-        self.tcon = [15,15,15,15,15,15,15,15,15,15,15,15]
+        self.vals = [150,2,50,20,0,0,0,0]
+        self.tcon = [15,15,15,15,15,15,15,15]
         self.gain = [ [6,6,6,6], [6,6,6,6] ]
+        self.mics = [50,50,50]
+        self.speakers = [50,50,50]
         # Open SELF.SPI bus
         self.spi = spidev.SpiDev()
-        self.xmlvars = ['vals','tcon', 'gain', 'GPIOEX1A', 'GPIOEX1B']
+        self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'GPIOEX1A', 'GPIOEX1B']
         self.GPIOEX1A = 0
         self.GPIOEX1B = 0
         self.haveIO = True
@@ -183,7 +186,7 @@ class hwio :
             except:
                 pass
     def init_all(self) :
-        for r in range(12) :
+        for r in range(8) :
             self.WriteRes(r,self.vals[r],0)
             self.WriteTcon(r,self.tcon[r],0)
         for p in range(2) :
@@ -219,6 +222,30 @@ class hwio :
             self.i2cSafeWrite(GPIOEX1, GPIOB, self.GPIOEX1B)
         else :
             print( "Error Bad port number to mute or unmute")
+
+    def setMixerByName(self, pn,  mixType, val) :
+        c=alsaaudio.cards()
+        if(pn==0) :
+            pc = self.top.port1.card
+        elif (pn==1) :
+            pc = self.top.port2.card
+        cn = pc[16:]
+        if (mixType == 'Mic') :
+            control = alsaaudio.PCM_CAPTURE
+        elif (mixType == 'Speaker') :
+            control = alsaaudio.PCM_PLAYBACK
+        else :
+            print("bad controtl type %s" % mixType)
+            control = None
+        #print("There are %d sound cards" % len(c))
+        for i in range(len(c)) :
+            m = alsaaudio.mixers(i)
+            if ('Mic' in m and 'Speaker' in m) :
+                #print("Card %d: %s has both" % (i,c[i]))
+                if(cn==c[i]) :
+                    mix = alsaaudio.Mixer(control=mixType, cardindex=i)
+                    mix.setvolume(val,0,control)
+                    return(None)
 
     def linkVoteSet(self, port, link) :
         pass
