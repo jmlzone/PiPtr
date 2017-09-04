@@ -6,7 +6,7 @@ EELAYER 26 0
 EELAYER END
 $Descr B 17000 11000
 encoding utf-8
-Sheet 2 5
+Sheet 4 5
 Title "PiPtr Audio"
 Date ""
 Rev ""
@@ -562,7 +562,7 @@ P 7850 3425
 AR Path="/5956F130/591CE5B0" Ref="R204"  Part="1" 
 AR Path="/596DD0D0/591CE5B0" Ref="R404"  Part="1" 
 F 0 "R404" V 7930 3425 50  0000 C CNN
-F 1 "20k" V 7850 3425 50  0000 C CNN
+F 1 "3k3" V 7850 3425 50  0000 C CNN
 F 2 "lib:smd0603" V 7780 3425 50  0001 C CNN
 F 3 "" H 7850 3425 50  0001 C CNN
 	1    7850 3425
