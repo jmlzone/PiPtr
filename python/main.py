@@ -124,6 +124,12 @@ if(port2.enabled) :
 #g = threading.Thread(target=gui.run)
 #g.daemon = True
 #g.start()
+hwioIThread = threading.Thread(target=hwio.runUInts)
+hwioIThread.daemon = True
+hwioIThread.start()
+hwioAThread = threading.Thread(target=hwio.runAdc)
+hwioAThread.daemon = True
+hwioAThread.start()
 cmdSockThread = threading.Thread(target=cmdSock.run)
 cmdSockThread.daemon = True
 cmdSockThread.start()

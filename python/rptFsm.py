@@ -61,7 +61,8 @@ class rptFsm :
         self.rxTimer = gpTimer(self.port.rx.timeout, userHandler = self.rxTo)
         self.rxResetTimer = gpTimer(self.port.rx.resetTimeout, userHandler = self.rxTimerStop)
         self.rxIdleTimer = gpTimer(self.port.rx.IdleTimeout, userHandler = self.idleTimeout)
-        self.cmdTimer = gpTimer(self.port.rx.cmdTimeout)
+        self.cmdTimer = gpTimer(self.port.rx.cmdTimeout, userHandler = self.cmdTimeout)
+        self.muteTimer = gptimer(self.port.rx.muteTime, userHandler = self.muteTimeout))
         self.linkVotes = 0
 
         self.lock = threading.Lock()
@@ -93,6 +94,7 @@ class rptFsm :
         self.rxResetTimer.timeout = self.port.rx.resetTimeout
         self.rxIdleTimer.timeout = self.port.rx.IdleTimeout
         self.cmdTimer.timeout = self.port.rx.cmdTimeout
+        self.muteTimer.timeout = self.port.rx.muteTime
 
         """ Input event functions here
         they need to
@@ -153,7 +155,7 @@ class rptFsm :
         self.rxState = 'rx'
         self.rxTimer.run()
         self.rxResetTimer.stop() 
-        self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, True) #enable audio
+        self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, self.port.rx.audioEnable) #enable audio
         if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
             self.port.other.fsm.setLinkRx(1) # port 1 linking is special and software only
         if(self.port.linkState == 2 or self.port.linkState == 3) :
@@ -244,6 +246,22 @@ class rptFsm :
         else :
             logit("Port %d idle Time Out queued Idle message" % self.port.portnum)
             self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], [self.port.idleWav], True, True, False, None)
+
+    def cmdTimeout(self) :
+        self.port.rx.cmdMode = False
+    def cmdOn(self) :
+        self.port.fsm.cmdTimer.reset()
+        self.port.rx.cmdMode = True
+        #self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], ["enterCmd.wav"], True, True, False, None)
+
+    def muteTimeout(self) :
+        self.port.rx.audioEnable = True
+        self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, self.port.rx.rxActive.isSet()) #enable audio
+
+    def mute(self) :
+        self.muteTimer.reset()
+        self.port.rx.audioEnable = False
+        self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, False) #disable audio
 
     def rxTimeoutRelease(self) :
         """ Entered when the RX goes off when in state rxTimeOut

@@ -115,8 +115,11 @@ class tx:
                 try:
                     print("Play messages Trying")
                     print(args)
-                    self.pid = subprocess.Popen(args)
-                    self.pid.wait()
+                    if(callable(method)) :
+                        method(self.port.card,msg)
+                    else :
+                        self.pid = subprocess.Popen(args)
+                        self.pid.wait()
                 except:
                     print("error could not run the tail message")
             if(self.cancel and alt and self.pid.returncode() <0) :
@@ -180,7 +183,8 @@ class rx:
         self.timeout = 180     # seconds
         self.resetTimeout = 1 # seconds
         self.IdleTimeout = 600 # seconds
-        self.cmdTimeout = 600 # seconds
+        self.cmdTimeout = 10 # seconds
+        self.muteTime = 1 # seconds
         self.disabled = False
         self.expired = False
         self.idle = True
@@ -197,6 +201,7 @@ class rx:
         self.softCtcssAllow = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.softCtcssCmd   = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.cmdMode = False
+        self.audioEnable = True
         if(self.port.portnum == 1) :
             self.corPin = 11
             self.ctcssPin = 13
@@ -216,7 +221,7 @@ class rx:
                         'useCtcssPin', 'ctcssPinLvl', 'useCorPin', 'corPinLvl',
                         'deemp', 'descEn', 'portDet',
                         'useSoftCtcss', 'softCtcssAllow', 'softCtcssCmd',
-                        'cmdMode', 'cmdTimeout')
+                        'cmdMode', 'cmdTimeout', 'muteTime')
 
     def ctcss(self):
         if(GPIO.input(self.ctcssPin) == self.ctcssPinLvl) :
@@ -294,6 +299,9 @@ class rx:
                 self.softCtcssState(self.ctcssAct)
             if(dtmf != None) :
                 q.put(dtmf.group('tone'))
+                if(self.port.rx.cmdMode) :
+                    self.port.fsm.cmdTimer.reset()
+                self.port.fsm.mute()
 
     def run(self) :
         self.sd = threading.Thread(target=self.softDecode, args=[self.q])

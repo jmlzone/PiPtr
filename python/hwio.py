@@ -1,4 +1,11 @@
 """ Routines to read and write non gpio hardware devices
+    User IO to the io expander is caller here like Raspberri pi GPIO
+    but use 
+      hwio.setup
+      hwio.output
+      hwio.input
+      hwio.add_event_detect
+      hwio.remove_event_detect
 """
 
 # Import all the libraries we need to run
@@ -6,6 +13,46 @@ import spidev
 import RPi.GPIO as GPIO
 import smbus
 import alsaaudio
+import threading
+import time
+import datetime
+import sys
+""" User IO pin naames
+"""
+GPA0 = 0
+GPA1 = 1
+GPA2 = 2
+GPA3 = 3
+GPA4 = 4
+GPA5 = 5
+GPA6 = 6
+GPA7 = 7
+GPB0 = 8
+GPB1 = 9
+GPB2 = 10
+GPB3 = 11
+GPB4 = 12
+GPB5 = 13
+GPB6 = 14
+GPB7 = 15
+INPUT = 1
+OUTPUT = 0
+
+""" MCP23008 Register names
+"""
+IODIR    = 0
+IPOL     = 1
+GPINTEN  = 2
+DEFVAL   = 3
+INTCON   = 4
+IOCON    = 5
+GPPU     = 6
+INTF     = 7
+INTCAP   = 8
+GPIOR    = 9
+OLAT     = 10
+""" MCP23017 Register names
+"""
 IODIRA   =  0  # 1 = input, 0 = output
 IODIRB   =  1
 IPOLA    =  2  # 1 = Interrupt inverted from IO state
@@ -19,8 +66,8 @@ INTCONB  =  9
 IOCON    = 10
 IOCONB   = 11
 GPPUA    = 12 # Enables Pullups
-CPPUB    = 13
-INTFA    = 14 # Intereupt flags
+GPPUB    = 13
+INTFA    = 14 # Interrupt flags
 INTFB    = 15
 INTCAPA =  16 # Captured values when an interup occurs
 INTCAPB =  17
@@ -28,10 +75,13 @@ GPIOA   =  18 # IO Values
 GPIOB   =  19
 OLATA   =  20 # read back written value
 OLATB   =  21
+""" The MCP23017 and MCP23008 base address is the same as the max7314 default used in the kenwoods instead of PROMs
+"""
 MCP23017BASE = 32
 GPIOEX1 = MCP23017BASE +1
 GPIOEX2 = MCP23017BASE +2
 GPIOEX3 = MCP23017BASE +3
+GPIOEX4 = MCP23017BASE +4
 INTPOL = 1<<1 # Interupt polarity, 1 = active high
 ODR    = 1<<2 # Open drain for the interupt pins, 1= open drain active low
 HAEN   = 1<<3 # used in spi only to ignore the address pins
@@ -39,12 +89,20 @@ DISSLW = 1<<4 # disables slew rate control when 1
 SEQOP  = 1<<5 # automatic address incementing disabled when 1
 MIRROR = 1<<6 # both interpt pins do the same thing
 BANK   = 1<<7 # Keep as zero or address map is different
-""" The MCP23017 base address is the same as the max7314 default used in the kenwoods instead of PROMs
+""" user IO related pins
 """
+UINTA = 8
+UNITB = 10
+ADCCS = 7
 class hwio :
     def __init__ (self,top) :
         self.top = top
         self.selPins = [32, 31, 29] # msb to lsb
+        self.port1=top.port1
+        self.port2=top.port2
+        userfuncs = [[None,None,None,None,None,None,None,None]
+                     ,[None,None,None,None,None,None,None,None]]
+        intf = 0
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.selPins, GPIO.OUT)
         GPIO.output(self.selPins, GPIO.LOW)
@@ -55,17 +113,59 @@ class hwio :
         self.speakers = [50,50,50]
         # Open SELF.SPI bus
         self.spi = spidev.SpiDev()
-        self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'GPIOEX1A', 'GPIOEX1B']
-        self.GPIOEX1A = 0
-        self.GPIOEX1B = 0
-        self.haveIO = True
+        self.CH1CTL = 0
+        self.CH2CTL = 0
+        self.CH3CTL = 0
+        self.haveIO = {GPIOEX1:True, GPIOEX2:True, GPIOEX3:True, GPIOEX4:True}
+        self.iodirA = 0xff
+        self.iodirB = 0xff
+        self.ovalA = 0
+        self.ovalB = 0
+        self.ivalA = 0xff
+        self.ivalB = 0xff
+        self.intconA = 0
+        self.intconB = 0
+        self.arate = 10
+        self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'CH1CTL', 'CH2CTL', 'CH3CTL'
+                        'iodirA', 'ovalA', 'iodirB', 'ovalB', 'arate']
+        self.intRun = threading.event
         self.i2cBus = smbus.SMBus(1)
+        # IOEX1 is the controls for radio port 1 
         try:
-            self.i2cBus.write_byte_data(GPIOEX1, IODIRA, 0) # port A as output
-            self.i2cBus.write_byte_data(GPIOEX1, IODIRB, 0) # port B as output
+            self.i2cBus.write_byte_data(GPIOEX1, IODIR,0) # port as output
         except:
-            self.haveIO = False
-
+            self.haveIO[GPIOEX1] = False
+        # IOEX2 is the controls for radio port 2 
+        try:
+            self.i2cBus.write_byte_data(GPIOEX2, IODIR,0) # port as output
+        except:
+            self.have[GPIOEX2] = False
+        # IOEX3 is the port 2 and sound card control
+        try:
+            self.i2cBus.write_byte_data(GPIOEX3, IODIR,0) # port as output
+        except:
+            self.haveIO[GPIOEX3] = False
+        # IOEX4 is the User IO and has interupt expansion
+        try:
+            self.i2cBus.write_byte_data(GPIOEX4, IODIRA,self.iodirA) # port A as input
+            self.i2cBus.write_byte_data(GPIOEX4, IODIRB,self.iodirB) # port B as input
+        except:
+            self.haveIO[GPIOEX4] = False
+        if(self.haveIO[GPIOEX4]) :
+            self.i2cBus.write_byte_data(GPIOEX4, GPINTENA,0) # default disable any interupts
+            self.i2cBus.write_byte_data(GPIOEX4, GPINTENB,0)
+            GPIO.setup([UINTA,UINTB], GPIO.IN)
+            GPIO.add_event_detect(UINTA, GPIO.RISING, callback=self.uinta)
+            GPIO.add_event_detect(UINTB, GPIO.RISING, callback=self.uintb)
+        # set up adc channels
+        adc = [adcChan(self.spi,0,(2.048/1024.0),0,2),
+               adcChan(self.spi,1,(20.48/1024.0),12.4,13.6),
+               adcChan(self.spi,2,(20.48/1024.0),0,20),
+               adcChan(self.spi,3,(20.48/1024.0),0,20),
+               adcChan(self.spi,4,(20.48/1024.0),0,20),
+               adcChan(self.spi,5,(20.48/1024.0),0,20),
+               adcChan(self.spi,6,(100.0/1024.0),0,20),
+               adcChan(self.spi,7,(20.48/1024.0),11.0,13.9)]
     def splitBits(self,val) :
         v0 = val & 1
         v1 = (val >> 1) & 1 
@@ -180,11 +280,19 @@ class hwio :
             outval = baseVal &  ~maskbit & 0xff
         return outval
     def i2cSafeWrite(self,busaddr,regaddr,val) :
-        if (self.haveIO) :
+        if (self.haveIO[busaddr]) :
             try: 
                 self.i2cBus.write_byte_data(busaddr, regaddr, val)
             except:
                 pass
+    def i2cSafeRead(self,busaddr,regaddr) :
+        val = 0xff
+        if (self.haveIO[busaddr]) :
+            try: 
+                val = self.i2cBus.read_byte_data(busaddr, regaddr)
+            except:
+                pass
+        return(val)
     def init_all(self) :
         for r in range(8) :
             self.WriteRes(r,self.vals[r],0)
@@ -197,29 +305,30 @@ class hwio :
                 
             self.WritePGAChan(chan,p+5,0)
             self.WritePGAGain(self.gain[p][chan],p+5,0)
-        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.rx.deemp,4)
-        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.rx.descEn,5)
-        self.GPIOEX1A = self.getBit(self.GPIOEX1A,self.top.port1.rx.portDet,6)
-        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.rx.deemp,4)
-        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.rx.descEn,5)
-        self.GPIOEX1B = self.getBit(self.GPIOEX1B,self.top.port2.rx.portDet,6)
-        self.i2cSafeWrite(GPIOEX1, GPIOA, self.GPIOEX1A) # port A default values
-        self.i2cSafeWrite(GPIOEX1, GPIOB, self.GPIOEX1B) # port B default values
+        self.CH1CTL = self.getBit(self.CH1CTL,self.top.port1.rx.deemp,4)
+        self.CH1CTL = self.getBit(self.CH1CTL,self.top.port1.rx.descEn,5)
+        self.CH1CTL = self.getBit(self.CH1CTL,self.top.port1.rx.portDet,6)
+        self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.deemp,4)
+        self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.descEn,5)
+        self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.portDet,6)
+        self.i2cSafeWrite(GPIOEX1, GPIO, self.CH1CTL) # chanel 1 default values
+        self.i2cSafeWrite(GPIOEX2, GPIO, self.CH2CTL) # chanel 2 default values
+        self.i2cSafeWrite(GPIOEX3, GPIO, self.CH3CTL) # chanel 3 default values
 
     def muteUnmute(self,port,link,en) :
         maskbit = 1<< link
         if(port == 1) :
             if (en) :
-                self.GPIOEX1A = self.GPIOEX1A | maskbit
+                self.CH1CTL = self.CH1CTL | maskbit
             else:
-                self.GPIOEX1A = self.GPIOEX1A &  ~maskbit
-            self.i2cSafeWrite(GPIOEX1, GPIOA, self.GPIOEX1A)
+                self.CH1CTL = self.CH1CTL &  ~maskbit
+            self.i2cSafeWrite(GPIOEX1, GPIO, self.CH1CTL)
         elif (port ==2) :
             if (en) :
-                self.GPIOEX1B = self.GPIOEX1B | maskbit
+                self.CH2CTL = self.CH2CTL | maskbit
             else:
-                self.GPIOEX1B = self.GPIOEX1B &  ~maskbit
-            self.i2cSafeWrite(GPIOEX1, GPIOB, self.GPIOEX1B)
+                self.CH2CTL = self.CH2CTL &  ~maskbit
+            self.i2cSafeWrite(GPIOEX2, GPIO, self.CH2CTL)
         else :
             print( "Error Bad port number to mute or unmute")
 
@@ -252,3 +361,190 @@ class hwio :
     def linkVoteClr(self, port, link) :
         pass
     
+    def updateMask(self,val,bp,bv) :
+        amask = ~(1<<bp) & 0xff
+        omask = bv<<bp &0xff
+        return(val & amask | omask)
+    def setup(self,pins, direction):
+        if type(pins) is not list :
+            pins = list(pins)
+        updateA = False
+        updateB = False
+        for pin in pins :
+            if(pin >=GPA0 and pin <=GPA7 ) :
+                self.iodirA = self.updateMask(self.iodirA,pin,direction)
+                updateA = True
+            elif(pin >=GPB0 and pin <=GPB7 ) :
+                pin = pin - GPB0
+                self.iodirB = self.updateMask(self.iodirB,pin,direction)
+                updateB = True
+            else:
+                print("Ilegal HWIO pin for SETUP %d" % pin)
+        if updateA :
+            self.i2cSafeWrite(GPIOEX4, IODIRA,self.iodirA)
+        if updateB :
+            self.i2cSafeWrite(GPIOEX4, IODIRB,self.iodirB)
+    def output(self, pins, vals):
+        if type(pins) is not list :
+            pins = list(pins)
+        len = len(pins)
+        if type(vals) is not list :
+            vals = [val for number in range(len)]
+        updateA = False
+        updateB = False
+        for n in range(len) :
+            pn = pins[n]
+            pv = vals[n]
+            if(pin >=GPA0 and pin <=GPA7 ) :
+                self.ovalA = self.updateMask(self.ovalA,pn,pv)
+                updateA = True
+            elif(pin >=GPB0 and pin <=GPB7 ) :
+                pn = pn - GPB0
+                self.ovalB = self.updateMask(self.ovalB,pn,pv)
+                updateB = True
+            else:
+                print("Ilegal HWIO pin for OUTPUT %d" % pin)
+        if updateA :
+            self.i2cSafeWrite(GPIOEX4, GPIOA,self.ovalA)
+        if updateB :
+            self.i2cSafeWrite(GPIOEX4, GPIOB,self.ovalB)
+    def getival(self,pin) :
+        return((self.ival>>pin) &1)
+    def input(self,pins):
+        if type(pins) is not list :
+            pinlist = list(pins)
+        updateA = False
+        updateB = False
+        for pin in pinlist :
+            if(pin >=GPA0 and pin <=GPA7 ) :
+                updateA = True
+            elif(pin >=GPB0 and pin <=GPB7 ) :
+                pin = pin - GPB0
+                updateB = True
+            else:
+                print("Ilegal HWIO pin for input %d" % pin)
+        if updateA :
+            self.ivalA = self.i2cSafeRead(GPIOEX4, GPIOA) & 0xff
+        if updateB :
+            self.ivalB = self.i2cSafeRead(GPIOEX4, GPIOB) & 0xff
+        self.ival = self.valB <<8 | self.ivalA
+        if type(pins) is not list :
+            return(self.getival(pins))
+        else :
+            rv=[]
+            for pin in pinlist :
+                rv.append(self.getival(pin))
+            return(rv)
+
+    def add_event_detect(self,pin,intdir,callback=None) :
+        if(pin >=GPA0 and pin <=GPA7 ) :
+            self.intconA = self.getBit(self.intconA,1,pin)
+            self.userfuncs[pin] = callback
+            self.i2cSafeWrite(GPIOEX4,INTCONA,self.intconA)
+        elif(pin >=GPB0 and pin <=GPB7 ) :
+            self.intconB = self.getBit(self.intconB,1,pin-8)
+            self.userfuncs[pin] = callback
+            self.i2cSafeWrite(GPIOEX4,INTCONB,self.intconB)
+        else:
+            print("Ilegal HWIO pin for add_event_detect %d" % pin)
+            
+
+    def remove_event_detect(self,pin) :
+        if(pin >=GPA0 and pin <=GPA7 ) :
+            self.intconA = self.getBit(self.intconA,0,pin)
+            self.userfuncs[pin] = None
+            self.i2cSafeWrite(GPIOEX4,INTCONA,self.intconA)
+        elif(pin >=GPB0 and pin <=GPB7 ) :
+            self.intconB = self.getBit(self.intconB,0,pin-8)
+            self.userfuncs[pin] = None
+            self.i2cSafeWrite(GPIOEX4,INTCONB,self.intconB)
+        else:
+            print("Ilegal HWIO pin for remove_event_detect %d" % pin)
+
+    def uinta(self) :
+        val = self.i2cSafeRead(GPIOEX4,INTFA)
+        self.intf = self.intf | val
+        self.intRun.set()
+    def uintb(self) :
+        val = self.i2cSafeRead(GPIOEX4,INTFB)
+        self.intf = self.intf | (val <<8)
+        self.intRun.set()
+
+    def runUInts(self) :
+        while True :
+            self.intRun.wait()
+            while (self.intf != 0) :
+                for i in range(16) :
+                    if (self.intf & 1<<i) :
+                        if callable self.userfuncs[i] :
+                            self.userfuncs[i]
+                        self.intf = getBit(self.intf,0,i)
+    def runAdc(self) :
+        while(True) :
+            time.sleep(arate)
+            for c in range(8) :
+                self.adc[n].measure()
+            #Force GPIO reads before logging
+            dummy = self.input([GPA0,GPB0])
+            self.csvLog("normal")
+
+    def csvlog(self,msg) :
+        dt = datetime.datetime.now()
+        ls = dt.strftime("%B %d, %Y %I:%M:%S%p")
+        logfn = os.path.join(self.top.localPath,"log.csv")
+        for i in range(8) :
+            ls = ls + ",%0.2f" % self.adc[i].val
+        for i in range(8) :
+            ls = ls + ",%d" %((self.ivalA>>i) &1)
+        for i in range(8) :
+            ls = ls + ",%d" %((self.ivalB>>i) &1)
+        ls = ls + "," + msg + "\n"
+        if os.path.exists(self.top.localPath) :
+            log = open(logfn,"a")
+            a.write(ls)
+            a.close
+                    
+
+class adcChan :
+    def __init__ (self,spi,chan,scale,llimit,hlimit,updateFunc=None, underFunc=None, overFunc=None, nomFunc=None) :
+        self.spi = spi
+        self.chan = chan
+        self.scale = scale
+        self.llimit = llimit
+        self.hlimit = hlimit
+        self.updateFunc = updateFunc
+        self.underFunc = underFunc
+        self.overFunc = overFunc
+        self.nomFunc = nomFunc
+        self.state = None
+        self.HiEdge = True
+        self.LoEdge = True
+        self.nomEdge = True
+        if chan > 7 or chan < 0 :
+            print "Error bad adc channel number must be 0-7"
+            return -1
+    def measure(self) :
+        GPIO.output(self.selPins, self.splitBits(ADCSS))
+        self.spi.open(0,bus)
+        r = self.spi.xfer2([1, 8 + self.chan << 4, 0])
+        self.spi.close()
+        data = ((r[1] & 3) << 8) + r[2]
+        self.val = (float(data) * self.scale)
+        if(callable(self.updateFunc)) :
+            self.updateFunc()
+        if( self.val < self.llimit ) :
+            if(self.state != 'low' or not self.loEdge) :
+                self.state = 'low'
+                if(callable(self.underFunc)) :
+                    self.underFunc()
+        elif (self.val > self.hlimit ) :
+            if(self.state != 'high' or not self.hiEdge) :
+                self.state = 'high'
+                if(callable(self.overFunc)) :
+                    self.overerFunc()
+        else :
+            if(self.state != 'nom' or not self.nomEdge) :
+                self.state = 'nom'
+                if(callable(self.nomFunc)) :
+                    self.nomFunc()
+        return ( self.val )

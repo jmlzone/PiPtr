@@ -44,6 +44,12 @@ def rptDown(port):
     GPIO.cleanup()
     exit(-1)
 
+def rptOn(port):
+    port.rx.disabled = False
+def rptOff(port):
+    port.rx.disabled = True
+    port.tx.down()
+    
 def setLinkState(port,arg) :
     port.linkState = arg # should probably queue some message
     if(arg == 0) :
@@ -62,6 +68,8 @@ def talkingClock(card,prefix = 'its'):
     os.environ['ALSA_CARD'] = device
     subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
+def tailClock(port) :
+    port.tx.addTailMsg(talkingClock,port.card)
 
 # command table.
 # the command table can be in the format of the long list or you can add things like shown at the end.
