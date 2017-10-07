@@ -36,8 +36,13 @@ GPB4 = 12
 GPB5 = 13
 GPB6 = 14
 GPB7 = 15
+# HWIO directions
 INPUT = 1
 OUTPUT = 0
+# interupt directions same as GPIO
+RISING = 31
+FALLING = 32
+BOTH = 33
 
 """ MCP23008 Register names
 """
@@ -95,6 +100,7 @@ BANK   = 1<<7 # Keep as zero or address map is different
 UINTA = 8
 UINTB = 10
 ADCSS = 7
+
 class hwio :
     def __init__ (self,top) :
         self.top = top
