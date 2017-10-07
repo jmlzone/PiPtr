@@ -62,7 +62,7 @@ class rptFsm :
         self.rxResetTimer = gpTimer(self.port.rx.resetTimeout, userHandler = self.rxTimerStop)
         self.rxIdleTimer = gpTimer(self.port.rx.IdleTimeout, userHandler = self.idleTimeout)
         self.cmdTimer = gpTimer(self.port.rx.cmdTimeout, userHandler = self.cmdTimeout)
-        self.muteTimer = gptimer(self.port.rx.muteTime, userHandler = self.muteTimeout))
+        self.muteTimer = gpTimer(self.port.rx.muteTime, userHandler = self.muteTimeout)
         self.linkVotes = 0
 
         self.lock = threading.Lock()
