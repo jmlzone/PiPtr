@@ -124,7 +124,7 @@ class hwio :
         self.ivalB = 0xff
         self.intconA = 0
         self.intconB = 0
-        self.arate = 10
+        self.arate = 300
         self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'CH1CTL', 'CH2CTL', 'CH3CTL'
                         'iodirA', 'ovalA', 'iodirB', 'ovalB', 'arate']
         self.intRun = threading.Event()
