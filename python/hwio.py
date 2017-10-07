@@ -310,24 +310,25 @@ class hwio :
         self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.deemp,4)
         self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.descEn,5)
         self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.portDet,6)
-        self.i2cSafeWrite(GPIOEX1, GPIO, self.CH1CTL) # chanel 1 default values
-        self.i2cSafeWrite(GPIOEX2, GPIO, self.CH2CTL) # chanel 2 default values
-        self.i2cSafeWrite(GPIOEX3, GPIO, self.CH3CTL) # chanel 3 default values
+        self.i2cSafeWrite(GPIOEX1, GPIOR, self.CH1CTL) # chanel 1 default values
+        self.i2cSafeWrite(GPIOEX2, GPIOR, self.CH2CTL) # chanel 2 default values
+        self.i2cSafeWrite(GPIOEX3, GPIOR, self.CH3CTL) # chanel 3 default values
 
     def muteUnmute(self,port,link,en) :
+        #print("muteUnmute:: Port %d, Link %d, en %d" %(port,link,en))
         maskbit = 1<< link
         if(port == 1) :
             if (en) :
                 self.CH1CTL = self.CH1CTL | maskbit
             else:
                 self.CH1CTL = self.CH1CTL &  ~maskbit
-            self.i2cSafeWrite(GPIOEX1, GPIO, self.CH1CTL)
+            self.i2cSafeWrite(GPIOEX1, GPIOR, self.CH1CTL)
         elif (port ==2) :
             if (en) :
                 self.CH2CTL = self.CH2CTL | maskbit
             else:
                 self.CH2CTL = self.CH2CTL &  ~maskbit
-            self.i2cSafeWrite(GPIOEX2, GPIO, self.CH2CTL)
+            self.i2cSafeWrite(GPIOEX2, GPIOR, self.CH2CTL)
         else :
             print( "Error Bad port number to mute or unmute")
 
