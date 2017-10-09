@@ -43,7 +43,9 @@ OUTPUT = 0
 RISING = 31
 FALLING = 32
 BOTH = 33
-
+PUD_UP = 22
+PUD_OFF = 20
+# the MCP23017 does not have a pull down
 """ MCP23008 Register names
 """
 IODIR    = 0
@@ -126,6 +128,8 @@ class hwio :
         self.iodirB = 0xff
         self.ovalA = 0
         self.ovalB = 0
+        self.gppuA = 0
+        self.gppuB = 0
         self.ivalA = 0xff
         self.ivalB = 0xff
         self.intconA = 0
@@ -371,25 +375,44 @@ class hwio :
         amask = ~(1<<bp) & 0xff
         omask = bv<<bp &0xff
         return(val & amask | omask)
-    def setup(self,pins, direction):
+    def setup(self,pins, direction, pull_up_down=PUD_OFF, initial=None):
         if type(pins) is not list :
             pins = [pins]
+        plen = len(pins)
+        if type(pull_up_down) is not list:
+            pull_up_down = [pull_up_down  for number in range(plen)]
+        if ((initial is not None) and (type(initial) is not list)) :
+            initial = [initial for number in range(plen)]
         updateA = False
         updateB = False
-        for pin in pins :
+        for n in range(plen) :
+            pin = pins[n]
+            pu = pull_up_down[n]
             if(pin >=GPA0 and pin <=GPA7 ) :
                 self.iodirA = self.updateMask(self.iodirA,pin,direction)
+                self.gppuA = self.updateMask(self.gppuA,pin,pu)
+                if(initial is not None) :
+                    self.ovalA =  self.updateMask(self.ovalA,pin,initial[n])
                 updateA = True
             elif(pin >=GPB0 and pin <=GPB7 ) :
                 pin = pin - GPB0
                 self.iodirB = self.updateMask(self.iodirB,pin,direction)
+                self.gppuB = self.updateMask(self.gppuB,pin,pu)
+                if(initial is not None) :
+                    self.ovalB =  self.updateMask(self.ovalB,pin,initial[n])
                 updateB = True
             else:
                 print("Ilegal HWIO pin for SETUP %d" % pin)
         if updateA :
             self.i2cSafeWrite(GPIOEX4, IODIRA,self.iodirA)
+            self.i2cSafeWrite(GPIOEX4, GPPUA,self.gppuA)
+            if(initial is not None) :
+                self.i2cSafeWrite(GPIOEX4, GPIOA,self.ovalA)
         if updateB :
             self.i2cSafeWrite(GPIOEX4, IODIRB,self.iodirB)
+            self.i2cSafeWrite(GPIOEX4, GPPUB,self.gppuB)
+            if(initial is not None) :
+                self.i2cSafeWrite(GPIOEX4, GPIOB,self.ovalB)
     def output(self, pins, vals):
         if type(pins) is not list :
             pins = [pins]
