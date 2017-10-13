@@ -71,6 +71,59 @@ def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
 def tailClock(port) :
     port.tx.addTailMsg(talkingClock,{'format': "%I %M %p"},True,False,False,None)
 
+def badCmd(port) :
+    resp = "I did not undertsnad the command on port %d" % (port.portnum)
+    port.tx.addTailMsg(['/usr/bin/espeak'],resp,False,False,False,None)
+    port.tx.addTailMsg([port.localPath('../bin/mout')],[ '20', '660', '5000', "bad"],True,False,False,None)
+
+def cmdMode(port) :
+    port.fsm.cmdOn
+    resp = "Set port %d Command mode on" % (port.portnum)
+    port.tx.addTailMsg(['/usr/bin/espeak'],resp,False,False,False,None)
+    print("Command Mode")
+    sys.stdout.flush()
+
+def setHwioIn(port,arg) :
+    if(arg <0 or arg >7) :
+        badCmd(port)
+    else :
+        resp = "Set port %d bit %d to input" % (port.portnum,arg)
+        port.tx.addTailMsg(['/usr/bin/espeak'],resp,False,False,False,None)
+        if(port.portnum ==2) :
+            arg = arg+8
+        hwio.setup(arg,1,pull_up_down=1)
+        port.tx.addTailMsg([port.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+def setHwioOut(port,arg) :
+    if(arg <0 or arg >7) :
+        badCmd(port)
+    else :
+        resp = "Set port %d bit %d to output" % (port.portnum,arg)
+        port.tx.addTailMsg(['/usr/bin/espeak'],resp,False,False,False,None)
+        if(port.portnum ==2) :
+            arg = arg+8
+        hwio.setup(arg,0,initial=0)
+        port.tx.addTailMsg([port.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+def hwioOut0(port,arg) :
+    if(arg <0 or arg >7) :
+        badCmd(port)
+    else :
+        resp = "Set port %d bit %d low" % (port.portnum,arg)
+        port.tx.addTailMsg(['/usr/bin/espeak'],resp,False,False,False,None)
+        if(port.portnum ==2) :
+            arg = arg+8
+        hwio.output(arg,0)
+        port.tx.addTailMsg([port.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+def hwioOut1(port,arg) :
+    if(arg <0 or arg >7) :
+        badCmd(port)
+    else :
+        resp = "Set port %d bit %d high" % (port.portnum,arg)
+        port.tx.addTailMsg(['/usr/bin/espeak'],resp,False,False,False,None)
+        if(port.portnum ==2) :
+            arg = arg+8
+        hwio.output(arg,1)
+        port.tx.addTailMsg([port.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+
 # command table.
 # the command table can be in the format of the long list or you can add things like shown at the end.
 #
@@ -82,6 +135,11 @@ cmdlist = cmdlist + [("DDDDD", "rptDown")]
 cmdlist = cmdlist + [("2337(\d)", "beepMethod")]
 cmdlist = cmdlist + [("5465(\d)", "linkBoth")]
 cmdlist = cmdlist + [("84$", "tailClock")]
+cmdlist = cmdlist + [("CCCC$", "cmdMode")]
+cmdlist = cmdlist + [("1011(\d)", "setHwioIn")]
+cmdlist = cmdlist + [("1010(\d)", "setHwioOut")]
+cmdlist = cmdlist + [("1001(\d)", "hwioOut1")]
+cmdlist = cmdlist + [("1000(\d)", "hwioOut0")]
 
 # command processor
 def cmdprocess (q,port) :
