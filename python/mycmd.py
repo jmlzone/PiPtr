@@ -59,9 +59,9 @@ def linkBoth(port,arg) :
     setLinkState(port,arg)
     setLinkState(port.other,arg)
     
-def talkingClock(card,prefix = 'its'):
+def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
     dt = datetime.datetime.now()
-    ds = dt.strftime("%I %M %p, %A %B %_d")
+    ds = dt.strftime(format)
     myTime = prefix + " "+ ds
 #    device = string.replace(card,'sysdefault:CARD=','')
     device = card.replace('sysdefault:CARD=','')
@@ -69,7 +69,7 @@ def talkingClock(card,prefix = 'its'):
     subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
 def tailClock(port) :
-    port.tx.addTailMsg(talkingClock,port.card)
+    port.tx.addTailMsg(talkingClock,{'format': "%I %M %p"},True,False,False,None)
 
 # command table.
 # the command table can be in the format of the long list or you can add things like shown at the end.
@@ -81,6 +81,7 @@ cmdlist = cmdlist + [("123(\d+)", "cmdWithArg")] # rexexp type argument needed 1
 cmdlist = cmdlist + [("DDDDD", "rptDown")]
 cmdlist = cmdlist + [("2337(\d)", "beepMethod")]
 cmdlist = cmdlist + [("5465(\d)", "linkBoth")]
+cmdlist = cmdlist + [("84$", "tailClock")]
 
 # command processor
 def cmdprocess (q,port) :

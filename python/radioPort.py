@@ -109,15 +109,21 @@ class tx:
             # run it
             if(not self.cancel or not cancelable) :
                 # realy run it
-                args = method + [self.port.card] + msg
-                print("tail message play: (args)")
-                print(args)
                 try:
                     print("Play messages Trying")
-                    print(args)
                     if(callable(method)) :
-                        method(self.port.card,msg)
+                        print("Play messages direct call")
+                        if(type(msg) == type(dict())) :
+                            print("with dictionary")
+                            method(self.port.card,**msg)
+                        else:
+                            print("without dictionary")
+                            method(self.port.card,msg)
                     else :
+                        print("Play messages external call")
+                        args = method + [self.port.card] + msg
+                        print("tail message play: (args)")
+                        print(args)
                         self.pid = subprocess.Popen(args)
                         self.pid.wait()
                 except:
