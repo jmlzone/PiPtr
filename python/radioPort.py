@@ -213,12 +213,14 @@ class rx:
             self.ctcssPin = 13
             self.corState=self.port.globalState.cor1.setValue
             self.ctcssState=self.port.globalState.ctcss1.setValue
+            self.cmdState=self.port.globalState.cmd1.setValue
             self.softCtcssState=self.port.globalState.softCtcss1.setValue
         else :
             self.corPin = 16
             self.ctcssPin = 18
             self.corState=self.port.globalState.cor2.setValue
             self.ctcssState=self.port.globalState.ctcss2.setValue
+            self.cmdState=self.port.globalState.cmd2.setValue
             self.softCtcssState=self.port.globalState.softCtcss2.setValue
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.ctcssPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -271,13 +273,21 @@ class rx:
                     self.q.put(" ")
             self.rxState = rx
         if(ctcssCmd) :
-           self.cmdMode = True
+           self.cmdModeSet()
            self.port.fsm.cmdTimer.reset()
         self.port.fsm.updateRx(rx)
         #self.port.gui.updateRxGui(self.port.portnum,(GPIO.input(self.corPin) == self.corPinLvl),
         #            (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),self.ctcssAct)
         self.corState(GPIO.input(self.corPin) == self.corPinLvl)
         self.ctcssState(GPIO.input(self.ctcssPin) == self.ctcssPinLvl)
+    def cmdModeSet(self):
+        if(not self.cmdMode) :
+            self.cmdState(True,'yellow')
+            self.cmdMode = True
+    def cmdModeClr(self):
+        if(self.cmdMode) :
+            self.cmdState(False,'yellow')
+            self.cmdMode = False
     def softDecode (self,q):
         mmPath = self.port.tx.localPath('../bin/multimon')
         logit("Port %d : starting multimon %s" % (self.port.portnum, mmPath)) 

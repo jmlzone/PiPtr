@@ -61,7 +61,7 @@ class rptFsm :
         self.rxTimer = gpTimer(self.port.rx.timeout, userHandler = self.rxTo)
         self.rxResetTimer = gpTimer(self.port.rx.resetTimeout, userHandler = self.rxTimerStop)
         self.rxIdleTimer = gpTimer(self.port.rx.IdleTimeout, userHandler = self.idleTimeout)
-        self.cmdTimer = gpTimer(self.port.rx.cmdTimeout, userHandler = self.cmdTimeout)
+        self.cmdTimer = gpTimer(self.port.rx.cmdTimeout, userHandler = self.cmdTimeout_cb)
         self.muteTimer = gpTimer(self.port.rx.muteTime, userHandler = self.muteTimeout)
         self.linkVotes = 0
 
@@ -247,11 +247,11 @@ class rptFsm :
             logit("Port %d idle Time Out queued Idle message" % self.port.portnum)
             self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], [self.port.idleWav], True, True, False, None)
 
-    def cmdTimeout(self) :
-        self.port.rx.cmdMode = False
+    def cmdTimeout_cb(self) :
+        self.port.rx.cmdModeClr()
     def cmdOn(self) :
         self.port.fsm.cmdTimer.reset()
-        self.port.rx.cmdMode = True
+        self.port.rx.cmdModeSet()
         #self.port.tx.addTailMsg(['/usr/bin/aplay', '-D'], ["enterCmd.wav"], True, True, False, None)
 
     def muteTimeout(self) :
