@@ -105,7 +105,7 @@ logit("Load XML Done")
 if(gui.gui) :
     gui.init()
 hwio.init_all()
-#fp.connect()
+fp.connect()
 if(port1.enabled) :
     p1 = threading.Thread(target=port1.run)
     p1.daemon = True

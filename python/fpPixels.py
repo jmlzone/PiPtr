@@ -4,7 +4,7 @@ from neopixel import *
 from rptFsm import gpTimer
 import re
 # LED strip configuration:
-LED_COUNT      = 60      # Number of LED pixels.
+LED_COUNT      = 24      # Number of LED pixels.
 LED_PIN        = 21      # GPIO pin connected to the pixels (18 uses PWM!).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
 LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
@@ -20,9 +20,9 @@ class fpPixels :
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
         self.state=state
-        self.leds = {'cor1':0, 'ctcss1':1, 'softCtcss1':2, 'tx1':10,
-                     'cor2':12, 'ctcss2':13, 'softCtcss2':14, 'tx2':22}
-        self.refreshTimer = gpTimer(0.01,self.refresh)
+        self.leds = {'cor1':0,  'ctcss1':1,  'cmd1':2,  'softCtcss1':3,  'tx1':11,
+                     'cor2':12, 'ctcss2':13, 'cmd2':14, 'softCtcss2':15, 'tx2':23}
+        self.refreshTimer = gpTimer(0.03,self.refresh)
         fi = "/usr/share/X11/rgb.txt"
         rgbExp = re.compile('\s*(\d+)\s+(\d+)\s+(\d+)\s+(.*)')
         f = open(fi,'r')
@@ -54,7 +54,7 @@ class fpPixels :
         self.strip.setPixelColor(led,value)
         self.refreshTimer.run()
     def refresh(self) :
-        """ called from timer threah when the timer expires to gater all events in a 10 ms range
+        """ called from timer thread when the timer expires to gater all events in a 30 ms range
         """
         self.strip.show()
         self.refreshTimer.expired = True
@@ -62,10 +62,12 @@ class fpPixels :
     def connect(self) :
          self.state.cor1.addCallback(self.updateItem)
          self.state.ctcss1.addCallback(self.updateItem)
+         self.state.cmd1.addCallback(self.updateItem)
          self.state.softCtcss1.addCallback(self.updateArray)
          self.state.tx1.addCallback(self.updateItem)
          self.state.cor2.addCallback(self.updateItem)
          self.state.ctcss2.addCallback(self.updateItem)
+         self.state.cmd2.addCallback(self.updateItem)
          self.state.softCtcss2.addCallback(self.updateArray)
          self.state.tx2.addCallback(self.updateItem)
     def updateItem(self,name,value,color=None) :
