@@ -23,6 +23,7 @@ class fpPixels :
         self.leds = {'cor1':0,  'ctcss1':1,  'cmd1':2,  'softCtcss1':3,  'tx1':11,
                      'cor2':12, 'ctcss2':13, 'cmd2':14, 'softCtcss2':15, 'tx2':23}
         self.refreshTimer = gpTimer(0.03,self.refresh)
+        self.running = False # to prevent reentrance from multiple threads
         fi = "/usr/share/X11/rgb.txt"
         rgbExp = re.compile('\s*(\d+)\s+(\d+)\s+(\d+)\s+(.*)')
         f = open(fi,'r')
@@ -42,7 +43,8 @@ class fpPixels :
     def clear (self) :
         for i in range(LED_COUNT) :
             self.strip.setPixelColor(i,0)
-        self.strip.show()
+        #self.strip.show()
+        self.refreshTimer.run()
 
     def setColorByName (self,led,name) :
         cname = name.lower().replace(" ","")
@@ -56,7 +58,10 @@ class fpPixels :
     def refresh(self) :
         """ called from timer thread when the timer expires to gater all events in a 30 ms range
         """
-        self.strip.show()
+        if not self.running:
+            self.running = True
+            self.strip.show()
+            self.running = False
         self.refreshTimer.expired = True
         self.refreshTimer.isrunning = False
     def connect(self) :
