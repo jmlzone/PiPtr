@@ -208,6 +208,9 @@ class rx:
         self.softCtcssCmd   = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.cmdMode = False
         self.audioEnable = True
+        self.defMorseWpm = 20
+        self.defMorseTone = 660
+        self.defMorseVolume = 5000
         if(self.port.portnum == 1) :
             self.corPin = 11
             self.ctcssPin = 13
@@ -229,7 +232,8 @@ class rx:
                         'useCtcssPin', 'ctcssPinLvl', 'useCorPin', 'corPinLvl',
                         'deemp', 'descEn', 'portDet',
                         'useSoftCtcss', 'softCtcssAllow', 'softCtcssCmd',
-                        'cmdMode', 'cmdTimeout', 'muteTime')
+                        'cmdMode', 'cmdTimeout', 'muteTime',
+                        'defMorseWpm','defMorseTone','defMorseVolume')
 
     def ctcss(self):
         if(GPIO.input(self.ctcssPin) == self.ctcssPinLvl) :

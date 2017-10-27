@@ -188,3 +188,50 @@ it acts globally or uses port context """
         else :
             port.cmd = port.cmd + tone
             print("Port" + str(port.portnum) + ": " + tone)
+
+#----------------------------------------------------------------------
+# Utility functions
+#----------------------------------------------------------------------
+def tailOrBeaconMorse(port,message,wpm=None,tone=None,vol=None, now=False):
+    if(wpm==None):
+        wpm = str(port.tx.defMorseWpm)
+    else:
+        wpm = str(wpm)
+    if(tone==None):
+        tone = str(port.tx.defMorseTone)
+    else:
+        tone = str(tone)
+    if(vol==None):
+        vol = str(port.tx.defMorseVolume)
+    else:
+        vol = str(vol)
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(["../bin/mout"],[ wpm, tone, vol, message],False,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(["../bin/mout"],[ wpm, tone, vol, message],False,False,False,None)
+ 
+def tailOrBeaconWave(port,waveFile, now=False):
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(['/usr/bin/aplay', '-D'],waveFile,False,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(['/usr/bin/aplay', '-D'],waveFile,False,False,False,None)
+
+def tailOrBeaconVoice(port,message, now=False):
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(say,message,False,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(say,message,False,False,False,None)
+
+def tailOrBeaconTime(port,message, now=False):
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(talkingClock,{'format': "%I %M %p", 'prefix': message},True,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(talkingClock,{'format': "%I %M %p"},True,False,False,None)
