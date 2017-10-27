@@ -1,3 +1,5 @@
 (fp_lib_table
   (lib (name lib)(type KiCad)(uri "$(KIPRJMOD)/lib.pretty")(options "")(descr ""))
+  (lib (name SeeedOPL-Connector-2016)(type KiCad)(uri C:/Users/ardai/Documents/kicad/Seeed_OPL_library/SeeedOPL-Connector-2016.pretty)(options "")(descr ""))
+  (lib (name SeeedOPL-IC-2016)(type KiCad)(uri C:/Users/ardai/Documents/kicad/Seeed_OPL_library/SeeedOPL-IC-2016.pretty)(options "")(descr ""))
 )
