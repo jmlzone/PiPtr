@@ -46,11 +46,16 @@ class tx:
         self.beepMethod = 2 # 0=none, 1=tone, 2=wave 3=morse
         self.beepTone = "660 5000 30 440 5000 30 1000 5000 30"
         self.tailBeepWav = self.localPath('../sounds/Tink.wav')
+        self.defMorseWpm = 20
+        self.defMorseTone = 660
+        self.defMorseVolume = 5000
         self.beepMorse = "20 440 5000 beep"
         self.xmlvars = ( 'pltone', 'id', 'idtime', 'polite', 'timeout',
                          'taildly', 'hangtime', 'disable', 'txupdly',
                          'txPinLvl', 'beepMethod', 'beepTone',
-                         'tailBeepWav', 'beepMorse') # data to store in xml config
+                         'tailBeepWav', 'beepMorse',
+                         'defMorseWpm','defMorseTone','defMorseVolume'
+                     ) # data to store in xml config
         self.up = False
 
     def localPath(self,file) :
@@ -208,9 +213,6 @@ class rx:
         self.softCtcssCmd   = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.cmdMode = False
         self.audioEnable = True
-        self.defMorseWpm = 20
-        self.defMorseTone = 660
-        self.defMorseVolume = 5000
         if(self.port.portnum == 1) :
             self.corPin = 11
             self.ctcssPin = 13
@@ -232,8 +234,7 @@ class rx:
                         'useCtcssPin', 'ctcssPinLvl', 'useCorPin', 'corPinLvl',
                         'deemp', 'descEn', 'portDet',
                         'useSoftCtcss', 'softCtcssAllow', 'softCtcssCmd',
-                        'cmdMode', 'cmdTimeout', 'muteTime',
-                        'defMorseWpm','defMorseTone','defMorseVolume')
+                        'cmdMode', 'cmdTimeout', 'muteTime')
 
     def ctcss(self):
         if(GPIO.input(self.ctcssPin) == self.ctcssPinLvl) :

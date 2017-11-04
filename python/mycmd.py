@@ -214,11 +214,11 @@ def tailOrBeaconMorse(port,message,wpm=None,tone=None,vol=None, now=False):
  
 def tailOrBeaconWave(port,waveFile, now=False):
     if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
-        port.tx.addBeaconMsg(['/usr/bin/aplay', '-D'],waveFile,False,False,False,None)
+        port.tx.addBeaconMsg(['/usr/bin/aplay', '-D'],[waveFile],False,False,False,None)
         if(now and port.fsm.rptState != 'beacon') :
             port.fsm.beacon()
     else:
-        port.tx.addTailMsg(['/usr/bin/aplay', '-D'],waveFile,False,False,False,None)
+        port.tx.addTailMsg(['/usr/bin/aplay', '-D'],[waveFile],False,False,False,None)
 
 def tailOrBeaconVoice(port,message, now=False):
     if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
@@ -234,4 +234,4 @@ def tailOrBeaconTime(port,message, now=False):
         if(now and port.fsm.rptState != 'beacon') :
             port.fsm.beacon()
     else:
-        port.tx.addTailMsg(talkingClock,{'format': "%I %M %p"},True,False,False,None)
+        port.tx.addTailMsg(talkingClock,{'format': "%I %M %p", 'prefix': message},True,False,False,None)

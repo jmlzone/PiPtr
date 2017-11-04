@@ -106,7 +106,7 @@ if(gui.gui) :
     gui.init()
 hwio.init_all()
 # commend out the fp.connect when no pixes to reduce load and hangs
-#fp.connect()
+fp.connect()
 if(port1.enabled) :
     p1 = threading.Thread(target=port1.run)
     p1.daemon = True
