@@ -105,7 +105,8 @@ logit("Load XML Done")
 if(gui.gui) :
     gui.init()
 hwio.init_all()
-#fp.connect()
+# commend out the fp.connect when no pixes to reduce load and hangs
+fp.connect()
 if(port1.enabled) :
     p1 = threading.Thread(target=port1.run)
     p1.daemon = True
@@ -124,6 +125,12 @@ if(port2.enabled) :
 #g = threading.Thread(target=gui.run)
 #g.daemon = True
 #g.start()
+hwioIThread = threading.Thread(target=hwio.runUInts)
+hwioIThread.daemon = True
+hwioIThread.start()
+hwioAThread = threading.Thread(target=hwio.runAdc)
+hwioAThread.daemon = True
+hwioAThread.start()
 cmdSockThread = threading.Thread(target=cmdSock.run)
 cmdSockThread.daemon = True
 cmdSockThread.start()

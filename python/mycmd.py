@@ -44,6 +44,12 @@ def rptDown(port):
     GPIO.cleanup()
     exit(-1)
 
+def rptOn(port):
+    port.rx.disabled = False
+def rptOff(port):
+    port.rx.disabled = True
+    port.tx.down()
+    
 def setLinkState(port,arg) :
     port.linkState = arg # should probably queue some message
     if(arg == 0) :
@@ -53,16 +59,87 @@ def linkBoth(port,arg) :
     setLinkState(port,arg)
     setLinkState(port.other,arg)
     
-def talkingClock(card,prefix = 'its'):
+def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
     dt = datetime.datetime.now()
-    ds = dt.strftime("%I %M %p, %A %B %_d")
+    ds = dt.strftime(format)
     myTime = prefix + " "+ ds
 #    device = string.replace(card,'sysdefault:CARD=','')
     device = card.replace('sysdefault:CARD=','')
     os.environ['ALSA_CARD'] = device
     subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
+def say(card,msg):
+    device = card.replace('sysdefault:CARD=','')
+    os.environ['ALSA_CARD'] = device
+    subprocess.call(['/usr/bin/espeak', msg], shell=False)
 
+def tailClock(port) :
+    port.tx.addTailMsg(talkingClock,{'format': "%I %M %p"},True,False,False,None)
+
+def badCmd(port) :
+    resp = "I did not undertsnad the command on port %d" % (port.portnum)
+    port.tx.addTailMsg(say,resp,False,False,False,None)
+    port.tx.addTailMsg([port.tx.localPath('../bin/mout')],[ '20', '660', '5000', "bad"],True,False,False,None)
+
+def cmdMode(port) :
+    port.fsm.cmdOn()
+    resp = "Set port %d Command mode on" % (port.portnum)
+    port.tx.addTailMsg(say,resp,False,False,False,None)
+    print("Command Mode")
+    sys.stdout.flush()
+
+def setHwioIn(port,arg) :
+    if(port.rx.cmdMode) :
+        if(arg <0 or arg >7) :
+            badCmd(port)
+        else :
+            resp = "Set port %d bit %d to input" % (port.portnum,arg)
+            port.tx.addTailMsg(say,resp,False,False,False,None)
+            if(port.portnum ==2) :
+                arg = arg+8
+            hwio.setup(arg,1,pull_up_down=1)
+            port.tx.addTailMsg([port.tx.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+def setHwioOut(port,arg) :
+    if(port.rx.cmdMode) :
+        if(arg <0 or arg >7) :
+            badCmd(port)
+        else :
+            resp = "Set port %d bit %d to output" % (port.portnum,arg)
+            port.tx.addTailMsg(say,resp,False,False,False,None)
+            if(port.portnum ==2) :
+                arg = arg+8
+            hwio.setup(arg,0,initial=0)
+            port.tx.addTailMsg([port.tx.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+def hwioOut0(port,arg) :
+    if(port.rx.cmdMode) :
+        if(arg <0 or arg >7) :
+            badCmd(port)
+        else :
+            resp = "Set port %d bit %d low" % (port.portnum,arg)
+            port.tx.addTailMsg(say,resp,False,False,False,None)
+            if(port.portnum ==2) :
+                arg = arg+8
+            hwio.output(arg,0)
+            port.tx.addTailMsg([port.tx.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+def hwioOut1(port,arg) :
+    if(port.rx.cmdMode) :
+        if(arg <0 or arg >7) :
+            badCmd(port)
+        else :
+            resp = "Set port %d bit %d high" % (port.portnum,arg)
+            port.tx.addTailMsg(say,resp,False,False,False,None)
+            if(port.portnum ==2) :
+                arg = arg+8
+            hwio.output(arg,1)
+            port.tx.addTailMsg([port.tx.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+def hwioIn(port,arg) :
+    if(port.rx.cmdMode) :
+        if(arg <0 or arg >7) :
+            badCmd(port)
+        else :
+            val = "high" if hwio.input(arg) else "low"
+            resp = "port %d bit %d is %s" % (port.portnum, arg, val)
+            port.tx.addTailMsg(say,resp,False,False,False,None)
 # command table.
 # the command table can be in the format of the long list or you can add things like shown at the end.
 #
@@ -73,6 +150,13 @@ cmdlist = cmdlist + [("123(\d+)", "cmdWithArg")] # rexexp type argument needed 1
 cmdlist = cmdlist + [("DDDDD", "rptDown")]
 cmdlist = cmdlist + [("2337(\d)", "beepMethod")]
 cmdlist = cmdlist + [("5465(\d)", "linkBoth")]
+cmdlist = cmdlist + [("84$", "tailClock")]
+cmdlist = cmdlist + [("CCCC$", "cmdMode")]
+cmdlist = cmdlist + [("1011(\d)", "setHwioIn")]
+cmdlist = cmdlist + [("1010(\d)", "setHwioOut")]
+cmdlist = cmdlist + [("1001(\d)", "hwioOut1")]
+cmdlist = cmdlist + [("1000(\d)", "hwioOut0")]
+cmdlist = cmdlist + [("1111(\d)", "hwioIn")]
 
 # command processor
 def cmdprocess (q,port) :
@@ -104,3 +188,50 @@ it acts globally or uses port context """
         else :
             port.cmd = port.cmd + tone
             print("Port" + str(port.portnum) + ": " + tone)
+
+#----------------------------------------------------------------------
+# Utility functions
+#----------------------------------------------------------------------
+def tailOrBeaconMorse(port,message,wpm=None,tone=None,vol=None, now=False):
+    if(wpm==None):
+        wpm = str(port.tx.defMorseWpm)
+    else:
+        wpm = str(wpm)
+    if(tone==None):
+        tone = str(port.tx.defMorseTone)
+    else:
+        tone = str(tone)
+    if(vol==None):
+        vol = str(port.tx.defMorseVolume)
+    else:
+        vol = str(vol)
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(["../bin/mout"],[ wpm, tone, vol, message],False,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(["../bin/mout"],[ wpm, tone, vol, message],False,False,False,None)
+ 
+def tailOrBeaconWave(port,waveFile, now=False):
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(['/usr/bin/aplay', '-D'],[waveFile],False,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(['/usr/bin/aplay', '-D'],[waveFile],False,False,False,None)
+
+def tailOrBeaconVoice(port,message, now=False):
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(say,message,False,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(say,message,False,False,False,None)
+
+def tailOrBeaconTime(port,message, now=False):
+    if(port.fsm.rptState == 'idle' or port.fsm.rptState == 'beacon' or port.fsm.rptState == 'TxTimeOut' ) :
+        port.tx.addBeaconMsg(talkingClock,{'format': "%I %M %p", 'prefix': message},True,False,False,None)
+        if(now and port.fsm.rptState != 'beacon') :
+            port.fsm.beacon()
+    else:
+        port.tx.addTailMsg(talkingClock,{'format': "%I %M %p", 'prefix': message},True,False,False,None)

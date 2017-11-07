@@ -1,0 +1,34 @@
+Drill report for /Users/jml/rpt/sch_pcb/PiPtr.kicad_pcb
+Created on Sunday, October 29, 2017 'AMt' 11:15:13 AM
+
+Copper Layer Stackup:
+    =============================================================
+    L1 :  F.Cu                      front
+    L2 :  In1.Cu                    inner1
+    L3 :  In2.Cu                    inner2
+    L4 :  B.Cu                      back
+
+
+Drill file 'PiPtr.drl' contains
+    plated through holes:
+    =============================================================
+    T1  0.40mm  0.016"  (456 holes)
+    T2  0.50mm  0.020"  (20 holes)
+    T3  0.51mm  0.020"  (2 holes)
+    T4  0.80mm  0.031"  (4 holes)
+    T5  0.81mm  0.032"  (7 holes)
+    T6  0.89mm  0.035"  (35 holes)
+    T7  1.02mm  0.040"  (99 holes)
+    T8  2.75mm  0.108"  (4 holes)
+    T9  3.15mm  0.124"  (6 holes)
+    T10  3.35mm  0.132"  (4 holes)
+
+    Total plated holes count 637
+
+
+Drill file 'PiPtr-NPTH.drl' contains
+    unplated through holes:
+    =============================================================
+    T1  3.00mm  0.118"  (2 holes)
+
+    Total unplated holes count 2

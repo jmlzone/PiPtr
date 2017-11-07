@@ -46,11 +46,16 @@ class tx:
         self.beepMethod = 2 # 0=none, 1=tone, 2=wave 3=morse
         self.beepTone = "660 5000 30 440 5000 30 1000 5000 30"
         self.tailBeepWav = self.localPath('../sounds/Tink.wav')
+        self.defMorseWpm = 20
+        self.defMorseTone = 660
+        self.defMorseVolume = 5000
         self.beepMorse = "20 440 5000 beep"
         self.xmlvars = ( 'pltone', 'id', 'idtime', 'polite', 'timeout',
                          'taildly', 'hangtime', 'disable', 'txupdly',
                          'txPinLvl', 'beepMethod', 'beepTone',
-                         'tailBeepWav', 'beepMorse') # data to store in xml config
+                         'tailBeepWav', 'beepMorse',
+                         'defMorseWpm','defMorseTone','defMorseVolume'
+                     ) # data to store in xml config
         self.up = False
 
     def localPath(self,file) :
@@ -109,14 +114,23 @@ class tx:
             # run it
             if(not self.cancel or not cancelable) :
                 # realy run it
-                args = method + [self.port.card] + msg
-                print("tail message play: (args)")
-                print(args)
                 try:
                     print("Play messages Trying")
-                    print(args)
-                    self.pid = subprocess.Popen(args)
-                    self.pid.wait()
+                    if(callable(method)) :
+                        print("Play messages direct call")
+                        if(type(msg) == type(dict())) :
+                            print("with dictionary")
+                            method(self.port.card,**msg)
+                        else:
+                            print("without dictionary")
+                            method(self.port.card,msg)
+                    else :
+                        print("Play messages external call")
+                        args = method + [self.port.card] + msg
+                        print("tail message play: (args)")
+                        print(args)
+                        self.pid = subprocess.Popen(args)
+                        self.pid.wait()
                 except:
                     print("error could not run the tail message")
             if(self.cancel and alt and self.pid.returncode() <0) :
@@ -180,7 +194,8 @@ class rx:
         self.timeout = 180     # seconds
         self.resetTimeout = 1 # seconds
         self.IdleTimeout = 600 # seconds
-        self.cmdTimeout = 600 # seconds
+        self.cmdTimeout = 10 # seconds
+        self.muteTime = 1 # seconds
         self.disabled = False
         self.expired = False
         self.idle = True
@@ -197,17 +212,20 @@ class rx:
         self.softCtcssAllow = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.softCtcssCmd   = [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.cmdMode = False
+        self.audioEnable = True
         if(self.port.portnum == 1) :
             self.corPin = 11
             self.ctcssPin = 13
             self.corState=self.port.globalState.cor1.setValue
             self.ctcssState=self.port.globalState.ctcss1.setValue
+            self.cmdState=self.port.globalState.cmd1.setValue
             self.softCtcssState=self.port.globalState.softCtcss1.setValue
         else :
             self.corPin = 16
             self.ctcssPin = 18
             self.corState=self.port.globalState.cor2.setValue
             self.ctcssState=self.port.globalState.ctcss2.setValue
+            self.cmdState=self.port.globalState.cmd2.setValue
             self.softCtcssState=self.port.globalState.softCtcss2.setValue
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.ctcssPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -216,7 +234,7 @@ class rx:
                         'useCtcssPin', 'ctcssPinLvl', 'useCorPin', 'corPinLvl',
                         'deemp', 'descEn', 'portDet',
                         'useSoftCtcss', 'softCtcssAllow', 'softCtcssCmd',
-                        'cmdMode', 'cmdTimeout')
+                        'cmdMode', 'cmdTimeout', 'muteTime')
 
     def ctcss(self):
         if(GPIO.input(self.ctcssPin) == self.ctcssPinLvl) :
@@ -260,13 +278,21 @@ class rx:
                     self.q.put(" ")
             self.rxState = rx
         if(ctcssCmd) :
-           self.cmdMode = True
+           self.cmdModeSet()
            self.port.fsm.cmdTimer.reset()
         self.port.fsm.updateRx(rx)
         #self.port.gui.updateRxGui(self.port.portnum,(GPIO.input(self.corPin) == self.corPinLvl),
         #            (GPIO.input(self.ctcssPin) == self.ctcssPinLvl),self.ctcssAct)
         self.corState(GPIO.input(self.corPin) == self.corPinLvl)
         self.ctcssState(GPIO.input(self.ctcssPin) == self.ctcssPinLvl)
+    def cmdModeSet(self):
+        if(not self.cmdMode) :
+            self.cmdState(True,'yellow')
+            self.cmdMode = True
+    def cmdModeClr(self):
+        if(self.cmdMode) :
+            self.cmdState(False,'yellow')
+            self.cmdMode = False
     def softDecode (self,q):
         mmPath = self.port.tx.localPath('../bin/multimon')
         logit("Port %d : starting multimon %s" % (self.port.portnum, mmPath)) 
@@ -294,6 +320,9 @@ class rx:
                 self.softCtcssState(self.ctcssAct)
             if(dtmf != None) :
                 q.put(dtmf.group('tone'))
+                if(self.port.rx.cmdMode) :
+                    self.port.fsm.cmdTimer.reset()
+                self.port.fsm.mute()
 
     def run(self) :
         self.sd = threading.Thread(target=self.softDecode, args=[self.q])

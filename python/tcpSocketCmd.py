@@ -50,7 +50,16 @@ class tcpSocketCmd:
                     print ('received "%s"' % data)
                     if data:
                         words = data.split()
-                        if(words[0] == 'get') :
+                        if(len(words) == 0) :
+                            response = '?'
+                        elif(words[0] == '?' or words[0] == 'h' or words[0] == 'help') :
+                            response = 'cmd one of the following\n'
+                            response = response + 'get <variable>\n'
+                            response = response + 'set <variable> <value>\n'
+                            response = response + 'tt <port> <sequence>\n'
+                            response = response + 'save\n'
+                            response = response + 'bye\n'
+                        elif(words[0] == 'get') :
                             if(self.isDict(self.dict,words[1])):
                                 result = self.getDict(self.dict,words[1])
                                 response = str(result)
@@ -65,10 +74,12 @@ class tcpSocketCmd:
                                 response = 'Not Found'
                         elif(words[0] == 'tt') : 
                             if(words[1] == '1') :
-                                self.q1.put(words[2] + ' ')
+                                self.q1.put(words[2])
+                                self.q1.put(' ')
                                 response = 'sent ' + words[2] + ' to port ' + words[1]
                             elif(words[1] == '2') :
-                                self.q2.put(words[2] + ' ')
+                                self.q2.put(words[2])
+                                self.q2.put(' ')
                                 response = 'sent ' + words[2] + ' to port ' + words[1]
                             else:
                                 response = "No such port %s must be either 1 or 2" % words[1]
