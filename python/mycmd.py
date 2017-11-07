@@ -157,6 +157,11 @@ cmdlist = cmdlist + [("1010(\d)", "setHwioOut")]
 cmdlist = cmdlist + [("1001(\d)", "hwioOut1")]
 cmdlist = cmdlist + [("1000(\d)", "hwioOut0")]
 cmdlist = cmdlist + [("1111(\d)", "hwioIn")]
+cmdlist = cmdlist + [("123A$", "mOk")]
+cmdlist = cmdlist + [("456B$", "mOk")]
+cmdlist = cmdlist + [("789C$", "mOk")]
+cmdlist = cmdlist + [("84$", "tailClock")]
+
 
 # command processor
 def cmdprocess (q,port) :
@@ -192,6 +197,9 @@ it acts globally or uses port context """
 #----------------------------------------------------------------------
 # Utility functions
 #----------------------------------------------------------------------
+def mOk(port) :
+    port.tx.addTailMsg([port.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+
 def tailOrBeaconMorse(port,message,wpm=None,tone=None,vol=None, now=False):
     if(wpm==None):
         wpm = str(port.tx.defMorseWpm)
