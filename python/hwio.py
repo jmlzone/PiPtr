@@ -495,20 +495,24 @@ class hwio :
     def uinta(self,pin) :
         val = self.i2cSafeRead(GPIOEX4,INTFA)
         self.intf = self.intf | val
+        self.intcapA = self.i2cSafeRead(GPIOEX4,INTCAPA)
         self.intRun.set()
     def uintb(self,pin) :
         val = self.i2cSafeRead(GPIOEX4,INTFB)
         self.intf = self.intf | (val <<8)
+        self.intcapB = self.i2cSafeRead(GPIOEX4,INTCAPB)
         self.intRun.set()
 
     def runUInts(self) :
         while True :
             self.intRun.wait()
+            intcap = self.intcapb<<16 | self.intcapA
             while (self.intf != 0) :
                 for i in range(16) :
                     if (self.intf & 1<<i) :
+                        v = (intcap >>i) & 1;
                         if(callable(self.userfuncs[i])) :
-                            self.userfuncs[i]()
+                            self.userfuncs[i](i,v)
                         self.intf = getBit(self.intf,0,i)
     def runAdc(self) :
         while(True) :
