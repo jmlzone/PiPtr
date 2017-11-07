@@ -148,7 +148,7 @@ class hwio :
         try:
             self.i2cBus.write_byte_data(GPIOEX2, IODIR,0) # port as output
         except:
-            self.have[GPIOEX2] = False
+            self.haveIO[GPIOEX2] = False
         # IOEX3 is the port 2 and sound card control
         try:
             self.i2cBus.write_byte_data(GPIOEX3, IODIR,0) # port as output
@@ -276,9 +276,9 @@ class hwio :
         data16 = self.spi.xfer2([cmd,val])
         self.spi.close()
 
-    def ReadAll(self):
+    def ReadAll(self,ss=0,bus=0):
         for i in range(11):
-            d = self.ReadLoc(i)
+            d = self.ReadLoc(i,ss,bus)
             print("Address %d data %x" % (i,d))
 
     def getBit(self,baseVal,bitVal,bitPos) :
