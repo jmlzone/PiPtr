@@ -134,6 +134,8 @@ class hwio :
         self.ivalB = 0xff
         self.intconA = 0
         self.intconB = 0
+        self.intcapA = 0
+        self.intcapB = 0
         self.arate = 300
         self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'CH1CTL', 'CH2CTL', 'CH3CTL',
                         'iodirA', 'ovalA', 'iodirB', 'ovalB', 'arate']
@@ -506,7 +508,7 @@ class hwio :
     def runUInts(self) :
         while True :
             self.intRun.wait()
-            intcap = self.intcapb<<16 | self.intcapA
+            intcap = self.intcapB<<16 | self.intcapA
             while (self.intf != 0) :
                 for i in range(16) :
                     if (self.intf & 1<<i) :
