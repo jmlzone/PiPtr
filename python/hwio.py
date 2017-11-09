@@ -132,10 +132,11 @@ class hwio :
         self.gppuB = 0
         self.ivalA = 0xff
         self.ivalB = 0xff
-        self.intconA = 0
-        self.intconB = 0
+        self.intenA = 0
+        self.intenB = 0
         self.intcapA = 0
         self.intcapB = 0
+        self.intEdge = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
         self.arate = 300
         self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'CH1CTL', 'CH2CTL', 'CH3CTL',
                         'iodirA', 'ovalA', 'iodirB', 'ovalB', 'arate']
@@ -469,28 +470,30 @@ class hwio :
                 rv.append(self.getival(pin))
             return(rv)
 
-    def add_event_detect(self,pin,intdir,callback=None) :
+    def add_event_detect(self,pin,intEdge,callback=None) :
         if(pin >=GPA0 and pin <=GPA7 ) :
-            self.intconA = self.getBit(self.intconA,1,pin)
+            self.intenA = self.getBit(self.intenA,1,pin)
             self.userfuncs[pin] = callback
-            self.i2cSafeWrite(GPIOEX4,INTCONA,self.intconA)
+            self.intEdge[pin] = intEdge
+            self.i2cSafeWrite(GPIOEX4,GPINTENA,self.intenA)
         elif(pin >=GPB0 and pin <=GPB7 ) :
-            self.intconB = self.getBit(self.intconB,1,pin-8)
+            self.intenB = self.getBit(self.intenB,1,pin-8)
             self.userfuncs[pin] = callback
-            self.i2cSafeWrite(GPIOEX4,INTCONB,self.intconB)
+            self.intEdge[pin] = intEdge
+            self.i2cSafeWrite(GPIOEX4,GPINTENB,self.intenB)
         else:
             print("Ilegal HWIO pin for add_event_detect %d" % pin)
             
 
     def remove_event_detect(self,pin) :
         if(pin >=GPA0 and pin <=GPA7 ) :
-            self.intconA = self.getBit(self.intconA,0,pin)
+            self.intenA = self.getBit(self.intenA,0,pin)
             self.userfuncs[pin] = None
-            self.i2cSafeWrite(GPIOEX4,INTCONA,self.intconA)
+            self.i2cSafeWrite(GPIOEX4,GPINTENA,self.intenA)
         elif(pin >=GPB0 and pin <=GPB7 ) :
-            self.intconB = self.getBit(self.intconB,0,pin-8)
+            self.intenB = self.getBit(self.intenB,0,pin-8)
             self.userfuncs[pin] = None
-            self.i2cSafeWrite(GPIOEX4,INTCONB,self.intconB)
+            self.i2cSafeWrite(GPIOEX4,GPINTENB,self.intenB)
         else:
             print("Ilegal HWIO pin for remove_event_detect %d" % pin)
 
@@ -513,8 +516,11 @@ class hwio :
                 for i in range(16) :
                     if (self.intf & 1<<i) :
                         v = (intcap >>i) & 1;
-                        if(callable(self.userfuncs[i])) :
-                            self.userfuncs[i](i,v)
+                        if(((self.intEdge[i] == BOTH)
+                            or ((self.intEdge[i]==FALLING) and (v==0))
+                            or ((self.intEdge[i]==RISING) and (v==1))
+                            ) and callable(self.userfuncs[i])) :
+                            self.userfuncs[i](i)
                         self.intf = getBit(self.intf,0,i)
     def runAdc(self) :
         while(True) :

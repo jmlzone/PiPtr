@@ -3,7 +3,7 @@ import os
 import subprocess
 import re
 import string
-
+import socket
 
 # This file is the "user level commands" and the mapping from the
 # touch tone codes to the functions.
@@ -81,6 +81,16 @@ def badCmd(port) :
     port.tx.addTailMsg(say,resp,False,False,False,None)
     port.tx.addTailMsg([port.tx.localPath('../bin/mout')],[ '20', '660', '5000', "bad"],True,False,False,None)
 
+def sayIp(port) :
+    gw = os.popen("ip -4 route show default").read().split()
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect((gw[2], 0))
+    ipaddr = s.getsockname()[0]
+    gateway = gw[2]
+    host = socket.gethostname()
+    msg =  "Host  " + host + " IP  " + ipaddr + " Gateway " + gateway
+    tailOrBeaconVoice(port,msg,now=True)
+
 def cmdMode(port) :
     port.fsm.cmdOn()
     resp = "Set port %d Command mode on" % (port.portnum)
@@ -140,6 +150,7 @@ def hwioIn(port,arg) :
             val = "high" if hwio.input(arg) else "low"
             resp = "port %d bit %d is %s" % (port.portnum, arg, val)
             port.tx.addTailMsg(say,resp,False,False,False,None)
+
 # command table.
 # the command table can be in the format of the long list or you can add things like shown at the end.
 #
@@ -161,7 +172,7 @@ cmdlist = cmdlist + [("123A$", "mOk")]
 cmdlist = cmdlist + [("456B$", "mOk")]
 cmdlist = cmdlist + [("789C$", "mOk")]
 cmdlist = cmdlist + [("84$", "tailClock")]
-
+cmdlist = cmdlist + [("47$", "sayIp")]
 
 # command processor
 def cmdprocess (q,port) :
@@ -243,3 +254,19 @@ def tailOrBeaconTime(port,message, now=False):
             port.fsm.beacon()
     else:
         port.tx.addTailMsg(talkingClock,{'format': "%I %M %p", 'prefix': message},True,False,False,None)
+
+
+#----------------------------------------------------------------------
+# demo functions
+#----------------------------------------------------------------------
+
+def bothDemo(pin) :
+    tailOrBeaconVoice(port1,"Edge Detection on pin " + str(pin), now=True)
+def fallingDemo(pin) :
+    tailOrBeaconVoice(port1,"Falling Edge on pin " + str(pin), now=True)
+def risingDemo(pin) :
+    tailOrBeaconVoice(port1,"rising Edge on pin " + str(pin), now=True)
+
+hwio.add_event_detect(0,hwio.BOTH,callback=bothDemo)
+hwio.add_event_detect(8,hwio.FALLING,callback=fallingDemo)
+#hwio.add_event_detect(8,hwio.RISING,callback=risingDemo)
