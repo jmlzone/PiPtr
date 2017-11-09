@@ -71,7 +71,7 @@ DEFVALA  =  6  # Default value for interupt on change compare
 DEFVALB  =  7
 INTCONA  =  8  # 1 = compare aginst def val, 0= compare against previous value
 INTCONB  =  9
-IOCON    = 10
+IOCONA   = 10
 IOCONB   = 11
 GPPUA    = 12 # Enables Pullups
 GPPUB    = 13
@@ -167,8 +167,8 @@ class hwio :
             self.i2cBus.write_byte_data(GPIOEX4, GPINTENA,0) # default disable any interupts
             self.i2cBus.write_byte_data(GPIOEX4, GPINTENB,0)
             GPIO.setup([UINTA,UINTB], GPIO.IN)
-            GPIO.add_event_detect(UINTA, GPIO.RISING, callback=self.uinta)
-            GPIO.add_event_detect(UINTB, GPIO.RISING, callback=self.uintb)
+            GPIO.add_event_detect(UINTA, GPIO.FALLING, callback=self.uinta)
+            GPIO.add_event_detect(UINTB, GPIO.FALLING, callback=self.uintb)
         # set up adc channels
         self.adc = [adcChan(self.spi,0,(2.048/1024.0),0,2),
                adcChan(self.spi,1,(20.48/1024.0),12.4,13.6),
@@ -521,7 +521,7 @@ class hwio :
                             or ((self.intEdge[i]==RISING) and (v==1))
                             ) and callable(self.userfuncs[i])) :
                             self.userfuncs[i](i)
-                        self.intf = getBit(self.intf,0,i)
+                        self.intf = self.getBit(self.intf,0,i)
     def runAdc(self) :
         while(True) :
             time.sleep(self.arate)

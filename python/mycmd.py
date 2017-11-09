@@ -267,6 +267,6 @@ def fallingDemo(pin) :
 def risingDemo(pin) :
     tailOrBeaconVoice(port1,"rising Edge on pin " + str(pin), now=True)
 
-hwio.add_event_detect(0,hwio.BOTH,callback=bothDemo)
-hwio.add_event_detect(8,hwio.FALLING,callback=fallingDemo)
-#hwio.add_event_detect(8,hwio.RISING,callback=risingDemo)
+#hwio.add_event_detect(0,GPIO.BOTH,callback=bothDemo)
+#hwio.add_event_detect(8,GPIO.FALLING,callback=fallingDemo)
+#hwio.add_event_detect(8,GPIO.RISING,callback=risingDemo)
