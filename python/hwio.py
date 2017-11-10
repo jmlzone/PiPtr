@@ -513,7 +513,7 @@ class hwio :
     def runUInts(self) :
         while True :
             self.intRun.wait()
-            intcap = self.intcapB<<16 | self.intcapA
+            intcap = self.intcapB<<8 | self.intcapA
             while (self.intf != 0) :
                 for i in range(16) :
                     if (self.intf & 1<<i) :

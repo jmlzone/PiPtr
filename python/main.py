@@ -52,7 +52,6 @@ import gui
 from logit import logit
 import xmlio
 import hwio as HWIO
-
 cmdFile = top.findFileOnPath([top.host + 'Cmd.py', 'mycmd.py'])
 if cmdFile :
     logit("Load command file: " + cmdFile)
