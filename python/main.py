@@ -51,7 +51,7 @@ sys.path.insert(0,top.localPath)
 import gui
 from logit import logit
 import xmlio
-import hwio
+import hwio as HWIO
 
 cmdFile = top.findFileOnPath([top.host + 'Cmd.py', 'mycmd.py'])
 if cmdFile :
@@ -84,7 +84,7 @@ port1 = radioPort.radioPort(1, q1, globalState)
 port2 = radioPort.radioPort(2, q2, globalState)
 port1.other = port2
 port2.other = port1
-hwio = hwio.hwio(top)
+hwio = HWIO.hwio(top)
 port1.hwio = hwio
 port2.hwio = hwio
 top.port1 = port1

@@ -501,11 +501,13 @@ class hwio :
         val = self.i2cSafeRead(GPIOEX4,INTFA)
         self.intf = self.intf | val
         self.intcapA = self.i2cSafeRead(GPIOEX4,INTCAPA)
+        inctrl = self.i2cSafeRead(GPIOEX4,GPIOA)
         self.intRun.set()
     def uintb(self,pin) :
         val = self.i2cSafeRead(GPIOEX4,INTFB)
         self.intf = self.intf | (val <<8)
         self.intcapB = self.i2cSafeRead(GPIOEX4,INTCAPB)
+        inctrl = self.i2cSafeRead(GPIOEX4,GPIOB)
         self.intRun.set()
 
     def runUInts(self) :
