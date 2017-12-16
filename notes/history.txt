@@ -689,3 +689,6 @@ PCB sources
 http://www.basicpcb.com/?utm_source=FACEBOOK&utm_campaign=FB-ADS-VIDEO&utm_medium=ADS
 https://www.seeedstudio.com/fusion_pcb.html
 
+ 673  sudo apt-get install libasound2-dev
+  674  sudo -H pip3 install pyalsaaudio
+sudo i2cdetect -y 1
