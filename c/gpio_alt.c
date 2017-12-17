@@ -16,7 +16,8 @@
     #include <fcntl.h>
     #include <sys/mman.h>
 
-    #define BCM2708_PERI_BASE        0x20000000
+//    #define BCM2708_PERI_BASE        0x20000000 // pi zero
+#define BCM2708_PERI_BASE        0x3f000000 // Pi 2 and 3
     #define GPIO_BASE                (BCM2708_PERI_BASE + 0x200000) /* GPIO controller */
     #define PAGE_SIZE (4*1024)
     #define BLOCK_SIZE (4*1024)

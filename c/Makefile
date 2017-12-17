@@ -17,6 +17,6 @@ $(BINDIR)/multimon:
 	mv multimon/bin-$(shell uname -m)/multimon $(BINDIR)
 
 $(BINDIR)/gpio_alt:
-	cc gpio-alt.c -o $(BINDIR)/gpio_alt
+	cc gpio_alt.c -o $(BINDIR)/gpio_alt
 	sudo chown root:root $(BINDIR)/gpio_alt
 	sudo chmod u+s $(BINDIR)/gpio_alt

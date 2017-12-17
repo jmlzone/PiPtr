@@ -1,4 +1,4 @@
-""" Routines to read and write non gpio hardware devices
+""" Routines to read and write non gpio hardware devices
     User IO to the io expander is caller here like Raspberri pi GPIO
     but use 
       hwio.setup
@@ -319,10 +319,10 @@ class hwio :
             self.WritePGAGain(self.gain[p][chan],p+5,0)
         self.CH1CTL = self.getBit(self.CH1CTL,self.top.port1.rx.deemp,4)
         self.CH1CTL = self.getBit(self.CH1CTL,self.top.port1.rx.descEn,5)
-        self.CH1CTL = self.getBit(self.CH1CTL,self.top.port1.rx.portDet,6)
+        self.CH1CTL = self.getBit(self.CH1CTL,not self.top.port1.rx.portDet,6)
         self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.deemp,4)
         self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.descEn,5)
-        self.CH2CTL = self.getBit(self.CH2CTL,self.top.port2.rx.portDet,6)
+        self.CH2CTL = self.getBit(self.CH2CTL,not self.top.port2.rx.portDet,6)
         self.i2cSafeWrite(GPIOEX1, GPIOR, self.CH1CTL) # chanel 1 default values
         self.i2cSafeWrite(GPIOEX2, GPIOR, self.CH2CTL) # chanel 2 default values
         self.i2cSafeWrite(GPIOEX3, GPIOR, self.CH3CTL) # chanel 3 default values

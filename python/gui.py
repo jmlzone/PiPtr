@@ -184,11 +184,11 @@ class gui :
         port = self.ps.get()
         if(port == 'port1') :
             self.top.port1.rx.portDet = val
-            self.top.hwio.CH1CTL = self.top.hwio.getBit(self.top.hwio.CH1CTL,self.top.port1.rx.portDet,6)
+            self.top.hwio.CH1CTL = self.top.hwio.getBit(self.top.hwio.CH1CTL,not self.top.port1.rx.portDet,6)
             self.top.hwio.i2cSafeWrite(hwio.GPIOEX1, hwio.GPIOR, self.top.hwio.CH1CTL)
         else:
             self.top.port2.rx.portDet = val
-            self.top.hwio.CH2CTL = self.top.hwio.getBit(self.top.hwio.CH2CTL,self.top.port2.rx.portDet,6)
+            self.top.hwio.CH2CTL = self.top.hwio.getBit(self.top.hwio.CH2CTL,not self.top.port2.rx.portDet,6)
             self.top.hwio.i2cSafeWrite(hwio.GPIOEX2, hwio.GPIOR, self.top.hwio.CH2CTL)
     def init(self) :
         self.ref = {}

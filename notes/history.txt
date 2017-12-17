@@ -692,3 +692,16 @@ https://www.seeedstudio.com/fusion_pcb.html
  673  sudo apt-get install libasound2-dev
   674  sudo -H pip3 install pyalsaaudio
 sudo i2cdetect -y 1
+
+sudo apt-get install -y raspi-gpio
+
+./bin/gpio_alt -p 18 -f 5
+./bin/gpio_alt -p 19 -f 5
+
+
+./bin/multimon sysdefault:CARD=Device -a scope &
+./bin/multimon sysdefault:CARD=Device_1 -a scope &
+./bin/multimon sysdefault:CARD=Device_2 -a scope &
+
+speaker-test -D sysdefault:CARD=ALSA -t sine -f 1000
+
