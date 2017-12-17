@@ -1,4 +1,4 @@
-""" Routines to read and write non gpio hardware devices
+""" Routines to read and write non gpio hardware devices
     User IO to the io expander is caller here like Raspberri pi GPIO
     but use 
       hwio.setup
@@ -357,7 +357,7 @@ class hwio :
         elif (mixType == 'Speaker') :
             control = alsaaudio.PCM_PLAYBACK
         else :
-            print("bad controtl type %s" % mixType)
+            print("bad control type %s" % mixType)
             control = None
         #print("There are %d sound cards" % len(c))
         for i in range(len(c)) :
