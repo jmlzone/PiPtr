@@ -18,6 +18,9 @@ import time
 import datetime
 import sys
 import os
+import subprocess
+import re
+
 """ User IO pin naames
 """
 GPA0 = 0
@@ -118,6 +121,7 @@ class hwio :
         self.gain = [ [6,6,6,6], [6,6,6,6] ]
         self.mics = [50,50,50]
         self.speakers = [50,50,50]
+        self.pwmLevel = 50
         # Open SELF.SPI bus
         self.spi = spidev.SpiDev()
         self.CH1CTL = 0
@@ -138,8 +142,9 @@ class hwio :
         self.intcapB = 0
         self.intEdge = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
         self.arate = 300
-        self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'CH1CTL', 'CH2CTL', 'CH3CTL',
-                        'iodirA', 'ovalA', 'iodirB', 'ovalB', 'arate']
+        self.autoPortDetect = True
+        self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'pwmLevel',  'CH1CTL', 'CH2CTL', 'CH3CTL',
+                        'iodirA', 'ovalA', 'iodirB', 'ovalB', 'arate','autoPortDetect']
         self.intRun = threading.Event()
         self.i2cBus = smbus.SMBus(1)
         # IOEX1 is the controls for radio port 1 
@@ -306,6 +311,8 @@ class hwio :
                 pass
         return(val)
     def init_all(self) :
+        if(self.autoPortDetect) :
+            self.portDetect()
         for r in range(8) :
             self.WriteRes(r,self.vals[r],0)
             self.WriteTcon(r,self.tcon[r],0)
@@ -326,6 +333,14 @@ class hwio :
         self.i2cSafeWrite(GPIOEX1, GPIOR, self.CH1CTL) # chanel 1 default values
         self.i2cSafeWrite(GPIOEX2, GPIOR, self.CH2CTL) # chanel 2 default values
         self.i2cSafeWrite(GPIOEX3, GPIOR, self.CH3CTL) # chanel 3 default values
+        # now initialize the values for the sound card controls
+        for p in range(3) :
+            self.setMixerByName(p,'Mic', self.mics[p])
+            self.setMixerByName(p,'Speaker', self.speakers[p])
+        # set the level for the onboard PWM
+        mix = alsaaudio.Mixer(control='PCM', cardindex=0)
+        mix.setvolume(self.pwmLevel,0, alsaaudio.PCM_PLAYBACK)
+        
 
     def muteUnmute(self,port,link,en) :
         #print("muteUnmute:: Port %d, Link %d, en %d" %(port,link,en))
@@ -351,6 +366,8 @@ class hwio :
             pc = self.top.port1.card
         elif (pn==1) :
             pc = self.top.port2.card
+        elif (pn==2) :
+            pc = self.top.port3.card
         cn = pc[16:]
         if (mixType == 'Mic') :
             control = alsaaudio.PCM_CAPTURE
@@ -367,6 +384,8 @@ class hwio :
                 if(cn==c[i]) :
                     mix = alsaaudio.Mixer(control=mixType, cardindex=i)
                     mix.setvolume(val,0,control)
+                    if (mixType == 'Speaker') :
+                        mix.setvolume(val,1,control) # also set the other channel
                     return(None)
 
     def linkVoteSet(self, port, link) :
@@ -549,7 +568,110 @@ class hwio :
             log = open(logfn,"a")
             log.write(ls)
             log.close
-                    
+
+    def portDetect(self):
+        p=subprocess.Popen(['../bin/gpio_alt','-p','18','-f','5'])
+        p=subprocess.Popen(['../bin/gpio_alt','-p','19','-f','5'])
+        self.i2cBus.write_byte_data(GPIOEX1, IODIR,0)
+        self.i2cBus.write_byte_data(GPIOEX2, IODIR,0)
+        self.i2cBus.write_byte_data(GPIOEX3, IODIR,0)
+        # turn on sound card
+        print("turning on sound cards")
+        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,0)
+        c=[]
+        i=0
+        while( i<10 and len(c) <4) :
+            time.sleep(1)
+            i=i+1
+            c=alsaaudio.cards()
+            print("%d: have %d cards" % (i,len(c)))
+        cardList = []
+        for i in range(len(c)) :
+            m = alsaaudio.mixers(i)
+            if ('Mic' in m and 'Speaker' in m) :
+                print("Card %d: %s has both" % (i,c[i]))
+                cardList.append(c[i])
+                mix = alsaaudio.Mixer(control='Mic', cardindex=i)
+                mix.setvolume(65,0, alsaaudio.PCM_CAPTURE)
+                mix = alsaaudio.Mixer(control='Speaker', cardindex=i)
+                mix.setvolume(24,0, alsaaudio.PCM_PLAYBACK)
+                mix.setvolume(24,1, alsaaudio.PCM_PLAYBACK)
+    # disable both port detects
+    print("preparing for port detection")
+    self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6)
+    self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6)
+
+    #set PCM hardware playback to 50
+    mix = alsaaudio.Mixer(control='PCM', cardindex=0)
+    mix.setvolume(83,0, alsaaudio.PCM_PLAYBACK)
+    cardDict={}
+    d0 = threading.Thread(target=decodeTone, args=[cardList[0],cardDict])
+    d1 = threading.Thread(target=decodeTone, args=[cardList[1],cardDict])
+    d2 = threading.Thread(target=decodeTone, args=[cardList[2],cardDict])
+    d0.daemon = True
+    d0.start()
+    d1.daemon = True
+    d1.start()
+    d2.daemon = True
+    d2.start()
+
+    print("Detecting port 1")
+    self.i2cBus.write_byte_data(GPIOEX1, GPIOR,0) # enable detect 1
+    p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.localPath('../sounds/audiocheck.net_dtmf_1.wav']))
+    time.sleep(2)
+    self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6) # disable port 1
+    print("Detecting port 2")
+    self.i2cBus.write_byte_data(GPIOEX2, GPIOR,0) # enable port 2
+    p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.localPath('../sounds/audiocheck.net_dtmf_2.wav']))
+    time.sleep(2)
+    self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6) # disable port 2
+    p3=[]
+    p3.append(cardList[0])
+    p3.append(cardList[1])
+    p3.append(cardList[2])
+    p3.remove(cardDict['1'])
+    p3.remove(cardDict['2'])
+    c3=p3[0]
+
+    print("Detecting port 3")
+    self.i2cBus.write_byte_data(GPIOEX3, GPIOR,6) # enable port 3 to both!
+    p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, self.top.localPath('../sounds/audiocheck.net_dtmf_3.wav']))
+    time.sleep(2)
+
+    for card in cardList :
+        cardDict[card+'_p'].kill()
+        cardDict[card+'_p'].poll()
+
+        card1 = "sysdefault:CARD=" + cardDict['1']
+        card2 = "sysdefault:CARD=" + cardDict['2']
+        card3 = "sysdefault:CARD=" + cardDict['3']
+
+    print("completed card detection, ordered cards are")
+    print(card1)
+    print(card2)
+    print(card3)
+    self.top.port1.card=card1
+    self.top.port2.card=card2
+    self.top.port3.card=card3
+
+    def decodeTone(self,card,cardDict):
+        mmPath = self.top.localPath('../bin/multimon')
+        print("card %s : starting multimon %s" % (card, mmPath)) 
+        try:
+            p=subprocess.Popen([mmPath, 'sysdefault:CARD='+card, '-a', 'dtmf'], stdout=subprocess.PIPE)
+        except:
+            PRINT("Error could not start MultiMon on card %s",card)
+        time.sleep(1)
+        cardDict[card+'_p'] = p
+        while(True) :
+            txt = str(p.stdout.readline())
+            dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
+            if(dtmf != None) :
+                tone = dtmf.group('tone')
+                p.terminate()
+                cardDict[tone] = card
+                print("detected tone %s on card %s" % (tone,card))
+                break
 
 class adcChan :
     def __init__ (self,spi,chan,scale,llimit,hlimit,updateFunc=None, underFunc=None, overFunc=None, nomFunc=None) :

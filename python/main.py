@@ -32,6 +32,8 @@ import state
 import fpPixels
 import tcpSocketCmd
 import socketPython
+import ipPort
+
 class top:
     def __init__ (self) :
         self.host = socket.gethostname()
@@ -78,19 +80,21 @@ GPIO.setmode(GPIO.BOARD)
 q1 = queue.Queue()
 q2 = queue.Queue()
 gui = gui.gui(top)
+top.gui=gui
 globalState = state.state(top,gui)
+top.globalState=globalState
 port1 = radioPort.radioPort(1, q1, globalState)
 port2 = radioPort.radioPort(2, q2, globalState)
 port1.other = port2
 port2.other = port1
+top.port1 = port1
+top.port2 = port2
+port3 = ipPort.ipPort(top)
+top.port3=port3
 hwio = HWIO.hwio(top)
 port1.hwio = hwio
 port2.hwio = hwio
-top.port1 = port1
-top.port2 = port2
-top.gui=gui
 top.hwio=hwio
-top.globalState=globalState
 fp = fpPixels.fpPixels(top.globalState)
 cmdSock = tcpSocketCmd.tcpSocketCmd(globals(), q1,q2)
 sp = socketPython.socketPython((dict(globals(), **locals())))
