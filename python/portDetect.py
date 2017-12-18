@@ -17,20 +17,45 @@ import os
 import subprocess
 import re
 import hwio as HWIO
+def decodeTone(card,cardDict):
+    mmPath = '../bin/multimon'
+    print("card %s : starting multimon %s" % (card, mmPath)) 
+    try:
+        p=subprocess.Popen([mmPath, 'sysdefault:CARD='+card, '-a', 'dtmf'], stdout=subprocess.PIPE)
+    except:
+        PRINT("Error could not start MultiMon on card %s",card)
+    time.sleep(1)
+    cardDict[card+'_p'] = p
+    while(True) :
+        txt = str(p.stdout.readline())
+        dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
+        if(dtmf != None) :
+            tone = dtmf.group('tone')
+            p.terminate()
+            cardDict[tone] = card
+            print("detected tone %s on card %s" % (tone,card))
+            break
 
 # this init of HWIO will turn on the USB power by default
 #hwio=HWIO.hwio()
+# setup the pwms for audio out
+p=subprocess.Popen(['../bin/gpio_alt','-p','18','-f','5'])
+p=subprocess.Popen(['../bin/gpio_alt','-p','19','-f','5'])
 HWIO.i2cBus = smbus.SMBus(1)
 
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX1, HWIO.IODIR,0)
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX2, HWIO.IODIR,0)
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX3, HWIO.IODIR,0)
-# turn off sound cards
-HWIO.i2cBus.write_byte_data(HWIO.GPIOEX3, HWIO.GPIOR,1)
 # turn on sound card
+print("turning on sound cards")
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX3, HWIO.GPIOR,0)
-time.sleep(3)
-c=alsaaudio.cards()
+c=[]
+i=0
+while( i<10 and len(c) <4) :
+    time.sleep(1)
+    i=i+1
+    c=alsaaudio.cards()
+    print("%d: have %d cards" % (i,len(c)))
 cardList = []
 for i in range(len(c)) :
     m = alsaaudio.mixers(i)
@@ -39,7 +64,11 @@ for i in range(len(c)) :
         cardList.append(c[i])
         mix = alsaaudio.Mixer(control='Mic', cardindex=i)
         mix.setvolume(65,0, alsaaudio.PCM_CAPTURE)
+        mix = alsaaudio.Mixer(control='Speaker', cardindex=i)
+        mix.setvolume(24,0, alsaaudio.PCM_PLAYBACK)
+        mix.setvolume(24,1, alsaaudio.PCM_PLAYBACK)
 # disable both port detects
+print("preparing for port detection")
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX1, HWIO.GPIOR,1<<6)
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX2, HWIO.GPIOR,1<<6)
 
@@ -57,33 +86,40 @@ d1.start()
 d2.daemon = True
 d2.start()
 
+print("Detecting port 1")
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX1, HWIO.GPIOR,0) # enable detect 1
 p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', '../sounds/audiocheck.net_dtmf_1.wav'])
+time.sleep(2)
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX1, HWIO.GPIOR,1<<6) # disable port 1
+print("Detecting port 2")
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX2, HWIO.GPIOR,0) # enable port 2
 p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', '../sounds/audiocheck.net_dtmf_2.wav'])
+time.sleep(2)
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX2, HWIO.GPIOR,1<<6) # disable port 2
+p3=[]
+p3.append(cardList[0])
+p3.append(cardList[1])
+p3.append(cardList[2])
+p3.remove(cardDict['1'])
+p3.remove(cardDict['2'])
+c3=p3[0]
 
+print("Detecting port 3")
 HWIO.i2cBus.write_byte_data(HWIO.GPIOEX3, HWIO.GPIOR,6) # enable port 3 to both!
+p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, '../sounds/audiocheck.net_dtmf_3.wav'])
+time.sleep(2)
 
+for card in cardList :
+    cardDict[card+'_p'].kill()
+    cardDict[card+'_p'].poll()
 
+card1 = "sysdefault:CARD=" + cardDict['1']
+card2 = "sysdefault:CARD=" + cardDict['2']
+card3 = "sysdefault:CARD=" + cardDict['3']
 
+print("completed card detection, ordered cards are")
+print(card1)
+print(card2)
+print(card3)
 
-def decodeTone(card,cardDict):
-    mmPath = '../bin/multimon'
-    print("card %s : starting multimon %s" % (card, mmPath)) 
-    try:
-        p=subprocess.Popen([mmPath, 'sysdefault:CARD='+card, '-a', 'dtmf'], stdout=subprocess.PIPE)
-    except:
-        PRINT("Error could not start MultiMon on card %s",card)
-    time.sleep(1)
-    cardDict[card+'_p'] = p
-    while(True) :
-        txt = str(p.stdout.readline())
-        dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
-        if(dtmf != None) :
-            tone = dtmf.group('tone')
-            p.terminate()
-            cardDict[card] = tone
-            break
 

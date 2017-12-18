@@ -695,8 +695,10 @@ sudo i2cdetect -y 1
 
 sudo apt-get install -y raspi-gpio
 
+gpio readall
 ./bin/gpio_alt -p 18 -f 5
 ./bin/gpio_alt -p 19 -f 5
+gpio readall
 
 
 ./bin/multimon sysdefault:CARD=Device -a scope &
