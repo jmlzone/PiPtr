@@ -571,7 +571,9 @@ class hwio :
 
     def portDetect(self):
         p=subprocess.Popen(['../bin/gpio_alt','-p','18','-f','5'])
+        p.wait()
         p=subprocess.Popen(['../bin/gpio_alt','-p','19','-f','5'])
+        p.wait()
         self.i2cBus.write_byte_data(GPIOEX1, IODIR,0)
         self.i2cBus.write_byte_data(GPIOEX2, IODIR,0)
         self.i2cBus.write_byte_data(GPIOEX3, IODIR,0)
@@ -596,66 +598,69 @@ class hwio :
                 mix = alsaaudio.Mixer(control='Speaker', cardindex=i)
                 mix.setvolume(24,0, alsaaudio.PCM_PLAYBACK)
                 mix.setvolume(24,1, alsaaudio.PCM_PLAYBACK)
-    # disable both port detects
-    print("preparing for port detection")
-    self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6)
-    self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6)
+        # disable both port detects
+        print("preparing for port detection")
+        self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6)
+        self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6)
 
-    #set PCM hardware playback to 50
-    mix = alsaaudio.Mixer(control='PCM', cardindex=0)
-    mix.setvolume(83,0, alsaaudio.PCM_PLAYBACK)
-    cardDict={}
-    d0 = threading.Thread(target=decodeTone, args=[cardList[0],cardDict])
-    d1 = threading.Thread(target=decodeTone, args=[cardList[1],cardDict])
-    d2 = threading.Thread(target=decodeTone, args=[cardList[2],cardDict])
-    d0.daemon = True
-    d0.start()
-    d1.daemon = True
-    d1.start()
-    d2.daemon = True
-    d2.start()
+        #set PCM hardware playback to 50
+        mix = alsaaudio.Mixer(control='PCM', cardindex=0)
+        mix.setvolume(83,0, alsaaudio.PCM_PLAYBACK)
+        cardDict={}
+        d0 = threading.Thread(target=self.decodeTone, args=[cardList[0],cardDict])
+        d1 = threading.Thread(target=self.decodeTone, args=[cardList[1],cardDict])
+        d2 = threading.Thread(target=self.decodeTone, args=[cardList[2],cardDict])
+        d0.daemon = True
+        d0.start()
+        d1.daemon = True
+        d1.start()
+        d2.daemon = True
+        d2.start()
 
-    print("Detecting port 1")
-    self.i2cBus.write_byte_data(GPIOEX1, GPIOR,0) # enable detect 1
-    p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.localPath('../sounds/audiocheck.net_dtmf_1.wav']))
-    time.sleep(2)
-    self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6) # disable port 1
-    print("Detecting port 2")
-    self.i2cBus.write_byte_data(GPIOEX2, GPIOR,0) # enable port 2
-    p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.localPath('../sounds/audiocheck.net_dtmf_2.wav']))
-    time.sleep(2)
-    self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6) # disable port 2
-    p3=[]
-    p3.append(cardList[0])
-    p3.append(cardList[1])
-    p3.append(cardList[2])
-    p3.remove(cardDict['1'])
-    p3.remove(cardDict['2'])
-    c3=p3[0]
+        print("Detecting port 1")
+        self.i2cBus.write_byte_data(GPIOEX1, GPIOR,0) # enable detect 1
+        p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.absPath('../sounds/audiocheck.net_dtmf_1.wav')])
+        p.wait()
+        time.sleep(2)
+        self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6) # disable port 1
+        print("Detecting port 2")
+        self.i2cBus.write_byte_data(GPIOEX2, GPIOR,0) # enable port 2
+        p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.absPath('../sounds/audiocheck.net_dtmf_2.wav')])
+        p.wait()
+        time.sleep(2)
+        self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6) # disable port 2
+        p3=[]
+        p3.append(cardList[0])
+        p3.append(cardList[1])
+        p3.append(cardList[2])
+        p3.remove(cardDict['1'])
+        p3.remove(cardDict['2'])
+        c3=p3[0]
 
-    print("Detecting port 3")
-    self.i2cBus.write_byte_data(GPIOEX3, GPIOR,6) # enable port 3 to both!
-    p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, self.top.localPath('../sounds/audiocheck.net_dtmf_3.wav']))
-    time.sleep(2)
+        print("Detecting port 3")
+        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,6) # enable port 3 to both!
+        p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, self.top.absPath('../sounds/audiocheck.net_dtmf_3.wav')])
+        p.wait()
+        time.sleep(2)
 
-    for card in cardList :
-        cardDict[card+'_p'].kill()
-        cardDict[card+'_p'].poll()
+        for card in cardList :
+            cardDict[card+'_p'].kill()
+            cardDict[card+'_p'].poll()
 
         card1 = "sysdefault:CARD=" + cardDict['1']
         card2 = "sysdefault:CARD=" + cardDict['2']
         card3 = "sysdefault:CARD=" + cardDict['3']
 
-    print("completed card detection, ordered cards are")
-    print(card1)
-    print(card2)
-    print(card3)
-    self.top.port1.card=card1
-    self.top.port2.card=card2
-    self.top.port3.card=card3
+        print("completed card detection, ordered cards are")
+        print(card1)
+        print(card2)
+        print(card3)
+        self.top.port1.card=card1
+        self.top.port2.card=card2
+        self.top.port3.card=card3
 
     def decodeTone(self,card,cardDict):
-        mmPath = self.top.localPath('../bin/multimon')
+        mmPath = self.top.absPath('../bin/multimon')
         print("card %s : starting multimon %s" % (card, mmPath)) 
         try:
             p=subprocess.Popen([mmPath, 'sysdefault:CARD='+card, '-a', 'dtmf'], stdout=subprocess.PIPE)
