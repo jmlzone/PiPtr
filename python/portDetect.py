@@ -124,11 +124,11 @@ print(card1)
 print(card2)
 print(card3)
 
-th = HWIO.DHT(7)
+th = HWIO.DHT(4) # board pin 7 in IO 4
 (hum,temp) = th.measure()
 if(temp) :
     print("Temperature: %3.1f" % temp)
-if(self.hum) :
+if(hum) :
     print("Humidity: %3.1f" % hum)
 
 

@@ -184,7 +184,7 @@ class hwio :
                adcChan(self.spi,5,(20.48/1024.0),0,20),
                adcChan(self.spi,6,(100.0/1024.0),0,20),
                adcChan(self.spi,7,(20.48/1024.0),11.0,13.9)]
-        self.th = DHT(7)
+        self.th = DHT(4) #IO pin 4 is board pin 7
 
     def splitBits(self,val) :
         v0 = val & 1
@@ -731,7 +731,7 @@ class adcChan :
         return ( self.val )
 
 class DHT :
-    def __init__(self,pin,thLimit=None,tlLimit=None,hhLimit=None,llLimit=None,
+    def __init__(self,pin,thLimit=None,tlLimit=None,hhLimit=None,hlLimit=None,
                  updateFunc=None, underFunc=None, overFunc=None, nomFunc=None) :
         self.pin = pin
         self.tlLimit = tlLimit
