@@ -20,6 +20,7 @@ import sys
 import os
 import subprocess
 import re
+import Adafruit_DHT
 
 """ User IO pin naames
 """
@@ -183,6 +184,8 @@ class hwio :
                adcChan(self.spi,5,(20.48/1024.0),0,20),
                adcChan(self.spi,6,(100.0/1024.0),0,20),
                adcChan(self.spi,7,(20.48/1024.0),11.0,13.9)]
+        self.th = DHT(7)
+
     def splitBits(self,val) :
         v0 = val & 1
         v1 = (val >> 1) & 1 
@@ -551,6 +554,7 @@ class hwio :
                 self.adc[c].measure()
             #Force GPIO reads before logging
             dummy = self.input([GPA0,GPB0])
+            (self.hum,self.temp) = self.th.measure()
             self.csvLog("normal")
 
     def csvLog(self,msg) :
@@ -563,6 +567,10 @@ class hwio :
             ls = ls + ",%d" %((self.ivalA>>i) &1)
         for i in range(8) :
             ls = ls + ",%d" %((self.ivalB>>i) &1)
+        if(self.temp) :
+            ls = ls + ",%3.1f" % self.temp    
+        if(self.hum) :
+            ls = ls + ",%3.1f" % self.hum    
         ls = ls + "," + msg + "\n"
         if os.path.exists(self.top.localPath) :
             log = open(logfn,"a")
@@ -721,3 +729,37 @@ class adcChan :
                 if(callable(self.nomFunc)) :
                     self.nomFunc()
         return ( self.val )
+
+class DHT :
+    def __init__(self,pin,thLimit=None,tlLimit=None,hhLimit=None,llLimit=None,
+                 updateFunc=None, underFunc=None, overFunc=None, nomFunc=None) :
+        self.pin = pin
+        self.tlLimit = tlLimit
+        self.thLimit = thLimit
+        self.hlLimit = hlLimit
+        self.hhLimit = hhLimit
+        self.updateFunc = updateFunc
+        self.underFunc = underFunc
+        self.overFunc = overFunc
+        self.nomFunc = nomFunc
+        self.tempState = None
+        self.humState = None
+        self.hiEdge = True
+        self.loEdge = True
+        self.nomEdge = True
+        self.active = True
+
+    def measure(self) :
+        if(self.active) :
+            (humidity, temperature) = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, self.pin)
+            if humidity is not None and  temperature is not None:
+                temperatureF = 9/5.0 * temperature + 32
+            else:
+                self.active=False
+                humidity = None
+                temperatureF = None
+        else:
+            humidity = None
+            temperatureF = None
+        return (humidity, temperatureF)
+

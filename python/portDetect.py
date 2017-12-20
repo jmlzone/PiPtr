@@ -17,6 +17,8 @@ import os
 import subprocess
 import re
 import hwio as HWIO
+import Adafruit_DHT
+
 def decodeTone(card,cardDict):
     mmPath = '../bin/multimon'
     print("card %s : starting multimon %s" % (card, mmPath)) 
@@ -122,4 +124,29 @@ print(card1)
 print(card2)
 print(card3)
 
+th = HWIO.DHT(7)
+(hum,temp) = th.measure()
+if(temp) :
+    print("Temperature: %3.1f" % temp)
+if(self.hum) :
+    print("Humidity: %3.1f" % hum)
+
+
+HWIO.spi = spidev.SpiDev()
+adc = [HWIO.adcChan(HWIO.spi,0,(2.048/1024.0),0,2),
+       HWIO.adcChan(HWIO.spi,1,(20.48/1024.0),12.4,13.6),
+       HWIO.adcChan(HWIO.spi,2,(20.48/1024.0),0,20),
+       HWIO.adcChan(HWIO.spi,3,(20.48/1024.0),0,20),
+       HWIO.adcChan(HWIO.spi,4,(20.48/1024.0),0,20),
+       HWIO.adcChan(HWIO.spi,5,(20.48/1024.0),0,20),
+       HWIO.adcChan(HWIO.spi,6,(100.0/1024.0),0,20),
+       HWIO.adcChan(HWIO.spi,7,(20.48/1024.0),11.0,13.9)]
+
+GPIO.setmode(GPIO.BOARD)
+selPins = [32, 31, 29]
+GPIO.setup(selPins, GPIO.OUT)
+GPIO.output(selPins, [1,1,1])
+for c in range(8) :
+    adc[c].measure()
+    print(" ADC[%d] = %0.2f" %(c,adc[c].val))
 
