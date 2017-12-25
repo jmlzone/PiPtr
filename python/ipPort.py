@@ -7,4 +7,4 @@
 class ipPort:
     def __init__(self,top):
         self.top=top
-        self.card=None
+        self.card='sysdefault:CARD=Device_2'

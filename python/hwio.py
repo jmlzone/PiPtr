@@ -143,9 +143,12 @@ class hwio :
         self.intcapB = 0
         self.intEdge = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
         self.arate = 300
-        self.autoPortDetect = True
-        self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'pwmLevel',  'CH1CTL', 'CH2CTL', 'CH3CTL',
-                        'iodirA', 'ovalA', 'iodirB', 'ovalB', 'arate','autoPortDetect']
+        self.cardWait = 4
+        self.autoPortDetect = False
+        self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'pwmLevel',
+                        'CH1CTL', 'CH2CTL', 'CH3CTL', 'iodirA', 'ovalA',
+                        'iodirB', 'ovalB', 'arate', 'cardWait',
+                        'autoPortDetect']
         self.intRun = threading.Event()
         self.i2cBus = smbus.SMBus(1)
         # IOEX1 is the controls for radio port 1 
@@ -314,6 +317,7 @@ class hwio :
                 pass
         return(val)
     def init_all(self) :
+        self.waitForCards(self.cardWait)
         if(self.autoPortDetect) :
             self.portDetect()
         for r in range(8) :
@@ -577,6 +581,18 @@ class hwio :
             log.write(ls)
             log.close
 
+    def waitForCards(self,ncards) :
+        # turn on sound card
+        print("turning on sound cards")
+        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,0)
+        c=[]
+        i=0
+        while( i<10 and len(c) <ncards) :
+            time.sleep(1)
+            i=i+1
+            c=alsaaudio.cards()
+            print("%d: have %d cards" % (i,len(c)))
+
     def portDetect(self):
         p=subprocess.Popen(['../bin/gpio_alt','-p','18','-f','5'])
         p.wait()
@@ -585,16 +601,7 @@ class hwio :
         self.i2cBus.write_byte_data(GPIOEX1, IODIR,0)
         self.i2cBus.write_byte_data(GPIOEX2, IODIR,0)
         self.i2cBus.write_byte_data(GPIOEX3, IODIR,0)
-        # turn on sound card
-        print("turning on sound cards")
-        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,0)
-        c=[]
-        i=0
-        while( i<10 and len(c) <4) :
-            time.sleep(1)
-            i=i+1
-            c=alsaaudio.cards()
-            print("%d: have %d cards" % (i,len(c)))
+        c=alsaaudio.cards()
         cardList = []
         for i in range(len(c)) :
             m = alsaaudio.mixers(i)
