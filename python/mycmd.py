@@ -51,7 +51,7 @@ def rptOff(port):
     port.tx.down()
     
 def setLinkState(port,arg) :
-    port.linkState = arg # should probably queue some message
+    port.setLinkState(arg) # should probably queue some message
     if(arg == 0) :
         port.linkVotes = 0
 

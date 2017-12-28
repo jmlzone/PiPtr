@@ -25,6 +25,7 @@ class fpPixels :
                      'cor2':12, 'ctcss2':13, 'cmd2':14, 'softCtcss2':15, 'tx2':23}
         self.refreshTimer = gpTimer(0.03,self.refresh)
         self.running = False # to prevent reentrance from multiple threads
+        self.connected = False
         fi = "/usr/share/X11/rgb.txt"
         rgbExp = re.compile('\s*(\d+)\s+(\d+)\s+(\d+)\s+(.*)')
         f = open(fi,'r')
@@ -48,9 +49,10 @@ class fpPixels :
         self.refreshTimer.run()
 
     def cleanup (self) :
-        for i in range(LED_COUNT) :
-            self.strip.setPixelColor(i,0)
-        self.strip.show()
+        if(self.connected) :
+            for i in range(LED_COUNT) :
+                self.strip.setPixelColor(i,0)
+            self.strip.show()
 
     def dim(self,rgbval):
         b=(rgbval & 255) * self.brightness / 100
@@ -89,6 +91,7 @@ class fpPixels :
          self.state.cmd2.addCallback(self.updateItem)
          self.state.softCtcss2.addCallback(self.updateArray)
          self.state.tx2.addCallback(self.updateItem)
+         self.connected=True
     def updateItem(self,name,value,color=None) :
         if(value) :
             if(color == None):

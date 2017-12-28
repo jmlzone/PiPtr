@@ -86,6 +86,8 @@ def int_handler(signum, frame):
     print('Int interrupt, Shutting down', signum)
     port1.tx.down()
     port2.tx.down()
+    print("turning off sound cards and GPIO interupts")
+    hwio.i2cBus.write_byte_data(HWIO.GPIOEX3, HWIO.GPIOR,129)
     GPIO.cleanup()
     fp.cleanup()
     #p0.terminate()

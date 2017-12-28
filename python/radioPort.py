@@ -365,3 +365,10 @@ class radioPort :
         if(self.enabled) :
             self.rx.run()
             self.fsm.startUp()
+
+    def setLinkState(self,linkNum):
+        if(linkNum >3) :
+            linkNum = 0;
+        self.linkState = linkNum;
+        top.hwio.WritePGAChan(linkNum,self.port+5,0)
+        top.hwio.WritePGAGain(top.hwio.gain[linkNum][chan],p+5,0)
