@@ -20,6 +20,7 @@ class fpPixels :
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
         self.state=state
+        self.brightness = 50 # 0 = off 100 = full bright 
         self.leds = {'cor1':0,  'ctcss1':1,  'cmd1':2,  'softCtcss1':3,  'tx1':11,
                      'cor2':12, 'ctcss2':13, 'cmd2':14, 'softCtcss2':15, 'tx2':23}
         self.refreshTimer = gpTimer(0.03,self.refresh)
@@ -46,6 +47,18 @@ class fpPixels :
         #self.strip.show()
         self.refreshTimer.run()
 
+    def cleanup (self) :
+        for i in range(LED_COUNT) :
+            self.strip.setPixelColor(i,0)
+        self.strip.show()
+
+    def dim(self,rbgval):
+        b=(rgbval & 255) * 100 / self.brightness
+        g=((rgbval>>8) & 255) * 100 / self.brightness
+        r=((rgbval>>16) & 255) * 100 / self.brightness
+        rgb = (int(r)<<16) + (int(g)<<8) + int(b)
+        return(rgb)
+    
     def setColorByName (self,led,name) :
         cname = name.lower().replace(" ","")
         if cname in self.rgbDict :
@@ -53,8 +66,9 @@ class fpPixels :
         else:
             self.setColorByValue(led,self.rgbDict['pink'])
     def setColorByValue (self,led,value) :
-        self.strip.setPixelColor(led,value)
+        self.strip.setPixelColor(led,self.dim(value))
         self.refreshTimer.run()
+        
     def refresh(self) :
         """ called from timer thread when the timer expires to gater all events in a 30 ms range
         """

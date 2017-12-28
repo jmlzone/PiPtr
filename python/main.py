@@ -69,6 +69,7 @@ def int_handler(signum, frame):
     port1.tx.down()
     port2.tx.down()
     GPIO.cleanup()
+    fp.cleanup()
     #p0.terminate()
     sys.exit(-1)
 signal.signal(signal.SIGHUP, hup_handler)
