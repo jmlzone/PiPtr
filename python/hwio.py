@@ -341,7 +341,7 @@ class hwio :
         self.i2cSafeWrite(GPIOEX2, GPIOR, self.CH2CTL) # chanel 2 default values
         self.i2cSafeWrite(GPIOEX3, GPIOR, self.CH3CTL) # chanel 3 default values
         # now initialize the values for the sound card controls
-        for p in range(3) :
+        for p in range(self.cardWait-1) :
             self.setMixerByName(p,'Mic', self.mics[p])
             self.setMixerByName(p,'Speaker', self.speakers[p])
         # set the level for the onboard PWM
@@ -378,6 +378,9 @@ class hwio :
             pc = self.top.port3.card
         elif (pn==4) :
             pc = 'sysdefault:CARD=ALSA'
+        if(self.top.options.verbose) :
+            print("setMixerByName port %d, card %s, mix %s, val %d" %
+                  (pn,pc,mixType,val))
         cn = pc[16:]
         if (mixType == 'Mic') :
             control = alsaaudio.PCM_CAPTURE
@@ -388,17 +391,22 @@ class hwio :
         else :
             print("bad control type %s" % mixType)
             control = None
-        #print("There are %d sound cards" % len(c))
+        if(self.top.options.verbose) :
+            print("There are %d sound cards" % len(c))
         for i in range(len(c)) :
             m = alsaaudio.mixers(i)
             if ('Mic' in m and 'Speaker' in m) :
-                #print("Card %d: %s has both" % (i,c[i]))
+                if(self.top.options.verbose) :
+                    print("Card %d: %s has both" % (i,c[i]))
                 pass
             if(cn==c[i]) :
-                mix = alsaaudio.Mixer(control=mixType, cardindex=i)
-                mix.setvolume(val,0,control)
-                if (mixType == 'Speaker') :
-                    mix.setvolume(val,1,control) # also set the other channel
+                if(mixType in m) :
+                    mix = alsaaudio.Mixer(control=mixType, cardindex=i)
+                    mix.setvolume(val,0,control)
+                    if (mixType == 'Speaker') :
+                        mix.setvolume(val,1,control) # set the other channel
+                else:
+                    print("Error: setMixerByName port %d card %s does not have mix %s.  CHECK CONFIG or run port detection" % (pn,pc,mixType))
                 return(None)
 
     def linkVoteSet(self, port, link) :

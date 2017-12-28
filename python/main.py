@@ -34,12 +34,28 @@ import tcpSocketCmd
 import socketPython
 import ipPort
 
+def create_parser():
+    """ Create an object to parse the command line arguments."""
+    from optparse import OptionParser
+    usage = "Usage: %s [options]" %__file__
+    parser = OptionParser(usage)
+    parser.add_option("--writeXML", "-w", dest="writeXML", default=False,
+                      action="store_true",
+                      help="""read in current XML config (if one can be found)
+or use built in defaults. Then write out a config file for editing."""
+                      )
+    parser.add_option("--verbose", "-v", dest="verbose", default=False,
+                      action="store_true",
+                      help="""Print extra debug messages"""
+                      )
+    return parser
 class top:
     def __init__ (self) :
         self.host = socket.gethostname()
         self.installPath = os.path.dirname(os.path.realpath(__file__))
         self.localPath = os.path.abspath(self.installPath + "/../" + self.host)
         self.xmlvars = []
+        self.options = {}
     def findFileOnPath (self,baseNameList) :
         for basename in baseNameList :
             for f in [os.path.join(self.localPath,basename), os.path.join(self.installPath,basename)] :
@@ -49,6 +65,8 @@ class top:
     def absPath(self,file) :
         return (os.path.abspath(os.path.join(self.installPath,file)))
 top = top()
+parser= create_parser()
+top.options,args = parser.parse_args()
 sys.path.insert(0,top.localPath)
 import gui
 from logit import logit
@@ -106,6 +124,9 @@ if xmlFile :
     logit("Load XML config : " + xmlFile )
     xmlio.loadXml(top,xmlFile)
 logit("Load XML Done")
+if(top.options.writeXML) :
+    gui.guiSave()
+    exit(0)
 if(gui.gui) :
     gui.init()
 hwio.init_all()
