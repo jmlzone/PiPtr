@@ -52,10 +52,10 @@ class fpPixels :
             self.strip.setPixelColor(i,0)
         self.strip.show()
 
-    def dim(self,rbgval):
-        b=(rgbval & 255) * 100 / self.brightness
-        g=((rgbval>>8) & 255) * 100 / self.brightness
-        r=((rgbval>>16) & 255) * 100 / self.brightness
+    def dim(self,rgbval):
+        b=(rgbval & 255) * self.brightness / 100
+        g=((rgbval>>8) & 255) * self.brightness / 100
+        r=((rgbval>>16) & 255) * self.brightness / 100
         rgb = (int(r)<<16) + (int(g)<<8) + int(b)
         return(rgb)
     

@@ -345,8 +345,9 @@ class hwio :
             self.setMixerByName(p,'Mic', self.mics[p])
             self.setMixerByName(p,'Speaker', self.speakers[p])
         # set the level for the onboard PWM
-        mix = alsaaudio.Mixer(control='PCM', cardindex=0)
-        mix.setvolume(self.pwmLevel,0, alsaaudio.PCM_PLAYBACK)
+        #mix = alsaaudio.Mixer(control='PCM', cardindex=0)
+        #mix.setvolume(self.pwmLevel,0, alsaaudio.PCM_PLAYBACK)
+        self.setMixerByName(4,'PCM',self.pwmLevel)
         
 
     def muteUnmute(self,port,link,en) :
@@ -375,10 +376,14 @@ class hwio :
             pc = self.top.port2.card
         elif (pn==2) :
             pc = self.top.port3.card
+        elif (pn==4) :
+            pc = 'sysdefault:CARD=ALSA'
         cn = pc[16:]
         if (mixType == 'Mic') :
             control = alsaaudio.PCM_CAPTURE
         elif (mixType == 'Speaker') :
+            control = alsaaudio.PCM_PLAYBACK
+        elif (mixType == 'PCM') :
             control = alsaaudio.PCM_PLAYBACK
         else :
             print("bad control type %s" % mixType)
@@ -388,12 +393,13 @@ class hwio :
             m = alsaaudio.mixers(i)
             if ('Mic' in m and 'Speaker' in m) :
                 #print("Card %d: %s has both" % (i,c[i]))
-                if(cn==c[i]) :
-                    mix = alsaaudio.Mixer(control=mixType, cardindex=i)
-                    mix.setvolume(val,0,control)
-                    if (mixType == 'Speaker') :
-                        mix.setvolume(val,1,control) # also set the other channel
-                    return(None)
+                pass
+            if(cn==c[i]) :
+                mix = alsaaudio.Mixer(control=mixType, cardindex=i)
+                mix.setvolume(val,0,control)
+                if (mixType == 'Speaker') :
+                    mix.setvolume(val,1,control) # also set the other channel
+                return(None)
 
     def linkVoteSet(self, port, link) :
         pass
@@ -619,8 +625,9 @@ class hwio :
         self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6)
 
         #set PCM hardware playback to 50
-        mix = alsaaudio.Mixer(control='PCM', cardindex=0)
-        mix.setvolume(83,0, alsaaudio.PCM_PLAYBACK)
+        #mix = alsaaudio.Mixer(control='PCM', cardindex=0)
+        #mix.setvolume(83,0, alsaaudio.PCM_PLAYBACK)
+        self.setMixerByName(4,'PCM',83)
         cardDict={}
         d0 = threading.Thread(target=self.decodeTone, args=[cardList[0],cardDict])
         d1 = threading.Thread(target=self.decodeTone, args=[cardList[1],cardDict])
@@ -657,6 +664,7 @@ class hwio :
         p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, self.top.absPath('../sounds/audiocheck.net_dtmf_3.wav')])
         p.wait()
         time.sleep(2)
+        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,0) # disable port 3 to both!
 
         for card in cardList :
             cardDict[card+'_p'].kill()
