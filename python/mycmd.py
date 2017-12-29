@@ -69,6 +69,9 @@ def enable(port) :
         port.cmdThread.daemon = True
         port.cmdThread.start()
 
+def enableOther(port) :
+    enable(port.other)
+        
 def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
     dt = datetime.datetime.now()
     ds = dt.strftime(format)
@@ -181,8 +184,9 @@ cmdlist = cmdlist + [("1111(\d)", "hwioIn")]
 cmdlist = cmdlist + [("123A$", "mOk")]
 cmdlist = cmdlist + [("456B$", "mOk")]
 cmdlist = cmdlist + [("789C$", "mOk")]
-cmdlist = cmdlist + [("84$", "tailClock")]
 cmdlist = cmdlist + [("47$", "sayIp")]
+cmdlist = cmdlist + [("6565$", "enableOther")]
+
 
 # command processor
 def cmdprocess (q,port) :
@@ -221,7 +225,7 @@ it acts globally or uses port context """
 # Utility functions
 #----------------------------------------------------------------------
 def mOk(port) :
-    port.tx.addTailMsg([port.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
+    port.tx.addTailMsg([port.tx.localPath('../bin/mout')],[ '20', '660', '5000', "OK"],False,False,False,None)
 
 def tailOrBeaconMorse(port,message,wpm=None,tone=None,vol=None, now=False):
     if(wpm==None):
