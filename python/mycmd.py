@@ -205,6 +205,9 @@ it acts globally or uses port context """
                     (name,func) = c
                     m = re.match(name,port.cmd)
                     if(m != None) :
+                        if(top.options.verbose) :
+                            print("CMD: found %s matched %s running command %s" %
+                                  (port.cmd, name, func))
                         found = 1
                         if(len(m.groups()) ==1) :
                             result = eval(func+"(port,"+m.group(1)+")")
