@@ -1,0 +1,54 @@
+Quick start guide.
+
+1) Install a fresh raspian on a SD card.  I use 32 Gig High speed cards.
+   Below is how I did it on my mac:
+  download from: https://www.raspberrypi.org/downloads/raspbian/
+
+ diskutil list
+ diskutil unmountDisk /dev/disk3
+ sudo dd bs=1m if=/Users/jml/Downloads/2017-11-29-raspbian-stretch.img of=/dev/rdisk3
+ diskutil eject /dev/disk3
+
+2) install the card in a pi3 with keybopard mouse, monitor and network access.
+
+3) Boot, open a terminal and "sudo raspi-config"
+  a) set a host name (suggestion repeater call and primary frequency)
+  b) configure wifi if needed
+  c) Localsation options
+     I1) Local  disable en_GB and select en_US.UTF-8, also select as default local
+     I2) set time zone
+     I3) change kepboard layout, select 104 key keyboard, English (US), English (US) a second time, defaul layout, no compose key, no (to terminate the x server)
+     I4) Wifi Country select US
+  c) interfacing options.
+     P2) enable SSH
+     P3) I enable the VNC server so we can run the GUI remotely.
+     P4) Enable SPI
+     P5) Enable I2C
+     P6) Disable login on serial and serial port, we done use it, the pin are using elswere in the PiRpt
+  d) Finish and reboot
+
+4) open a terminal and install PiPtr code
+   git clone https://github.com/jmlzone/PiPtr
+
+5) auto get all needed updates and package dependancies for PiPtr
+  cd PiPrt
+  ./setup.sh
+
+
+6) Create a config template and edit as needed
+   cd python
+   sudo ./main.py -w
+   sudo chown pi.pi <the newly created template file>
+
+  edit with your favoriate editor the newly created template.
+
+  if you are not using a piptr board but USB sound cards, edit the
+  <cardWait> to the numer of cards you actually have
+
+  Set the call sign(s) and other values as needed
+
+  edit the sound caerd device names as needed (aplay -L | grep sysdefault)
+
+7) run PiPtr with your configuration
+  sudo ./main.py
+
