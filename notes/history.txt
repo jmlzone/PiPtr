@@ -666,7 +666,6 @@ sudo apt-get install -y python3-smbus scons python-dev swig
 
 # to set up the neopixel module
 # this one hangs freqauently bad!!!
-#git clone https://github.com/jgarff/rpi_ws281x
 #cd rpi_ws281x/
 #scons
 #cd python
@@ -674,9 +673,10 @@ sudo apt-get install -y python3-smbus scons python-dev swig
 #sudo python3 ./setup.py install
 # try this variation
 #git clone https://github.com/richardghirst/rpi_ws281x
-edit mailbox.c to change the /tmp to /dev...
-git clone https://github.com/plan44/rpi_ws281x
+#edit mailbox.c to change the /tmp to /dev...
+#git clone https://github.com/plan44/rpi_ws281x
 cd ~
+git clone https://github.com/jgarff/rpi_ws281x
 cd rpi_ws281x/
 scons
 cd python
