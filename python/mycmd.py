@@ -168,8 +168,8 @@ def hwioIn(port,arg) :
 # the command table can be in the format of the long list or you can add things like shown at the end.
 #
 cmdlist =[("123$","test123"), # the $ at the end forces an exact match
-          ("456","test456"),
-          ("789","test789")]
+          ("456$","test456"),
+          ("789$","test789")]
 cmdlist = cmdlist + [("123(\d+)", "cmdWithArg")] # rexexp type argument needed 1 or more decimal digits.
 cmdlist = cmdlist + [("DDDDD", "rptDown")]
 cmdlist = cmdlist + [("2337(\d)", "beepMethod")]
