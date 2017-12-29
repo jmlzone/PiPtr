@@ -307,7 +307,7 @@ class rx:
             p=dummy()
 
         time.sleep(1)
-        while(True) :
+        while(self.port.enabled) :
             txt = str(p.stdout.readline())
             ctcss = re.search(r'CTCSS (?P<state>[DL]): (?P<num>\d)',txt)
             dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
@@ -323,6 +323,9 @@ class rx:
                 if(self.port.rx.cmdMode) :
                     self.port.fsm.cmdTimer.reset()
                 self.port.fsm.mute()
+        # while exits when port disabled
+        p.terminate()
+        #join(self.sd,None)
 
     def run(self) :
         self.sd = threading.Thread(target=self.softDecode, args=[self.q])
@@ -360,12 +363,17 @@ class radioPort :
         self.cmd = ""
         self.enabled = True
         self.idleWav = self.tx.localPath('../sounds/idle.wav')
+        self.fsmThread = None
+        self.cmdThread = None
+        
 
+        
     def run(self) :
         if(self.enabled) :
             self.rx.run()
             self.fsm.startUp()
-
+            #threading.Thread.join(self.fsmThread,None)
+            
     def setLinkState(self,linkNum):
         if(linkNum >3) :
             linkNum = 0;

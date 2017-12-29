@@ -135,19 +135,19 @@ hwio.init_all()
 # commend out the fp.connect when no pixes to reduce load and hangs
 fp.connect()
 if(port1.enabled) :
-    p1 = threading.Thread(target=port1.run)
-    p1.daemon = True
-    p1.start()
-    d1 = threading.Thread(target=cmdprocess, args=(q1,port1))
-    d1.daemon = True
-    d1.start()
+    port1.fsmThread = threading.Thread(target=port1.run)
+    port1.fsmThread.daemon = True
+    port1.fsmThread.start()
+    port1.cmdThread = threading.Thread(target=cmdprocess, args=(q1,port1))
+    port1.cmdThread.daemon = True
+    port1.cmdThread.start()
 if(port2.enabled) :
-    p2 = threading.Thread(target=port2.run)
-    p2.daemon = True
-    p2.start()
-    d2 = threading.Thread(target=cmdprocess, args=(q2,port2))
-    d2.daemon = True
-    d2.start()
+    port2.fsmThread = threading.Thread(target=port2.run)
+    port2.fsmThread.daemon = True
+    port2.fsmThread.start()
+    port2.cmdThread = threading.Thread(target=cmdprocess, args=(q2,port2))
+    port2.cmdThread.daemon = True
+    port2.cmdThread.start()
 
 #g = threading.Thread(target=gui.run)
 #g.daemon = True

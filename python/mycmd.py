@@ -58,7 +58,17 @@ def setLinkState(port,arg) :
 def linkBoth(port,arg) :
     setLinkState(port,arg)
     setLinkState(port.other,arg)
-    
+
+def enable(port) :
+    if(not port.enabled) :
+        port.enabled = True
+        port.fsmThread = threading.Thread(target=port.run)
+        port.fsmThread.daemon = True
+        port.fsmThread.start()
+        port.cmdThread = threading.Thread(target=cmdprocess, args=(port.q,port))
+        port.cmdThread.daemon = True
+        port.cmdThread.start()
+
 def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
     dt = datetime.datetime.now()
     ds = dt.strftime(format)
@@ -180,7 +190,7 @@ def cmdprocess (q,port) :
 and a process thread for each port it gets the port specific touch
 tone queue and the port for context.  Its up to a command to decide if
 it acts globally or uses port context """
-    while (True) :
+    while (port.enabled) :
         tone = str(q.get()) # block until somthing is ready
         if (tone == " ") : # terminator at end of rx
             if(len(port.cmd) >0) :
@@ -204,6 +214,8 @@ it acts globally or uses port context """
         else :
             port.cmd = port.cmd + tone
             print("Port" + str(port.portnum) + ": " + tone)
+    # while exits when port disabled (evenually)
+    # threading.Thread.join(self,None)
 
 #----------------------------------------------------------------------
 # Utility functions
