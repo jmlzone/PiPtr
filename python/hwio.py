@@ -266,6 +266,8 @@ class hwio :
         self.WriteTconPair(rn,wv,bus)
 
     def WritePGAChan(self,chan,ss,bus):
+        if(self.top.options.verbose) :
+            print("WritePGAChan, chan %d, ss %d, bus %d" % (chan,ss,bus))
         GPIO.output(self.selPins, self.splitBits(ss))
         cmd = 65
         val = chan & 7
@@ -283,6 +285,8 @@ class hwio :
         100 gain = 16
         111 gain = 32
         """
+        if(self.top.options.verbose) :
+            print("WritePGAGain, gain %d, ss %d, bus %d" % (gain,ss,bus))
         GPIO.output(self.selPins, self.splitBits(ss))
         cmd = 64
         val = gain & 7

@@ -370,5 +370,5 @@ class radioPort :
         if(linkNum >3) :
             linkNum = 0;
         self.linkState = linkNum;
-        self.hwio.WritePGAChan(linkNum,self.portnum+5,0)
-        self.hwio.WritePGAGain(self.hwio.gain[linkNum][linkNum],self.portnum+5,0)
+        self.hwio.WritePGAChan(linkNum,self.portnum+4,0)
+        self.hwio.WritePGAGain(self.hwio.gain[linkNum][linkNum],self.portnum+4,0)
