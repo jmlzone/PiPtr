@@ -610,6 +610,13 @@ class hwio :
             i=i+1
             c=alsaaudio.cards()
             print("%d: have %d cards" % (i,len(c)))
+        # now that we see the cards, let's unbind the hid driver since it only caseses problems
+        try: 
+            hidfd = open('/sys/bus/hid/drivers/generic-usb/unbind','w')
+            hidfd.write('0003:0D8C:0012.0005')
+            hidfd.close()
+        except :
+            print('waitForCards:: could not disable HID driver')
 
     def portDetect(self):
         p=subprocess.Popen(['../bin/gpio_alt','-p','18','-f','5'])
