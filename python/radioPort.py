@@ -380,7 +380,7 @@ class radioPort :
         if(self.linkState) :
             if(self.fsm.linkVotes) :
                 self.fsm.linkVotes = 0;  #If we were linked clear our vote.
-                if(self.linkState==1) & (self.other.linkState==1) & self.other.enabled) :
+                if((self.linkState==1) & (self.other.linkState==1) & self.other.enabled) :
                     self.other.fsm.clrLinkRx(1) # port 1 linking is special and software only
                     self.fsm.clrLinkRx(1) # clear ourself also
         self.linkState = linkNum;
