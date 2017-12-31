@@ -612,7 +612,8 @@ class hwio :
             print("%d: have %d cards" % (i,len(c)))
         # now that we see the cards, let's unbind the hid driver since it only caseses problems
         try: 
-            hidfd = open('/sys/bus/hid/drivers/generic-usb/unbind','w')
+            #hidfd = open('/sys/bus/hid/drivers/generic-usb/unbind','w')
+            hidfd = open('/sys/bus/hid/drivers/hid-generic/unbind','w')
             hidfd.write('0003:0D8C:0012.0005')
             hidfd.close()
         except :
