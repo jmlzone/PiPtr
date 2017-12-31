@@ -52,8 +52,6 @@ def rptOff(port):
     
 def setLinkState(port,arg) :
     port.setLinkState(arg) # should probably queue some message
-    if(arg == 0) :
-        port.linkVotes = 0
 
 def linkBoth(port,arg) :
     setLinkState(port,arg)
