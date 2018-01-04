@@ -413,6 +413,19 @@ class hwio :
                     print("Error: setMixerByName port %d card %s does not have mix %s.  CHECK CONFIG or run port detection" % (pn,pc,mixType))
                 return(None)
 
+    def checkCard(self,cardName):
+        good=False
+        c=alsaaudio.cards()
+        cn = cardName[16:]
+        for i in range(len(c)) :
+            m = alsaaudio.mixers(i)
+            if ('Mic' in m and 'Speaker' in m) :
+                if(self.top.options.verbose) :
+                    print("Card %d: %s has both" % (i,c[i]))
+                if(cn==c[i]) :
+                    good = True
+        return(good)
+    
     def linkVoteSet(self, port, link) :
         pass
     def linkVoteClr(self, port, link) :
@@ -721,25 +734,27 @@ class hwio :
 
     def decodeTone(self,card,cardDict):
         mmPath = self.top.absPath('../bin/multimon')
-        print("card %s : starting multimon %s" % (card, mmPath)) 
-        try:
-            p=subprocess.Popen([mmPath, 'sysdefault:CARD='+card, '-a', 'dtmf'], stdout=subprocess.PIPE)
-        except:
-            PRINT("Error could not start MultiMon on card %s",card)
-        time.sleep(1)
-        cardDict[card+'_p'] = p
-        while(p.poll()==None) :
-            txt = str(p.stdout.readline())
-            dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
-            if(dtmf != None) :
-                tone = dtmf.group('tone')
-                p.terminate()
-                cardDict[tone] = card
-                print("detected tone %s on card %s" % (tone,card))
+        print("card %s : starting multimon %s" % (card, mmPath))
+        if(self.checkCard('sysdefault:CARD='+card)) :
+            try:
+                p=subprocess.Popen([mmPath, 'sysdefault:CARD='+card, '-a', 'dtmf'], stdout=subprocess.PIPE)
+            except:
+                PRINT("Error could not start MultiMon on card %s",card)
+            time.sleep(1)
+            cardDict[card+'_p'] = p
+            while(p.poll()==None) :
+                txt = str(p.stdout.readline())
+                dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
+                if(dtmf != None) :
+                    tone = dtmf.group('tone')
+                    p.terminate()
+                    cardDict[tone] = card
+                    print("detected tone %s on card %s" % (tone,card))
                 break
-        (stdout,stderr) = p.communicate(timeout=1)
-        print("decodeTone done on card %s" % card)
-
+            (stdout,stderr) = p.communicate(timeout=1)
+            print("decodeTone done on card %s" % card)
+        else:
+            print("decodeTone ignored on bad card %s" % card)
 class adcChan :
     def __init__ (self,spi,chan,scale,llimit,hlimit,updateFunc=None, underFunc=None, overFunc=None, nomFunc=None) :
         self.spi = spi

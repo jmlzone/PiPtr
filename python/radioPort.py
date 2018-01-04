@@ -295,37 +295,40 @@ class rx:
             self.cmdMode = False
     def softDecode (self,q):
         mmPath = self.port.tx.localPath('../bin/multimon')
-        logit("Port %d : starting multimon %s" % (self.port.portnum, mmPath)) 
-        try:
-            p=subprocess.Popen([mmPath, self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
-        except:
-            # dummy test wrapper to simulate multimon
-            import io
-            class dummy:
-                def __init__(self):
-                    self.stdout=io.StringIO("DTMF: 1")
-            p=dummy()
+        if(self.port.hwio.checkCard(self.port.card)) :
+            logit("Port %d : starting multimon %s" % (self.port.portnum, mmPath)) 
+            try:
+                p=subprocess.Popen([mmPath, self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
+            except:
+                # dummy test wrapper to simulate multimon
+                import io
+                class dummy:
+                    def __init__(self):
+                        self.stdout=io.StringIO("DTMF: 1")
+                    p=dummy()
 
-        time.sleep(1)
-        while(self.port.enabled) :
-            txt = str(p.stdout.readline())
-            ctcss = re.search(r'CTCSS (?P<state>[DL]): (?P<num>\d)',txt)
-            dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
-            mute = re.search(r'MUTE',txt)
-            if(ctcss != None) :
-                #print( txt )
-                self.ctcssAct[int(ctcss.group('num'))] = (ctcss.group('state') == 'D')
-                #print( self.ctcssAct )
-                self.update(False) # update the RX status
-                self.softCtcssState(self.ctcssAct)
-            if(dtmf != None) :
-                q.put(dtmf.group('tone'))
+            time.sleep(1)
+            while(self.port.enabled) :
+                txt = str(p.stdout.readline())
+                ctcss = re.search(r'CTCSS (?P<state>[DL]): (?P<num>\d)',txt)
+                dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
+                mute = re.search(r'MUTE',txt)
+                if(ctcss != None) :
+                    #print( txt )
+                    self.ctcssAct[int(ctcss.group('num'))] = (ctcss.group('state') == 'D')
+                    #print( self.ctcssAct )
+                    self.update(False) # update the RX status
+                    self.softCtcssState(self.ctcssAct)
+                if(dtmf != None) :
+                    q.put(dtmf.group('tone'))
                 if(self.port.rx.cmdMode) :
                     self.port.fsm.cmdTimer.reset()
-                self.port.fsm.mute()
-        # while exits when port disabled
-        p.terminate()
-        #join(self.sd,None)
+                    self.port.fsm.mute()
+            # while exits when port disabled
+            p.terminate()
+            #join(self.sd,None)
+        else:
+            print("Error, bad card %s for soft decode, check config or run port detect", self.port.card)
 
     def run(self) :
         self.sd = threading.Thread(target=self.softDecode, args=[self.q])
