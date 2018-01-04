@@ -649,15 +649,18 @@ class hwio :
         #mix.setvolume(83,0, alsaaudio.PCM_PLAYBACK)
         self.setMixerByName(4,'PCM',83)
         cardDict={}
-        d0 = threading.Thread(target=self.decodeTone, args=[cardList[0],cardDict])
-        d1 = threading.Thread(target=self.decodeTone, args=[cardList[1],cardDict])
-        d2 = threading.Thread(target=self.decodeTone, args=[cardList[2],cardDict])
-        d0.daemon = True
-        d0.start()
-        d1.daemon = True
-        d1.start()
-        d2.daemon = True
-        d2.start()
+        if(len(cardList) >0):
+           d0 = threading.Thread(target=self.decodeTone, args=[cardList[0],cardDict])
+           d0.daemon = True
+           d0.start()
+        if(len(cardList) >1):
+           d1 = threading.Thread(target=self.decodeTone, args=[cardList[1],cardDict])
+           d1.daemon = True
+           d1.start()
+        if(len(cardList) >2):
+           d2 = threading.Thread(target=self.decodeTone, args=[cardList[2],cardDict])
+           d2.daemon = True
+           d2.start()
 
         print("Detecting port 1")
         self.i2cSafeWrite(GPIOEX1, GPIOR,0) # enable detect 1
@@ -672,35 +675,49 @@ class hwio :
         time.sleep(2)
         self.i2cSafeWrite(GPIOEX2, GPIOR,1<<6) # disable port 2
         p3=[]
-        p3.append(cardList[0])
-        p3.append(cardList[1])
-        p3.append(cardList[2])
-        p3.remove(cardDict['1'])
-        p3.remove(cardDict['2'])
-        c3=p3[0]
-
-        print("Detecting port 3")
-        self.i2cSafeWrite(GPIOEX3, GPIOR,6) # enable port 3 to both!
-        p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, self.top.absPath('../sounds/audiocheck.net_dtmf_3.wav')])
-        p.wait()
-        time.sleep(2)
-        self.i2cSafeWrite(GPIOEX3, GPIOR,0) # disable port 3 to both!
+        for i in range(len(cardList)) :
+            p3.append(cardList[i])
+        if( '1' in cardDict.keys()) : 
+            p3.remove(cardDict['1'])
+        else:
+            print("Port Detect:: Warning: Unable to detect sound device on port 1")
+        if( '2' in cardDict.keys()) : 
+            p3.remove(cardDict['2'])
+        else:
+            print("Port Detect:: Warning: Unable to detect sound device on port 2")
+        if(len(p3) >0) :
+            c3=p3[0]
+            print("Detecting port 3")
+            self.i2cSafeWrite(GPIOEX3, GPIOR,6) # enable port 3 to both!
+            p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, self.top.absPath('../sounds/audiocheck.net_dtmf_3.wav')])
+            p.wait()
+            time.sleep(2)
+            self.i2cSafeWrite(GPIOEX3, GPIOR,0) # disable port 3 to both!
 
         for card in cardList :
             cardDict[card+'_p'].kill()
             cardDict[card+'_p'].poll()
 
-        card1 = "sysdefault:CARD=" + cardDict['1']
-        card2 = "sysdefault:CARD=" + cardDict['2']
-        card3 = "sysdefault:CARD=" + cardDict['3']
+        if( '1' in cardDict.keys()) : 
+            card1 = "sysdefault:CARD=" + cardDict['1']
+            self.top.port1.card=card1
+        else:
+            card1 = "Not Detected"
+        if( '2' in cardDict.keys()) : 
+            card2 = "sysdefault:CARD=" + cardDict['2']
+            self.top.port2.card=card2
+        else:
+            card2 = "Not Detected"
+        if( '3' in cardDict.keys()) : 
+            card3 = "sysdefault:CARD=" + cardDict['3']
+            self.top.port3.card=card3
+        else:
+            card3 = "Not Detected"
 
-        print("completed card detection, ordered cards are")
+        print("Completed card detection, ordered cards are")
         print(card1)
         print(card2)
         print(card3)
-        self.top.port1.card=card1
-        self.top.port2.card=card2
-        self.top.port3.card=card3
 
     def decodeTone(self,card,cardDict):
         mmPath = self.top.absPath('../bin/multimon')
@@ -711,7 +728,7 @@ class hwio :
             PRINT("Error could not start MultiMon on card %s",card)
         time.sleep(1)
         cardDict[card+'_p'] = p
-        while(True) :
+        while(p.poll()==None) :
             txt = str(p.stdout.readline())
             dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
             if(dtmf != None) :
@@ -720,6 +737,8 @@ class hwio :
                 cardDict[tone] = card
                 print("detected tone %s on card %s" % (tone,card))
                 break
+        (stdout,stderr) = p.communicate(timeout=1)
+        print("decodeTone done on card %s" % card)
 
 class adcChan :
     def __init__ (self,spi,chan,scale,llimit,hlimit,updateFunc=None, underFunc=None, overFunc=None, nomFunc=None) :
