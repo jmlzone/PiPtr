@@ -602,7 +602,7 @@ class hwio :
     def waitForCards(self,ncards) :
         # turn on sound card
         print("turning on sound cards")
-        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,0)
+        self.i2cSafeWrite(GPIOEX3, GPIOR,0)
         c=[]
         i=0
         while( i<10 and len(c) <ncards) :
@@ -624,9 +624,9 @@ class hwio :
         p.wait()
         p=subprocess.Popen(['../bin/gpio_alt','-p','19','-f','5'])
         p.wait()
-        self.i2cBus.write_byte_data(GPIOEX1, IODIR,0)
-        self.i2cBus.write_byte_data(GPIOEX2, IODIR,0)
-        self.i2cBus.write_byte_data(GPIOEX3, IODIR,0)
+        self.i2cSafeWrite(GPIOEX1, IODIR,0)
+        self.i2cSafeWrite(GPIOEX2, IODIR,0)
+        self.i2cSafeWrite(GPIOEX3, IODIR,0)
         c=alsaaudio.cards()
         cardList = []
         for i in range(len(c)) :
@@ -641,8 +641,8 @@ class hwio :
                 mix.setvolume(24,1, alsaaudio.PCM_PLAYBACK)
         # disable both port detects
         print("preparing for port detection")
-        self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6)
-        self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6)
+        self.i2cSafeWrite(GPIOEX1, GPIOR,1<<6)
+        self.i2cSafeWrite(GPIOEX2, GPIOR,1<<6)
 
         #set PCM hardware playback to 50
         #mix = alsaaudio.Mixer(control='PCM', cardindex=0)
@@ -660,17 +660,17 @@ class hwio :
         d2.start()
 
         print("Detecting port 1")
-        self.i2cBus.write_byte_data(GPIOEX1, GPIOR,0) # enable detect 1
+        self.i2cSafeWrite(GPIOEX1, GPIOR,0) # enable detect 1
         p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.absPath('../sounds/audiocheck.net_dtmf_1.wav')])
         p.wait()
         time.sleep(2)
-        self.i2cBus.write_byte_data(GPIOEX1, GPIOR,1<<6) # disable port 1
+        self.i2cSafeWrite(GPIOEX1, GPIOR,1<<6) # disable port 1
         print("Detecting port 2")
-        self.i2cBus.write_byte_data(GPIOEX2, GPIOR,0) # enable port 2
+        self.i2cSafeWrite(GPIOEX2, GPIOR,0) # enable port 2
         p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD=ALSA', self.top.absPath('../sounds/audiocheck.net_dtmf_2.wav')])
         p.wait()
         time.sleep(2)
-        self.i2cBus.write_byte_data(GPIOEX2, GPIOR,1<<6) # disable port 2
+        self.i2cSafeWrite(GPIOEX2, GPIOR,1<<6) # disable port 2
         p3=[]
         p3.append(cardList[0])
         p3.append(cardList[1])
@@ -680,11 +680,11 @@ class hwio :
         c3=p3[0]
 
         print("Detecting port 3")
-        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,6) # enable port 3 to both!
+        self.i2cSafeWrite(GPIOEX3, GPIOR,6) # enable port 3 to both!
         p=subprocess.Popen(['/usr/bin/aplay', '-D', 'sysdefault:CARD='+c3, self.top.absPath('../sounds/audiocheck.net_dtmf_3.wav')])
         p.wait()
         time.sleep(2)
-        self.i2cBus.write_byte_data(GPIOEX3, GPIOR,0) # disable port 3 to both!
+        self.i2cSafeWrite(GPIOEX3, GPIOR,0) # disable port 3 to both!
 
         for card in cardList :
             cardDict[card+'_p'].kill()
