@@ -714,6 +714,8 @@ class hwio :
             self.i2cSafeWrite(GPIOEX3, GPIOR,0) # disable port 3 to both!
 
         for card in cardList :
+            if (self.top.options.verbose) :
+                print("Killing processes on %s" % card)
             cardDict[card+'_p'].kill()
             cardDict[card+'_p'].poll()
 
