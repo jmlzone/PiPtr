@@ -48,6 +48,18 @@ or use built in defaults. Then write out a config file for editing."""
                       action="store_true",
                       help="""Print extra debug messages"""
                       )
+    parser.add_option("--portdetect", "-d", dest="portdetect", default=False,
+                      action="store_true",
+                      help="""force port detection even if configured off"""
+                      )
+    parser.add_option("--exitafterdetection", "-e", dest="exitdetect", default=False,
+                      action="store_true",
+                      help="""force port detection even if configured off then exit"""
+                      )
+    parser.add_option("--nosound", "-n", dest="nosound", default=False,
+                      action="store_true",
+                      help="""configure all ports to onboard sound output only"""
+                      )
     return parser
 class top:
     def __init__ (self) :

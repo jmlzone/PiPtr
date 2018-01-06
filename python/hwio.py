@@ -322,8 +322,14 @@ class hwio :
         return(val)
     def init_all(self) :
         self.waitForCards(self.cardWait)
-        if(self.autoPortDetect) :
+        if(self.autoPortDetect or self.top.options.portdetect or self.top.options.exitdetect) :
             self.portDetect()
+            if(self.top.options.exitdetect) :
+                exit()
+        if(self.top.options.nosound) :
+            self.top.port1.card='sysdefault:CARD=ALSA'
+            self.top.port2.card='sysdefault:CARD=ALSA'
+            self.top.port3.card='sysdefault:CARD=ALSA'
         for r in range(8) :
             self.WriteRes(r,self.vals[r],0)
             self.WriteTcon(r,self.tcon[r],0)

@@ -308,7 +308,7 @@ class rx:
                     p=dummy()
 
             time.sleep(1)
-            while(self.port.enabled) :
+            while(self.port.enabled and (p.poll()==None)) :
                 txt = str(p.stdout.readline())
                 ctcss = re.search(r'CTCSS (?P<state>[DL]): (?P<num>\d)',txt)
                 dtmf = re.search(r'DTMF: (?P<tone>[0123456789ABCDEF])',txt)
