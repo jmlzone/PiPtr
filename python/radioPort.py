@@ -296,7 +296,7 @@ class rx:
     def softDecode (self,q):
         mmPath = self.port.tx.localPath('../bin/multimon')
         if(self.port.hwio.checkCard(self.port.card)) :
-            logit("Port %d : starting multimon %s" % (self.port.portnum, mmPath)) 
+            logit("Port %d : starting multimon %s on %s" % (self.port.portnum, mmPath, self.port.card)) 
             try:
                 p=subprocess.Popen([mmPath, self.port.card, '-a', 'dtmf', '-a', 'ctcss'], stdout=subprocess.PIPE)
             except:
