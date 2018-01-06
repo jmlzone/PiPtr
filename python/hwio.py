@@ -731,6 +731,7 @@ class hwio :
             card3 = "sysdefault:CARD=" + cardDict['3']
             self.top.port3.card=card3
         else:
+            print("Port Detect:: Warning: Unable to detect sound device on port 3")
             card3 = "Not Detected"
 
         print("Completed card detection, ordered cards are")
@@ -757,7 +758,10 @@ class hwio :
                     cardDict[tone] = card
                     print("detected tone %s on card %s" % (tone,card))
                 break
-            (stdout,stderr) = p.communicate(timeout=1)
+            try:
+                (stdout,stderr) = p.communicate(timeout=1)
+            except:
+                pass
             print("decodeTone done on card %s" % card)
         else:
             print("decodeTone ignored on bad card %s" % card)
