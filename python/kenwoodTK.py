@@ -63,7 +63,7 @@ class kenwoodTK:
     """ A Kenwood TK701 (VHF) or Kenwood TK801 (UHF) With the proms removed and
     a max7314 driging the prom outputs to be frequency agile 
     """
-    def __init__ (self,addr) :
+    def __init__ (self,addr=ADDR2) :
         self.addr = addr
         self.i2cBus = smbus.SMBus(1)
         """ initialize max7314 for static outputs,
@@ -81,8 +81,8 @@ class kenwoodTK:
             tx_code = ((tx_freq -21400) * 2) / 25 # uhf settings
             rx_code = ((rx_freq -21400) * 2) / 25
             
-        self.pllSetTx(tx_code)
-        self.pllSetRx(rx_code)
+        self.pllSetTx(int(tx_code))
+        self.pllSetRx(int(rx_code))
 
 
     def pllSetRx(self,freq) :
