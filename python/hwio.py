@@ -205,6 +205,7 @@ class hwio :
         #print "cmd is %x" % cmd
         GPIO.output(self.selPins, self.splitBits(ss))
         self.spi.open(0,bus)
+        self.spi.max_speed_hz=10000000
         data16 = self.spi.xfer2([cmd,0])
         data = ((data16[0]&1) << 8) + data16[1]
         if((data16[0] & 1) == 2) :
@@ -229,6 +230,7 @@ class hwio :
             cmd=cmd+1
             val=val-256
         self.spi.open(0,bus)
+        self.spi.max_speed_hz=10000000
         data16 = self.spi.xfer2([cmd,val])
         if((data16[0] & 1) == 2) :
             print("SPI Command Error")
@@ -250,6 +252,7 @@ class hwio :
             cmd=cmd+1
             val=val-256
         self.spi.open(0,bus)
+        self.spi.max_speed_hz=10000000
         data16 = self.spi.xfer2([cmd,val])
         if((data16[0] & 1) == 2) :
             print("SPI Command Error")
@@ -272,6 +275,7 @@ class hwio :
         cmd = 65
         val = chan & 7
         self.spi.open(0,bus)
+        self.spi.max_speed_hz=10000000
         data16 = self.spi.xfer2([cmd,val])
         self.spi.close()
 
@@ -291,6 +295,7 @@ class hwio :
         cmd = 64
         val = gain & 7
         self.spi.open(0,bus)
+        self.spi.max_speed_hz=10000000
         data16 = self.spi.xfer2([cmd,val])
         self.spi.close()
 
