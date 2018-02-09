@@ -788,6 +788,7 @@ class adcChan :
             return -1
     def measure(self) :
         self.spi.open(0,self.bus)
+        self.spi.max_speed_hz=3000000
         r = self.spi.xfer2([1, 8 + self.chan << 4, 0])
         self.spi.close()
         data = ((r[1] & 3) << 8) + r[2]
