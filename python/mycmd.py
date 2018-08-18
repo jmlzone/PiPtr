@@ -74,15 +74,16 @@ def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
     dt = datetime.datetime.now()
     ds = dt.strftime(format)
     myTime = prefix + " "+ ds
-#    device = string.replace(card,'sysdefault:CARD=','')
-    device = card.replace('sysdefault:CARD=','')
-    os.environ['ALSA_CARD'] = device
-    subprocess.call(['/usr/bin/espeak', myTime], shell=False)
+    say(card,myTime)
+#    device = card.replace('sysdefault:CARD=','')
+#    os.environ['ALSA_CARD'] = device
+#    subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
 def say(card,msg):
-    device = card.replace('sysdefault:CARD=','')
-    os.environ['ALSA_CARD'] = device
-    subprocess.call(['/usr/bin/espeak', msg], shell=False)
+    subprocess.call(['/usr/local/bin/espeak-ng','-D',card, '-v!v/Storm', msg], shell=False)
+#    device = card.replace('sysdefault:CARD=','')
+#    os.environ['ALSA_CARD'] = device
+#    subprocess.call(['/usr/bin/espeak', msg], shell=False)
 
 def tailClock(port) :
     port.tx.addTailMsg(talkingClock,{'format': "%I %M %p"},True,False,False,None)
