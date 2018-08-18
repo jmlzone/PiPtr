@@ -58,12 +58,12 @@ BLINKFLIP = (1<<1)  # Invert polarity of blink pin/bit
 BLINKEN   = 1       # Enable two Phase Blinking
 
 # Intestsity Registers
-INTSTATIC = 0xff   # all intesisies static
+INTSTATIC = 0xff   # all intensities static
 class kenwoodTK:
     """ A Kenwood TK701 (VHF) or Kenwood TK801 (UHF) With the proms removed and
     a max7314 driging the prom outputs to be frequency agile 
     """
-    def __init__ (self,addr) :
+    def __init__ (self,addr=ADDR2) :
         self.addr = addr
         self.i2cBus = smbus.SMBus(1)
         """ initialize max7314 for static outputs,
@@ -75,14 +75,14 @@ class kenwoodTK:
 
     def setFreqDirect(self,tx_freq, rx_freq) :
         if(tx_freq < 200000) :
-            tx_code = (tx_freq -21400) /5 # vhf settings
-            rx_code = (rx_freq -21400) /5
+            tx_code = (tx_freq -21400) //5 # vhf settings
+            rx_code = (rx_freq -21400) //5 # // is integer divide!
         else :
-            tx_code = ((tx_freq -21400) * 2) / 25 # uhf settings
-            rx_code = ((rx_freq -21400) * 2) / 25
+            tx_code = ((tx_freq -21400) * 2) // 25 # uhf settings
+            rx_code = ((rx_freq -21400) * 2) // 25
             
-        self.pllSetTx(tx_code)
-        self.pllSetRx(rx_code)
+        self.pllSetTx(int(tx_code))
+        self.pllSetRx(int(rx_code))
 
 
     def pllSetRx(self,freq) :
