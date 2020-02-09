@@ -123,8 +123,11 @@ class kenwoodTK:
     """ A Kenwood TK701 (VHF) or Kenwood TK801 (UHF) With the proms removed and
     a max7314 driging the prom outputs to be frequency agile 
     """
-    def __init__ (self,addr=ADDR2,plAddr=0x27) :
+    def __init__ (self,addr=ADDR2,plAddr=0x27,txFreq=446000,rxFreq=446000,plName="88.5") :
         self.addr = addr
+        self.txFreq = txFreq
+        self.rxFreq = rxFreq
+        self.plName = plName
         self.plAddr = plAddr # MCP3008 for frequency control
         self.i2cBus = smbus.SMBus(1)
         self.plVal=dict()
@@ -147,7 +150,9 @@ class kenwoodTK:
         except:
             print("Kenwood TK PL control is offline");
             self.plCtl = False
-           
+        if(self.freqCtl and self.plCtl) :
+            self.update()
+        print("Initilized Kenwood to Rx %d, TX %d, PL %s" %(self.rxFreq,self.txFreq,self.plName)) 
 
     def setFreqDirect(self,tx_freq, rx_freq) :
         if(tx_freq < 200000) :
@@ -157,16 +162,19 @@ class kenwoodTK:
             tx_code = ((tx_freq -21400) * 2) // 25 # uhf settings
             rx_code = ((rx_freq -21400) * 2) // 25
             
+        self.txFreq = tx_freq
+        self.txFreq = rx_freq
         self.pllSetTx(int(tx_code))
         self.pllSetRx(int(rx_code))
 
 
     def pllSetRx(self,freq) :
-        self.i2cBus.write_word_data(self.addr,DOUT_P0_L,freq)
-
+        if(self.freqCtl):
+            self.i2cBus.write_word_data(self.addr,DOUT_P0_L,freq)
 
     def pllSetTx(self,freq):
-        self.i2cBus.write_word_data(self.addr,DOUT_P1_L,freq)
+        if(self.freqCtl):
+            self.i2cBus.write_word_data(self.addr,DOUT_P1_L,freq)
 
     def readAll(self) :
         [buf0,buf1] = self.i2cBus.read_i2c_block_data(self.addr,DIN_L,2)
@@ -192,6 +200,7 @@ class kenwoodTK:
 
     def setPlByName(self,plName) :
         if(plName in self.plVal):
+            self.plName = plName
             if(self.plCtl) :
                 try:
                     self.i2cBus.write_byte_data(self.plAddr, GPIOR, self.plVal[plName])
@@ -201,3 +210,7 @@ class kenwoodTK:
                 print("There is not PLcontrol for theis kenwood")
         else :
             print("I dont know a code for PL %s" %plName)
+
+    def update(self) :
+        self.setFreqDirect(self.txFreq,self.rxFreq)
+        self.setPlByName(self.plName)
