@@ -129,7 +129,10 @@ class kenwoodTK:
         self.rxFreq = rxFreq
         self.plName = plName
         self.plAddr = plAddr # MCP3008 for frequency control
-        self.i2cBus = smbus.SMBus(1)
+        try:
+            self.i2cBus = smbus.SMBus(0) # i2c 0 is the external i2c bus on PiPtr not SMBus(1)
+        except:
+            print("SMBus 0 not available for Kenwood control")
         self.plVal=dict()
         self.SwitchTableToValue()
         """ initialize max7314 for static outputs,
