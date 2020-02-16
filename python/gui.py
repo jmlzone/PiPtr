@@ -276,24 +276,29 @@ class gui :
             self.c.tag_bind(self.ref['tx2'], '<Button-1>', self.txClick2)
 
             if(self.top.options.tunekenwood) :
-                self.c.create_text(45,420,text="RX",fill="white")
-                self.rxFreq = Text(self.tk,height=1,width=7)
-                self.rxFreq.place(x=60,y=410)
-                self.rxFreq.insert(1.0, self.top.kenwood.rxFreq)
-                self.rxFreq.bind('<FocusOut>',self.rxupdate)
-                self.rxFreq.bind('<Return>',self.rxupdate)
-                self.c.create_text(140,420,text="TX",fill="white")
-                self.txFreq = Text(self.tk,height=1,width=7)
-                self.txFreq.place(x=155,y=410)
-                self.txFreq.insert(1.0, self.top.kenwood.txFreq)
-                self.txFreq.bind('<FocusOut>',self.txupdate)
-                self.txFreq.bind('<Return>',self.txupdate)
-                self.c.create_text(240,420,text="PL",fill="white")
-                self.plName = Text(self.tk,height=1,width=5)
-                self.plName.place(x=255,y=410)
-                self.plName.insert(1.0, self.top.kenwood.plName)
-                self.plName.bind('<FocusOut>',self.plupdate)
-                self.plName.bind('<Return>',self.plupdate)
+                import pbfreq
+                self.rxf = pbfreq.mySixDigit(self.c,self.tk,10,410,"Receive",int(self.top.kenwood.rxFreq),self.txrxUpdate)
+                self.txf = pbfreq.mySixDigit(self.c,self.tk,200,410,"Transmit",int(self.top.kenwood.txFreq),self.txrxUpdate)
+                self.pl = pbfreq.myPlSelect(self.c,self.tk,390,410, sorted(self.top.kenwood.plVal.keys()),self.top.kenwood.plName,self.plupdate)
+ 
+                #self.c.create_text(45,420,text="RX",fill="white")
+                #self.rxFreq = Text(self.tk,height=1,width=7)
+                #self.rxFreq.place(x=60,y=410)
+                #self.rxFreq.insert(1.0, self.top.kenwood.rxFreq)
+                #self.rxFreq.bind('<FocusOut>',self.rxupdate)
+                #self.rxFreq.bind('<Return>',self.rxupdate)
+                #self.c.create_text(140,420,text="TX",fill="white")
+                #self.txFreq = Text(self.tk,height=1,width=7)
+                #self.txFreq.place(x=155,y=410)
+                #self.txFreq.insert(1.0, self.top.kenwood.txFreq)
+                #self.txFreq.bind('<FocusOut>',self.txupdate)
+                #self.txFreq.bind('<Return>',self.txupdate)
+                #self.c.create_text(240,420,text="PL",fill="white")
+                #self.plName = Text(self.tk,height=1,width=5)
+                #self.plName.place(x=255,y=410)
+                #self.plName.insert(1.0, self.top.kenwood.plName)
+                #self.plName.bind('<FocusOut>',self.plupdate)
+                #self.plName.bind('<Return>',self.plupdate)
 
     def updateItem(self,name,value,color=None):
         if(self.gui) :
@@ -348,9 +353,16 @@ class gui :
         tf=int(self.txFreq.get("1.0",END))
         print("RX %d, TX %d" %(rf,tf));
         self.top.kenwood.setFreqDirect(tf,rf)
+    def txrxUpdate(self) :
+        print("TX RX Update")
+        rf=int(self.rxf.val)
+        tf=int(self.txf.val)
+        print("RX %d, TX %d" %(rf,tf));
+        self.top.kenwood.setFreqDirect(tf,rf)
 
-    def plupdate(self,event) :
+    def plupdate(self) :
         print("plupdate")
-        n=self.plName.get("1.0",END)
+        #n=self.plName.get("1.0",END)
+        n=self.pl.val
         print(n);
         self.top.kenwood.setPlByName(n)
