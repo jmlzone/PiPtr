@@ -32,6 +32,17 @@ cd Adafruit_Python_DHT
 sudo python3 setup.py install
 echo "----------------------------------------------------------------------"
 
+sudo apt-get install -y automake libtool
+echo "getting updated espreak with asla interface:
+cd ~
+git clone https://github.com/jmlzone/espeak-ng
+cd espeak-ng/
+./autogen.sh
+./configure
+make
+sudo make install
+
+
 
 echo "done"
 

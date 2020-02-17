@@ -156,6 +156,10 @@ hwio.init_all()
 # commend out the fp.connect when no pixes to reduce load and hangs
 fp.connect()
 if(top.options.tunekenwood) :
+    port1.rxThread = threading.Thread(target=port1.rx.run)
+    port1.rxThread.daemon = True
+    port1.rxThread.start()
+    
     if (gui.gui) :
         gui.run()
    
