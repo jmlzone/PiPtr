@@ -107,14 +107,17 @@ class rptFsm :
         time.sleep(5 * self.port.portnum)
         self.updateTimers()
         self.getLock()
-        self.port.tx.tx()
-        time.sleep(1)
-        self.port.tx.plGen()
-        self.port.tx.sendId()
-        logit("Port %d Initial Clock" % self.port.portnum)
-        talkingClock(self.port.card, prefix="Start up at")
-        time.sleep(1)
-        self.port.tx.down()
+        if(self.port.isLink) :
+            logit("Port %d is a link" % self.port.portnum)
+        else :
+            self.port.tx.tx()
+            time.sleep(1)
+            self.port.tx.plGen()
+            self.port.tx.sendId()
+            logit("Port %d Initial Clock" % self.port.portnum)
+            talkingClock(self.port.card, prefix="Start up at")
+            time.sleep(1)
+            self.port.tx.down()
         logit("Port %d Startup Done." % self.port.portnum)
         self.releaseLock()
         self.idle()
@@ -162,18 +165,21 @@ class rptFsm :
             self.port.hwio.linkVoteSet(self.port.portnum, self.port.linkState)
         self.rxUpAny()
     def rxUpAny(self):
-        if(self.rptState == 'idle') :
-            self.repeat()
-        elif (self.rptState == 'beacon') :
-            self.cancelBeacon()
-            self.repeat()
-        elif (self.rptState == 'tail') :
-            self.cancelTail()
-            self.repeat()
-        elif (self.rptState == 'repeat') :
-            pass
+        if(self.port.isLink) :
+            print("link rx")
         else:
-            logit("Port %d Error Rx active again in state %s " % (self.port.portnum, self.rxState) )
+            if(self.rptState == 'idle') :
+                self.repeat()
+            elif (self.rptState == 'beacon') :
+                self.cancelBeacon()
+                self.repeat()
+            elif (self.rptState == 'tail') :
+                self.cancelTail()
+                self.repeat()
+            elif (self.rptState == 'repeat') :
+                pass
+            else:
+                logit("Port %d Error Rx active again in state %s " % (self.port.portnum, self.rxState) )
     def rxDown(self) : # part of rx state machine
         self.rxResetTimer.reset() 
         self.rxIdle()
@@ -188,15 +194,18 @@ class rptFsm :
             self.rxTimeoutRelease()
 
     def rxDownAll(self):
-        if(self.rptState == 'repeat') :
-            if(self.port.isLink) :
-                self.idle()
-            else :
-                    self.tail()
-        elif(self.rxState == 'idle' or self.rptState == 'idle') :
-            pass
+        if(self.port.isLink) :
+            print("link rx down")
         else:
-            logit("Port %d Error Rx off again in state %s " % (self.port.portnum, self.rptState) )
+            if(self.rptState == 'repeat') :
+                if(self.port.isLink) :
+                    self.idle()
+                else :
+                    self.tail()
+            elif(self.rxState == 'idle' or self.rptState == 'idle') :
+                pass
+            else:
+                logit("Port %d Error Rx off again in state %s " % (self.port.portnum, self.rptState) )
         
     def rxIdle(self) :
         self.rxState = 'idle'

@@ -107,6 +107,13 @@ UINTA = 8
 UINTB = 10
 ADCSS = 7
 
+""" Link related pins
+"""
+LINK1I = 36
+LINK1O = 33
+LINK2I = 40
+LINK2O = 37
+
 class hwio :
     def __init__ (self,top) :
         self.top = top
@@ -117,6 +124,9 @@ class hwio :
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.selPins, GPIO.OUT)
         GPIO.output(self.selPins, GPIO.LOW)
+        GPIO.setup([LINK1O,LINK2O], GPIO.OUT) 
+        GPIO.setup([LINK1I,LINK2I], GPIO.IN)
+        GPIO.output([LINK1O,LINK2O], GPIO.LOW)
         self.vals = [150,2,50,20,0,0,0,0]
         self.tcon = [15,15,15,15,15,15,15,15]
         self.gain = [ [6,6,6,6], [6,6,6,6] ]
