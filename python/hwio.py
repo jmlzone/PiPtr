@@ -155,6 +155,9 @@ class hwio :
         self.arate = 300
         self.cardWait = 4
         self.autoPortDetect = False
+        # elink votes for external links rpresenting which local ports are receiving and asking to go out a link port
+        self.elink1Votes = 0
+        self.elink2Votes = 0
         self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'pwmLevel',
                         'CH1CTL', 'CH2CTL', 'CH3CTL', 'iodirA', 'ovalA',
                         'iodirB', 'ovalB', 'arate', 'cardWait',
@@ -446,11 +449,38 @@ class hwio :
                 if(cn==c[i]) :
                     good = True
         return(good)
-    
+    """
+        link = 1 internal soft link
+        link = 2 externallink 1 (LINK1O, LINK1I)
+        link = 3 externallink 2 (LINK2O, LINK2I)
+    """
     def linkVoteSet(self, port, link) :
-        pass
+        # is this thread safe or do we need a semiphore?
+        if(link==2) :
+            oldVotes = self.elink1Votes
+            self.elink1Votes = oldVotes | (1<<port)
+            if(oldVotes==0) :
+                GPIO.OUTPUT(LINK1O,GPIO.HI)
+        elif(link==3) :
+            oldVotes = self.elink2Votes
+            self.elink2Votes = oldVotes | (1<<port)
+            if(oldVotes==0) :
+                GPIO.OUTPUT(LINK2O,GPIO.HI)
+        else:
+            pass
     def linkVoteClr(self, port, link) :
-        pass
+        # is this thread safe or do we need a semiphore?
+        if(link==2) :
+            self.elink1Votes = self.elink1Votes &  ~(1<<port)
+            if(self.elink1Votes==0) :
+                GPIO.OUTPUT(LINK1O,GPIO.LOW)
+        elif(link==3) :
+            oldVotes = 
+            self.elink2Votes = self.elink2Votes & ~(1<<port)
+            if(self.elink2Votes==0) :
+                GPIO.OUTPUT(LINK2O,GPIO.LOW)
+        else:
+            pass
     
     def updateMask(self,val,bp,bv) :
         amask = ~(1<<bp) & 0xff

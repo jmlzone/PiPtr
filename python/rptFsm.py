@@ -67,6 +67,17 @@ class rptFsm :
 
         self.lock = threading.Lock()
 
+    """ fsm.linkVotes is a bit vector of the links we are connected to.
+        port.linkState = 0 not linked
+        port.linkState = 1 internal soft link
+        port.linkState = 2 externallink 1 (LINK1O, LINK1I)
+        port.linkState = 3 externallink 2 (LINK2O, LINK2I)
+        So:
+        self.linkVotes bit[0] is not used
+        self.linkVotes bit[1] is the local link
+        self.linkVotes bit[2] is external 1
+        self.linkVotes bit[3] is external 2
+    """
     def setLinkRx(self,linkNum) :
         oldVotes = self.linkVotes
         self.linkVotes = oldVotes | (1<<linkNum)
