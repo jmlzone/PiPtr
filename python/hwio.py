@@ -460,12 +460,12 @@ class hwio :
             oldVotes = self.elink1Votes
             self.elink1Votes = oldVotes | (1<<port)
             if(oldVotes==0) :
-                GPIO.OUTPUT(LINK1O,GPIO.HI)
+                GPIO.output(LINK1O,GPIO.HIGH)
         elif(link==3) :
             oldVotes = self.elink2Votes
             self.elink2Votes = oldVotes | (1<<port)
             if(oldVotes==0) :
-                GPIO.OUTPUT(LINK2O,GPIO.HI)
+                GPIO.output(LINK2O,GPIO.HIGH)
         else:
             pass
     def linkVoteClr(self, port, link) :
@@ -473,12 +473,11 @@ class hwio :
         if(link==2) :
             self.elink1Votes = self.elink1Votes &  ~(1<<port)
             if(self.elink1Votes==0) :
-                GPIO.OUTPUT(LINK1O,GPIO.LOW)
+                GPIO.output(LINK1O,GPIO.LOW)
         elif(link==3) :
-            oldVotes = 
             self.elink2Votes = self.elink2Votes & ~(1<<port)
             if(self.elink2Votes==0) :
-                GPIO.OUTPUT(LINK2O,GPIO.LOW)
+                GPIO.output(LINK2O,GPIO.LOW)
         else:
             pass
     
