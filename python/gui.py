@@ -12,8 +12,12 @@ class gui :
     def __init__(self,top) :
         try: 
             self.tk=Tk()
-            self.c = Canvas(self.tk,bg="black",height = 400, width = 550)
-            self.c.place(x=0, y=0, height = 400, width = 550)
+            if(top.options.tunekenwood) :
+                self.c = Canvas(self.tk,bg="black",height = 450, width = 550)
+                self.c.place(x=0, y=0, height = 450, width = 550)
+            else :
+                self.c = Canvas(self.tk,bg="black",height = 400, width = 550)
+                self.c.place(x=0, y=0, height = 400, width = 550)
             self.c.pack() # extends window to fit.
             self.gui = True
         except:
@@ -268,7 +272,33 @@ class gui :
                 x=x+40
             SaveButton = Button(self.tk,text="Save",command=self.guiSave)
             SaveButton.place(x=500,y=70, height = 30, width = 40)
+            self.c.tag_bind(self.ref['tx1'], '<Button-1>', self.txClick1)
+            self.c.tag_bind(self.ref['tx2'], '<Button-1>', self.txClick2)
 
+            if(self.top.options.tunekenwood) :
+                import pbfreq
+                self.rxf = pbfreq.mySixDigit(self.c,self.tk,10,410,"Receive",int(self.top.kenwood.rxFreq),self.txrxUpdate)
+                self.txf = pbfreq.mySixDigit(self.c,self.tk,200,410,"Transmit",int(self.top.kenwood.txFreq),self.txrxUpdate)
+                self.pl = pbfreq.myPlSelect(self.c,self.tk,390,410, sorted(self.top.kenwood.plVal.keys()),self.top.kenwood.plName,self.plupdate)
+ 
+                #self.c.create_text(45,420,text="RX",fill="white")
+                #self.rxFreq = Text(self.tk,height=1,width=7)
+                #self.rxFreq.place(x=60,y=410)
+                #self.rxFreq.insert(1.0, self.top.kenwood.rxFreq)
+                #self.rxFreq.bind('<FocusOut>',self.rxupdate)
+                #self.rxFreq.bind('<Return>',self.rxupdate)
+                #self.c.create_text(140,420,text="TX",fill="white")
+                #self.txFreq = Text(self.tk,height=1,width=7)
+                #self.txFreq.place(x=155,y=410)
+                #self.txFreq.insert(1.0, self.top.kenwood.txFreq)
+                #self.txFreq.bind('<FocusOut>',self.txupdate)
+                #self.txFreq.bind('<Return>',self.txupdate)
+                #self.c.create_text(240,420,text="PL",fill="white")
+                #self.plName = Text(self.tk,height=1,width=5)
+                #self.plName.place(x=255,y=410)
+                #self.plName.insert(1.0, self.top.kenwood.plName)
+                #self.plName.bind('<FocusOut>',self.plupdate)
+                #self.plName.bind('<Return>',self.plupdate)
 
     def updateItem(self,name,value,color=None):
         if(self.gui) :
@@ -292,3 +322,47 @@ class gui :
         if(self.gui) :
             self.tk.mainloop()
 
+    def txClick1(self,event) :
+        #print( 'clicked tx 1')
+        if(self.top.globalState.tx1.value) :
+            self.top.port1.tx.down()
+            #print('was on')
+        else :
+            self.top.port1.tx.tx()
+            #print('was off')
+
+    def txClick2(self,event) :
+        #print( 'clicked tx 2')
+        if(self.top.globalState.tx2.value) :
+            self.top.port2.tx.down()
+            #print('was on')
+        else :
+            self.top.port2.tx.tx()
+            #print('was off')
+
+    def rxupdate(self,event) :
+        print("rxupdate")
+        rf=int(self.rxFreq.get("1.0",END))
+        tf=int(self.txFreq.get("1.0",END))
+        print("RX %d, TX %d" %(rf,tf));
+        self.top.kenwood.setFreqDirect(tf,rf)
+        
+    def txupdate(self,event) :
+        print("txupdate")
+        rf=int(self.rxFreq.get("1.0",END))
+        tf=int(self.txFreq.get("1.0",END))
+        print("RX %d, TX %d" %(rf,tf));
+        self.top.kenwood.setFreqDirect(tf,rf)
+    def txrxUpdate(self) :
+        print("TX RX Update")
+        rf=int(self.rxf.val)
+        tf=int(self.txf.val)
+        print("RX %d, TX %d" %(rf,tf));
+        self.top.kenwood.setFreqDirect(tf,rf)
+
+    def plupdate(self) :
+        print("plupdate")
+        #n=self.plName.get("1.0",END)
+        n=self.pl.val
+        print(n);
+        self.top.kenwood.setPlByName(n)

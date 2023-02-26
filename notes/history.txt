@@ -712,3 +712,4 @@ git clone https://github.com/adafruit/Adafruit_Python_DHT.git
 cd Adafruit_Python_DHT
 sudo python3 setup.py install
 sudo /etc/init.d/udev restart  -- fixes USB enumeration
+https://www.aliexpress.com/item/10Sets-5-7mm-Header-Plate-Bracket-Stud-Bolt-Nut-Nuts-Screw-D-Sub-VGA-DB9-DB15/32721156151.html?spm=2114.search0104.3.2.cbf4b1bK0yDN3&ws_ab_test=searchweb0_0,searchweb201602_1_10152_10151_10065_10344_10130_10068_10324_10547_10342_10325_10546_10343_10340_10548_10341_10545_10084_10617_10083_10616_10615_10307_10313_10059_10534_100031_10604_10103_10142,searchweb201603_25,ppcSwitch_3&algo_expid=9d866f43-ca2b-4d7e-9e42-42ccc814278a-0&algo_pvid=9d866f43-ca2b-4d7e-9e42-42ccc814278a&transAbTest=ae803_4&priceBeautifyAB=5

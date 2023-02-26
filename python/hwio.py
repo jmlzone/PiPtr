@@ -107,6 +107,13 @@ UINTA = 8
 UINTB = 10
 ADCSS = 7
 
+""" Link related pins
+"""
+LINK1I = 36
+LINK1O = 33
+LINK2I = 40
+LINK2O = 37
+
 class hwio :
     def __init__ (self,top) :
         self.top = top
@@ -117,6 +124,9 @@ class hwio :
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.selPins, GPIO.OUT)
         GPIO.output(self.selPins, GPIO.LOW)
+        GPIO.setup([LINK1O,LINK2O], GPIO.OUT) 
+        GPIO.setup([LINK1I,LINK2I], GPIO.IN)
+        GPIO.output([LINK1O,LINK2O], GPIO.LOW)
         self.vals = [150,2,50,20,0,0,0,0]
         self.tcon = [15,15,15,15,15,15,15,15]
         self.gain = [ [6,6,6,6], [6,6,6,6] ]
@@ -145,6 +155,9 @@ class hwio :
         self.arate = 300
         self.cardWait = 4
         self.autoPortDetect = False
+        # elink votes for external links rpresenting which local ports are receiving and asking to go out a link port
+        self.elink1Votes = 0
+        self.elink2Votes = 0
         self.xmlvars = ['vals','tcon', 'gain', 'mics', 'speakers', 'pwmLevel',
                         'CH1CTL', 'CH2CTL', 'CH3CTL', 'iodirA', 'ovalA',
                         'iodirB', 'ovalB', 'arate', 'cardWait',
@@ -436,11 +449,37 @@ class hwio :
                 if(cn==c[i]) :
                     good = True
         return(good)
-    
+    """
+        link = 1 internal soft link
+        link = 2 externallink 1 (LINK1O, LINK1I)
+        link = 3 externallink 2 (LINK2O, LINK2I)
+    """
     def linkVoteSet(self, port, link) :
-        pass
+        # is this thread safe or do we need a semiphore?
+        if(link==2) :
+            oldVotes = self.elink1Votes
+            self.elink1Votes = oldVotes | (1<<port)
+            if(oldVotes==0) :
+                GPIO.output(LINK1O,GPIO.HIGH)
+        elif(link==3) :
+            oldVotes = self.elink2Votes
+            self.elink2Votes = oldVotes | (1<<port)
+            if(oldVotes==0) :
+                GPIO.output(LINK2O,GPIO.HIGH)
+        else:
+            pass
     def linkVoteClr(self, port, link) :
-        pass
+        # is this thread safe or do we need a semiphore?
+        if(link==2) :
+            self.elink1Votes = self.elink1Votes &  ~(1<<port)
+            if(self.elink1Votes==0) :
+                GPIO.output(LINK1O,GPIO.LOW)
+        elif(link==3) :
+            self.elink2Votes = self.elink2Votes & ~(1<<port)
+            if(self.elink2Votes==0) :
+                GPIO.output(LINK2O,GPIO.LOW)
+        else:
+            pass
     
     def updateMask(self,val,bp,bv) :
         amask = ~(1<<bp) & 0xff

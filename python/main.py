@@ -60,6 +60,10 @@ or use built in defaults. Then write out a config file for editing."""
                       action="store_true",
                       help="""configure all ports to onboard sound output only"""
                       )
+    parser.add_option("--tunekenwood", "-k", dest="tunekenwood", default=False,
+                      action="store_true",
+                      help="""Go into tune kenwood mode"""
+                      )
     return parser
 class top:
     def __init__ (self) :
@@ -112,6 +116,11 @@ xmlvars = ( )
 GPIO.setmode(GPIO.BOARD)
 q1 = queue.Queue()
 q2 = queue.Queue()
+
+if(top.options.tunekenwood) :
+    import kenwoodTK
+    top.kenwood=kenwoodTK.kenwoodTK()
+    
 gui = gui.gui(top)
 top.gui=gui
 globalState = state.state(top,gui)
@@ -146,6 +155,16 @@ if(gui.gui) :
 hwio.init_all()
 # commend out the fp.connect when no pixes to reduce load and hangs
 fp.connect()
+if(top.options.tunekenwood) :
+    port1.isLink = True
+    port1.linkState = 3
+    #port1.rxThread = threading.Thread(target=port1.rx.run)
+    #port1.rxThread.daemon = True
+    #port1.rxThread.start()
+    
+    #if (gui.gui) :
+    #    gui.run()
+   
 if(port1.enabled) :
     port1.fsmThread = threading.Thread(target=port1.run)
     port1.fsmThread.daemon = True
