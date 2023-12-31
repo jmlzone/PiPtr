@@ -80,7 +80,7 @@ def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
 #    subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
 def say(card,msg):
-    subprocess.call(['/usr/local/bin/espeak-ng','-D',card, '-v!v/Storm', msg], shell=False)
+    subprocess.call(['/usr/local/bin/espeak-ng','-z -d',card, '-v!v/Storm', msg], shell=False)
 #    device = card.replace('sysdefault:CARD=','')
 #    os.environ['ALSA_CARD'] = device
 #    subprocess.call(['/usr/bin/espeak', msg], shell=False)
