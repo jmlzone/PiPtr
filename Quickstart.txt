@@ -40,7 +40,7 @@ Quick start guide.
   cd PiPrt
   ./setup.sh
 
-6) Install espeak-ng withthe alsa updates:
+6) Install espeak-ng with the alsa updates:
    (how did I do this?)
 
 7) Create a config template and edit as needed
@@ -55,7 +55,7 @@ Quick start guide.
 
   Set the call sign(s) and other values as needed
 
-  edit the sound caerd device names as needed (aplay -L | grep sysdefault)
+  edit the sound card device names as needed (aplay -L | grep sysdefault)
 
 8) run PiPtr with your configuration
   sudo ./main.py

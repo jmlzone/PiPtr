@@ -1,6 +1,6 @@
 """Front Panel LED's implemented as neopixels
 """
-from neopixel import *
+from rpi_ws281x import *
 from rptFsm import gpTimer
 import re
 # LED strip configuration:
