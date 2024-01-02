@@ -3,12 +3,14 @@
 # this script will install all the needed updates and packages for
 # running PiPtr
 echo "Updating and upgrading"
-sudo apt-get update
-sudo apt-get upgrade -y
+sudo apt update
+sudo apt upgrade -y
 echo "----------------------------------------------------------------------"
 
 echo " installing needed packages"
-sudo apt-get install -y python-dev python-pyaudio libasound2-dev espeak python3-smbus scons python-dev swig raspi-gpio emacs telnet
+sudo apt install -y python-dev python-pyaudio libasound2-dev espeak \
+     python3-smbus scons python-dev swig raspi-gpio emacs telnet \
+     cmake automake libtool
 echo "----------------------------------------------------------------------"
 
 echo " installing python3 alsa audio"
@@ -32,7 +34,6 @@ cd Adafruit_Python_DHT
 sudo python3 setup.py install
 echo "----------------------------------------------------------------------"
 
-sudo apt-get install -y automake libtool
 echo "getting updated espreak with asla interface:
 cd ~
 git clone https://github.com/jmlzone/espeak-ng
