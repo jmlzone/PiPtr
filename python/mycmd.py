@@ -80,10 +80,13 @@ def talkingClock(card,prefix = 'its',format="%I %M %p, %A %B %_d"):
 #    subprocess.call(['/usr/bin/espeak', myTime], shell=False)
 
 def say(card,msg):
-    subprocess.call(['/usr/local/bin/espeak-ng','-z -d',card, '-v!v/Storm', msg], shell=False)
+    try:
+        subprocess.call(['/usr/local/bin/espeak-ng','-z', '-d',card, '-v!v/Storm', msg], shell=False)
 #    device = card.replace('sysdefault:CARD=','')
 #    os.environ['ALSA_CARD'] = device
 #    subprocess.call(['/usr/bin/espeak', msg], shell=False)
+    except:
+        print("Failed to run /usr/local/bin/espeak-ng")
 
 def tailClock(port) :
     port.tx.addTailMsg(talkingClock,{'format': "%I %M %p"},True,False,False,None)
