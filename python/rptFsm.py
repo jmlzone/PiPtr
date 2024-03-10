@@ -177,7 +177,20 @@ class rptFsm :
         self.rxUpAny()
     def rxUpAny(self):
         if(self.port.isLink) :
-            print("link rx")
+            print("Port %d link rx" % self.port.portnum)
+            if(self.rxState != 'rx') :
+                if(self.rptState == 'idle') :
+                    self.linkTX();
+                elif (self.rptState == 'beacon') :
+                    self.cancelBeacon()
+                    self.linkTX();
+                elif (self.rptState == 'tail') :
+                    self.cancelTail()
+                    self.repeat()
+                elif (self.rptState == 'linkTX') :
+                    pass
+                else:
+                    logit("Port %d Error Link Rx active again in state %s " % (self.port.portnum, self.rxState) )
         else:
             if(self.rptState == 'idle') :
                 self.repeat()
@@ -195,18 +208,23 @@ class rptFsm :
         self.rxResetTimer.reset() 
         self.rxIdle()
         self.port.hwio.muteUnmute(self.port.portnum, self.port.linkState, False) #mute audio
-        if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
-            self.port.other.fsm.clrLinkRx(1) # port 1 linking is special and software only
-        if(self.port.linkState == 2 or self.port.linkState == 3) :
-            self.port.hwio.linkVoteClr(self.port.portnum, self.port.linkState)
+        self.rxUnlink()
         if(self.linkVotes==0) :
             self.rxDownAll()
         if(self.rxState == 'rxTimeOut') :
             self.rxTimeoutRelease()
 
+    def rxUnlink(self) :
+        if((self.port.linkState==1) & (self.port.other.linkState==1) & self.port.other.enabled) :
+            self.port.other.fsm.clrLinkRx(1) # port 1 linking is special and software only
+        if(self.port.linkState == 2 or self.port.linkState == 3) :
+            self.port.hwio.linkVoteClr(self.port.portnum, self.port.linkState)
+        
     def rxDownAll(self):
         if(self.port.isLink) :
-            print("link rx down")
+            print("Port %d: link rx down" % self.port.portnum)
+            if(self.rptState == 'linkTX') :
+                self.idle()
         else:
             if(self.rptState == 'repeat') :
                 if(self.port.isLink) :
@@ -232,13 +250,15 @@ class rptFsm :
         self.rxState = 'rxTimeOut'
         logit("Port %d Rx Time Out" % self.port.portnum)
         self.releaseLock()
+        self.rxUnlink()
         self.rxTimer.expired = True
         self.rxTimer.isrunning = False
-        idPlayed = self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "to"],False,False,False,None)])
-        # send time out message
-        # turn off transmitter (if not linked)
-        self.port.tx.plStop()
-        self.port.tx.down()
+        if(not self.port.isLink) :
+            idPlayed = self.port.tx.playMsgs([(["../bin/mout"],[ '20', '660', '5000', "to"],False,False,False,None)])
+            # send time out message
+            # turn off transmitter (if not linked)
+            self.port.tx.plStop()
+            self.port.tx.down()
         logit("Port %d Rx Time Out complete" % self.port.portnum)
 
     def rxTimerStop(self) :
@@ -343,6 +363,34 @@ class rptFsm :
             self.port.tx.tx()
         self.port.tx.plGen()
         """ Exited when the RX goes off or times out """
+
+    def linkTX(self) :
+        self.idTimer.run()     # start or run the ID timers since they may be stopped
+        self.politeIdTimer.run()
+        self.rptState = 'linkTX'
+        logit("Port %d Link TX" % self.port.portnum)
+        if (not self.port.tx.up) :
+            self.txTimeoutTimer.reset()
+            self.port.tx.tx()
+        self.port.tx.plGen()
+        """ Exited when the link RX goes off or times out """
+    def linkTXDown() : # kind of link a tail but shorter
+        self.rptState = 'linkTXDown'
+        if (self.politeIdTimer.expired) :
+            self.port.tx.sendId()
+            self.politeIdTimer.reset()
+            self.idTimer.reset()
+        idPlayed = self.port.tx.playMsgs(self.port.tx.tailMsgList)
+        if(idPlayed) : # a message that counts as an ID
+            logit("Port %d Played a tail message that counted for an ID " % self.port.portnum )
+            self.politeIdTimer.reset()
+            self.IdTimer.reset()
+        self.port.tx.pid = False
+        """ if the tail is cancelled, we must have been pulled back into repeat by an active RX"""
+        if( not self.port.tx.cancel) :
+            self.port.tx.tailBeep()
+            self.port.tx.plStop()
+            self.idle()
         
     def tail(self) :
         """ Entered when the RX goes in active and in the repeat state"""
@@ -375,7 +423,7 @@ class rptFsm :
 
 
     def cancelTail(self) :
-        """ Cancel tail will be enterer whtn the RX goes active but we are in the tail state"""
+        """ Cancel tail will be enter when the RX goes active but we are in the tail state"""
         """ in this case the tail thread shodul clean itself up as the state is switched to repeat """
         logit("Port %d Cancel Tail" % self.port.portnum )
         self.port.tx.cancel = True

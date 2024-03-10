@@ -13,15 +13,28 @@ class gui :
     def __init__(self,top) :
         try: 
             self.tk=Tk()
+            self.tk.title("PiPtr")
+            #self.tabs = tkk.Notebook(self.tk)
+            #self.audioTab = tkk.Frame(tabs)
+            #self.setingsTab = tkk.Frame(tabs)
+            #self.radioTab = tkk.Frame(tabs)
+            #self.tabs.add(self.audioTab, text="Audio")
+            #self.tabs.add(self.settingsTab, text="Settings")
+            #self.tabs.add(self.radioTab, text="Radio")
+            #self.tabs.pack(expand = 1, fill ="both")
+            
             if(top.options.tunekenwood) :
                 self.c = Canvas(self.tk,bg="black",height = 450, width = 550)
+                #self.c = Canvas(self.radioTab,bg="black",height = 450, width = 550)
                 self.c.place(x=0, y=0, height = 450, width = 550)
             else :
                 self.c = Canvas(self.tk,bg="black",height = 400, width = 550)
+                #self.c = Canvas(self.audioTab,bg="black",height = 400, width = 550)
                 self.c.place(x=0, y=0, height = 400, width = 550)
             self.c.pack() # extends window to fit.
             self.gui = True
         except:
+            print("Gui Start failed")
             self.gui = False
         self.top = top
     linkStates = ['Off','Internal', 'Ext 1', 'Ext 2']
