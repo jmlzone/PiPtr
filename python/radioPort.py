@@ -362,7 +362,7 @@ class radioPort :
         self.rx = rx(self,q) # self passed in is the port instance for parent refences to this data
         self.tx = tx(self)
         self.fsm = rptFsm.rptFsm(self)
-        self.xmlvars = ( 'card', 'islink', 'linkstate', 'enabled', 'idleWav')
+        self.xmlvars = ( 'card', 'isLink', 'linkState', 'enabled', 'idleWav')
         self.cmd = ""
         self.enabled = True
         self.idleWav = self.tx.localPath('../sounds/idle.wav')

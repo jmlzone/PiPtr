@@ -353,9 +353,9 @@ class hwio :
             self.WriteTcon(r,self.tcon[r],0)
         for p in range(2) :
             if (p==0) :
-                chan = self.top.port1.linkstate
+                chan = self.top.port1.linkState
             elif (p==1) :
-                chan = self.top.port2.linkstate
+                chan = self.top.port2.linkState
                 
             self.WritePGAChan(chan,p+5,0)
             self.WritePGAGain(self.gain[p][chan],p+5,0)

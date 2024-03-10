@@ -2,6 +2,7 @@
 import threading
 import time
 from tkinter import *
+from tkinter import ttk
 import socket
 import os
 import sys
@@ -23,7 +24,7 @@ class gui :
         except:
             self.gui = False
         self.top = top
-
+    linkStates = ['Off','Internal', 'Ext 1', 'Ext 2']
     def mytriangle (self,canvas,x,y,text) :
         """ draw a horizontal triangle centered starting at startxy """
         incr=100
@@ -109,6 +110,7 @@ class gui :
                 self.deempVal = self.top.port1.rx.deemp
                 self.descEnVal = self.top.port1.rx.descEn
                 self.portDetVal = self.top.port1.rx.portDet
+                self.isLinkVal = self.top.port1.isLink
             else :
                 self.RA = self.top.hwio.vals[4]
                 self.RB = self.top.hwio.vals[5]
@@ -117,10 +119,12 @@ class gui :
                 self.deempVal = self.top.port2.rx.deemp
                 self.descEnVal = self.top.port2.rx.descEn
                 self.portDetVal = self.top.port2.rx.portDet
+                self.isLinkVal = self.top.port2.isLink
             self.RS = self.top.hwio.speakers[pn]
             self.RM = self.top.hwio.mics[pn]
             self.updateRs()
             self.updateChecks()
+            self.initLinkState()
 
     def updateRs(self):
         self.rA.set(self.RA)
@@ -163,6 +167,10 @@ class gui :
             self.portDet.select()
         else:
             self.portDet.deselect()
+        if(self.isLinkVal) :
+            self.isLink.select()
+        else:
+            self.isLink.deselect()
     def deempCb(self) :
         val = True if self.deempVar.get() else False
         port = self.ps.get()
@@ -196,6 +204,29 @@ class gui :
             self.top.port2.rx.portDet = val
             self.top.hwio.CH2CTL = self.top.hwio.getBit(self.top.hwio.CH2CTL,not self.top.port2.rx.portDet,6)
             self.top.hwio.i2cSafeWrite(hwio.GPIOEX2, hwio.GPIOR, self.top.hwio.CH2CTL)
+    def isLinkCb(self) :
+        val = True if self.isLinkVar.get() else False
+        port = self.ps.get()
+        if(port == 'port1') :
+            self.top.port1.isLink = val
+        else:
+            self.top.port2.isLink = val
+    def linkStateCb (self) :
+        port = self.ps.get()
+        val = self.linkState.get()
+        vn = self.linkStates.index(val)
+        if(port == 'port1') :
+            self.top.port1.linkState = vn
+        else:
+            self.top.port2.linkState = vn
+    def initLinkState(self) :
+        port = self.ps.get()
+        if(port == 'port1') :
+            vn = self.top.port1.linkState
+        else:
+            vn = self.top.port2.linkState
+        self.linkState.set(self.linkStates[vn])
+
     def init(self) :
         if(self.gui) :
             self.ref = {}
@@ -239,9 +270,20 @@ class gui :
             self.portDetVar = IntVar()
             self.portDet = Checkbutton(self.tk,text="Port Detect", variable=self.portDetVar,command=self.portDetCb, bg='black', fg='green', bd=0, selectcolor='black')
             self.portDet.place(x=310,y=260,height=20,width=95)
+
+            tx = self.c.create_text(495,130,text="Link",fill="green", anchor=W)
+            self.linkState = ttk.Spinbox(self.tk,values=(self.linkStates), command=self.linkStateCb, wrap=True)
+            self.linkState.place(x=465,y=140,width=75)
+            self.isLinkVar = IntVar()
+            self.isLink = Checkbutton(self.tk,text="is Link", variable=self.isLinkVar,command=self.isLinkCb, bg='black', fg='green', bd=0, selectcolor='black')
+            self.isLink.place(x=465,y=170,height=20,width=75)
+
+            #all  GUI needs to be defined before the port select since port select
+            #initialzes all the values
             self.ps = Spinbox(self.tk,values=('port1','port2'), command=self.portSelect, wrap=True)
-            self.ps.place(x=490,y=40,width=50)
+            self.ps.place(x=485,y=40,width=55)
             self.portSelect()
+
             co = self.c.create_text(5,215,text="From\nComputer", anchor=W, fill="green")
             l6 = self.c.create_line(105,200, 180,200,fill="white")
             self.c.create_text(35,300,text="COR",fill="green")
