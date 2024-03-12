@@ -29,6 +29,7 @@ class fpPixels :
         # Create NeoPixel object with appropriate configuration.
         try:
             self.strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, freq_hz=LED_FREQ_HZ, dma=LED_DMA, invert=LED_INVERT, brightness=LED_BRIGHTNESS, channel=LED_CHANNEL, strip_type=LED_STRIP)
+            self.dummy = False
         except:
             self.dummy = True
         self.brightness = 50 # 0 = off 100 = full bright 

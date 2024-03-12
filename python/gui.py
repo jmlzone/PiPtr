@@ -138,6 +138,9 @@ class gui :
                 self.descEnVal = self.top.port1.rx.descEn
                 self.portDetVal = self.top.port1.rx.portDet
                 self.isLinkVal = self.top.port1.isLink
+                self.callBox.delete(1.0, 'end')
+                self.callBox.insert(1.0, self.top.port1.tx.id)
+                self.callBox.edit_modified(False)
             else :
                 self.RA = self.top.hwio.vals[4]
                 self.RB = self.top.hwio.vals[5]
@@ -147,6 +150,9 @@ class gui :
                 self.descEnVal = self.top.port2.rx.descEn
                 self.portDetVal = self.top.port2.rx.portDet
                 self.isLinkVal = self.top.port2.isLink
+                self.callBox.delete(1.0, 'end')
+                self.callBox.insert(1.0, self.top.port2.tx.id)
+                self.callBox.edit_modified(False)
             self.RS = self.top.hwio.speakers[pn]
             self.RM = self.top.hwio.mics[pn]
             self.updateRs()
@@ -254,14 +260,27 @@ class gui :
             vn = self.top.port2.linkState
         self.linkState.set(self.linkStates[vn])
 
+    def callChangedCb(self):
+        port = self.ps.get()
+        if(port == 'port1') :
+            self.top.port1.tx.id=self.callBox.get(1.0, 'end')
+        else:
+            self.top.port2.tx.id=self.callBox.get(1.0, 'end')
+        self.callBox.edit_modified(False)
+
     def initRadio(self,canvas) :
-        self.rxf = pbfreq.mySixDigit(canvas,10,20,"Receive",int(self.top.kenwood.rxFreq),self.txrxUpdate)
-        self.txf = pbfreq.mySixDigit(canvas,200,20,"Transmit",int(self.top.kenwood.txFreq),self.txrxUpdate)
-        self.pl = pbfreq.myPlSelect(canvas,390,20, sorted(self.top.kenwood.plVal.keys()),self.top.kenwood.plName,self.plupdate)
+        if(self.top.options.tunekenwood) :
+        
+            self.rxf = pbfreq.mySixDigit(canvas,10,20,"Receive",int(self.top.kenwood.rxFreq),self.txrxUpdate)
+            self.txf = pbfreq.mySixDigit(canvas,200,20,"Transmit",int(self.top.kenwood.txFreq),self.txrxUpdate)
+            self.pl = pbfreq.myPlSelect(canvas,390,20, sorted(self.top.kenwood.plVal.keys()),self.top.kenwood.plName,self.plupdate)
+        else :
+            canvas.create_text(50,250,text="No tunable radio interfaces defined",fill="white",anchor=W)
         
         
     def init(self) :
         if(self.gui) :
+            self.initRadio(self.radioCanvas)
             self.ref = {}
             self.mytriangle (self.c,60,100,"RX Main")
             self.mytriangle (self.c,180,70,"PGA")
@@ -305,10 +324,9 @@ class gui :
             self.portDet.place(x=310,y=260,height=20,width=95)
 
             tx = self.c.create_text(495,130,text="Call",fill="green", anchor=W)
-            callBox = Text(self.c,height=1,width=10)
-            callBox.place(x=465,y=140,width=75)
-            callBox.insert(END, "N0CALL")
-            
+            self.callBox = Text(self.c,height=1,width=10)
+            self.callBox.place(x=465,y=140,width=75)
+            self.callBox.bind('<<Modified>>', lambda event: self.callChangedCb())
             tx = self.c.create_text(495,210,text="Link",fill="green", anchor=W)
             self.linkState = ttk.Spinbox(self.c,values=(self.linkStates), command=self.linkStateCb, wrap=True)
             self.linkState.place(x=465,y=220,width=75)
