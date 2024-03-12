@@ -9,28 +9,42 @@ import sys
 import pdb
 from xmlio import dumpXml
 import hwio
+import pbfreq
+
+class timerGui:
+    fields = {'idtime': {'name': 'Id Time Limit','txrx':'tx','help':'Time in seconds when ID is required'},
+              'polite': {'name': 'Polite ID Time','txrx':'tx','help':'Time in seconds when ID will be sent on a tail'},
+              'timeout': {'name': 'Transmitter Maximum timeout','txrx':'tx','help':'Maximum time in seconds for continuous transmitter operation'},
+              'taildly': {'name': 'Tail delay','txrx':'tx','help':'Delay from rx drop to tail messages and tail beep'},
+              'hangtime': {'name': 'Hang Time','txrx':'tx','help':'Time from last tail message/beep untiul the transmitter drops.'},
+              'timeout': {'name': 'Receiver Maximum timeout','txrx':'rx','help':'Maximum time in seconds for continuous reciever operation before it is disabled'},
+              'IdleTimeout': {'name': 'Idle Time','txrx':'rx','help':'After no recierver operation for the idle time, Welcome and other messages may be queued'},
+              }
+    def __init__(self,portNum):
+        self.portNum = portNum
+
 class gui :
     def __init__(self,top) :
         try: 
             self.tk=Tk()
             self.tk.title("PiPtr")
-            #self.tabs = tkk.Notebook(self.tk)
-            #self.audioTab = tkk.Frame(tabs)
-            #self.setingsTab = tkk.Frame(tabs)
-            #self.radioTab = tkk.Frame(tabs)
-            #self.tabs.add(self.audioTab, text="Audio")
-            #self.tabs.add(self.settingsTab, text="Settings")
-            #self.tabs.add(self.radioTab, text="Radio")
-            #self.tabs.pack(expand = 1, fill ="both")
-            
-            if(top.options.tunekenwood) :
-                self.c = Canvas(self.tk,bg="black",height = 450, width = 550)
-                #self.c = Canvas(self.radioTab,bg="black",height = 450, width = 550)
-                self.c.place(x=0, y=0, height = 450, width = 550)
-            else :
-                self.c = Canvas(self.tk,bg="black",height = 400, width = 550)
-                #self.c = Canvas(self.audioTab,bg="black",height = 400, width = 550)
-                self.c.place(x=0, y=0, height = 400, width = 550)
+            self.tk.geometry("550x420")
+            self.tabs = ttk.Notebook(self.tk)
+            self.audioTab = ttk.Frame(self.tabs)
+            self.timersTab = ttk.Frame(self.tabs)
+            self.portIOTab = ttk.Frame(self.tabs)
+            self.radioTab = ttk.Frame(self.tabs)
+            self.tabs.add(self.audioTab, text="Audio")
+            self.tabs.add(self.timersTab, text="Timers")
+            self.tabs.add(self.radioTab, text="Radio")
+            self.tabs.add(self.portIOTab, text="Port IO")
+            self.tabs.pack(expand = 1, fill = "both")
+        
+            self.radioCanvas = Canvas(self.radioTab,bg="black",height = 400, width = 550)
+            self.radioCanvas.place(x=0, y=80, height = 400, width = 550)
+            self.radioCanvas.pack() # extends window to fit.
+            self.c = Canvas(self.audioTab,bg="black",height = 400, width = 550)
+            self.c.place(x=0, y=80, height = 400, width = 550)
             self.c.pack() # extends window to fit.
             self.gui = True
         except:
@@ -240,6 +254,12 @@ class gui :
             vn = self.top.port2.linkState
         self.linkState.set(self.linkStates[vn])
 
+    def initRadio(self,canvas) :
+        self.rxf = pbfreq.mySixDigit(canvas,10,20,"Receive",int(self.top.kenwood.rxFreq),self.txrxUpdate)
+        self.txf = pbfreq.mySixDigit(canvas,200,20,"Transmit",int(self.top.kenwood.txFreq),self.txrxUpdate)
+        self.pl = pbfreq.myPlSelect(canvas,390,20, sorted(self.top.kenwood.plVal.keys()),self.top.kenwood.plName,self.plupdate)
+        
+        
     def init(self) :
         if(self.gui) :
             self.ref = {}
@@ -262,38 +282,43 @@ class gui :
             l5 = self.c.create_line(280,200, 290,200, 290,70, fill="white")
             tx = self.c.create_text(420,70,text="to\nTX",fill="green", anchor=W)
             tx = self.c.create_text(420,220,text="CTCSS\nTX",fill="green", anchor=W)
-            self.rA = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rAcb)
+            self.rA = Scale(self.c,from_=0, to=256, orient=HORIZONTAL, command=self.rAcb)
             self.rA.place(x=40,y=150,height=40,width=120)
-            self.rB = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rBcb)
+            self.rB = Scale(self.c,from_=0, to=256, orient=HORIZONTAL, command=self.rBcb)
             self.rB.place(x=40,y=10,height=40,width=120)
-            self.rC = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rCcb)
+            self.rC = Scale(self.c,from_=0, to=256, orient=HORIZONTAL, command=self.rCcb)
             self.rC.place(x=295,y=200,height=40,width=120)
-            self.rD = Scale(self.tk,from_=0, to=256, orient=HORIZONTAL, command=self.rDcb)
+            self.rD = Scale(self.c,from_=0, to=256, orient=HORIZONTAL, command=self.rDcb)
             self.rD.place(x=295,y=120,height=40,width=120)
-            self.rS = Scale(self.tk,from_=0, to=100, orient=HORIZONTAL, command=self.rScb)
+            self.rS = Scale(self.c,from_=0, to=100, orient=HORIZONTAL, command=self.rScb)
             self.rS.place(x=70,y=195,height=40,width=100)
-            self.rM = Scale(self.tk,from_=0, to=100, orient=HORIZONTAL, command=self.rMcb)
+            self.rM = Scale(self.c,from_=0, to=100, orient=HORIZONTAL, command=self.rMcb)
             self.rM.place(x=345,y=5,height=40,width=100)
             self.deempVar = IntVar()
-            self.deemp = Checkbutton(self.tk,text="DeEmphasis", variable=self.deempVar,command=self.deempCb, bg='black', fg='green', bd=0, selectcolor='black')
+            self.deemp = Checkbutton(self.c,text="DeEmphasis", variable=self.deempVar,command=self.deempCb, bg='black', fg='green', bd=0, selectcolor='black')
             self.deemp.place(x=185,y=125,height=20,width=100)
             self.descEnVar = IntVar()
-            self.descEn = Checkbutton(self.tk,text="Desc En", variable=self.descEnVar,command=self.descEnCb, bg='black', fg='green', bd=0, selectcolor='black')
+            self.descEn = Checkbutton(self.c,text="Desc En", variable=self.descEnVar,command=self.descEnCb, bg='black', fg='green', bd=0, selectcolor='black')
             self.descEn.place(x=225,y=20,height=20,width=75)
             self.portDetVar = IntVar()
-            self.portDet = Checkbutton(self.tk,text="Port Detect", variable=self.portDetVar,command=self.portDetCb, bg='black', fg='green', bd=0, selectcolor='black')
+            self.portDet = Checkbutton(self.c,text="Port Detect", variable=self.portDetVar,command=self.portDetCb, bg='black', fg='green', bd=0, selectcolor='black')
             self.portDet.place(x=310,y=260,height=20,width=95)
 
-            tx = self.c.create_text(495,130,text="Link",fill="green", anchor=W)
-            self.linkState = ttk.Spinbox(self.tk,values=(self.linkStates), command=self.linkStateCb, wrap=True)
-            self.linkState.place(x=465,y=140,width=75)
+            tx = self.c.create_text(495,130,text="Call",fill="green", anchor=W)
+            callBox = Text(self.c,height=1,width=10)
+            callBox.place(x=465,y=140,width=75)
+            callBox.insert(END, "N0CALL")
+            
+            tx = self.c.create_text(495,210,text="Link",fill="green", anchor=W)
+            self.linkState = ttk.Spinbox(self.c,values=(self.linkStates), command=self.linkStateCb, wrap=True)
+            self.linkState.place(x=465,y=220,width=75)
             self.isLinkVar = IntVar()
-            self.isLink = Checkbutton(self.tk,text="is Link", variable=self.isLinkVar,command=self.isLinkCb, bg='black', fg='green', bd=0, selectcolor='black')
-            self.isLink.place(x=465,y=170,height=20,width=75)
+            self.isLink = Checkbutton(self.c,text="is Link", variable=self.isLinkVar,command=self.isLinkCb, bg='black', fg='green', bd=0, selectcolor='black')
+            self.isLink.place(x=465,y=250,height=20,width=75)
 
             #all  GUI needs to be defined before the port select since port select
             #initialzes all the values
-            self.ps = Spinbox(self.tk,values=('port1','port2'), command=self.portSelect, wrap=True)
+            self.ps = Spinbox(self.c,values=('port1','port2'), command=self.portSelect, wrap=True)
             self.ps.place(x=485,y=40,width=55)
             self.portSelect()
 
@@ -325,35 +350,11 @@ class gui :
                 t=self.c.create_oval(x,y2,x+30,y2+30, fill="grey")
                 self.ref['softCtcss2'].append(t)
                 x=x+40
-            SaveButton = Button(self.tk,text="Save",command=self.guiSave)
+            SaveButton = Button(self.c,text="Save",command=self.guiSave)
             SaveButton.place(x=500,y=70, height = 30, width = 40)
             self.c.tag_bind(self.ref['tx1'], '<Button-1>', self.txClick1)
             self.c.tag_bind(self.ref['tx2'], '<Button-1>', self.txClick2)
 
-            if(self.top.options.tunekenwood) :
-                import pbfreq
-                self.rxf = pbfreq.mySixDigit(self.c,self.tk,10,410,"Receive",int(self.top.kenwood.rxFreq),self.txrxUpdate)
-                self.txf = pbfreq.mySixDigit(self.c,self.tk,200,410,"Transmit",int(self.top.kenwood.txFreq),self.txrxUpdate)
-                self.pl = pbfreq.myPlSelect(self.c,self.tk,390,410, sorted(self.top.kenwood.plVal.keys()),self.top.kenwood.plName,self.plupdate)
- 
-                #self.c.create_text(45,420,text="RX",fill="white")
-                #self.rxFreq = Text(self.tk,height=1,width=7)
-                #self.rxFreq.place(x=60,y=410)
-                #self.rxFreq.insert(1.0, self.top.kenwood.rxFreq)
-                #self.rxFreq.bind('<FocusOut>',self.rxupdate)
-                #self.rxFreq.bind('<Return>',self.rxupdate)
-                #self.c.create_text(140,420,text="TX",fill="white")
-                #self.txFreq = Text(self.tk,height=1,width=7)
-                #self.txFreq.place(x=155,y=410)
-                #self.txFreq.insert(1.0, self.top.kenwood.txFreq)
-                #self.txFreq.bind('<FocusOut>',self.txupdate)
-                #self.txFreq.bind('<Return>',self.txupdate)
-                #self.c.create_text(240,420,text="PL",fill="white")
-                #self.plName = Text(self.tk,height=1,width=5)
-                #self.plName.place(x=255,y=410)
-                #self.plName.insert(1.0, self.top.kenwood.plName)
-                #self.plName.bind('<FocusOut>',self.plupdate)
-                #self.plName.bind('<Return>',self.plupdate)
 
     def updateItem(self,name,value,color=None):
         if(self.gui) :
@@ -375,7 +376,7 @@ class gui :
 
     def run(self) :
         if(self.gui) :
-            self.tk.mainloop()
+            self.tabs.mainloop()
 
     def txClick1(self,event) :
         #print( 'clicked tx 1')
