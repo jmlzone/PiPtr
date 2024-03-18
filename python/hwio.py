@@ -201,7 +201,8 @@ class hwio :
                adcChan(self.spi,6,(100.0/1024.0),0,20),
                adcChan(self.spi,7,(20.48/1024.0),11.0,13.9)]
         self.th = DHT(4) #IO pin 4 is board pin 7
-
+        self.temp = 0  #default values to make attribute exist
+        self.hum = 0   #default values to make attribute exist
     def splitBits(self,val) :
         v0 = val & 1
         v1 = (val >> 1) & 1 
@@ -641,6 +642,7 @@ class hwio :
             dummy = self.input([GPA0,GPB0])
             (self.hum,self.temp) = self.th.measure()
             self.csvLog("normal")
+            self.top.gui.updateMeasurements()
 
     def csvLog(self,msg) :
         dt = datetime.datetime.now()
@@ -827,6 +829,7 @@ class adcChan :
         self.hiEdge = True
         self.loEdge = True
         self.nomEdge = True
+        self.val = 0 # default to create attribute
         if(chan > 7 or chan < 0) :
             print("Error bad adc channel number must be 0-7")
             return -1
