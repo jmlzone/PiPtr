@@ -7,11 +7,14 @@ def getModel ():
     model = 'unknown'
     submod = 'unknown'
     rev = 'unknown'
+    cores = 0
     try:
         with open('/proc/cpuinfo', 'r', encoding='UTF-8') as file:
             while line := file.readline():
                 if('Model' in line) :
                     words = line.split()
+                if('processor	:' in line) :
+                    cores = cores + 1;
         model = words[4]
         if(words[5]) == 'Model' :
             submod = words[6]
@@ -22,7 +25,7 @@ def getModel ():
         file.close()
     except:
         pass
-    return((model,submod,rev))
+    return((model,submod,rev,cores))
 
 def getMemGB() :
     """memory from: cat /proc/meminfo | grep Total
@@ -42,6 +45,6 @@ def getMemGB() :
     return(GB)
 
 if(__name__ == '__main__') :
-    (model,submod,rev) = getModel()
+    (model,submod,rev,cores) = getModel()
     GB = getMemGB()
-    print("This is a %s, %s rev %s with %f GB of memory" %  (model,submod,rev, GB))
+    print("This is a %d core, Model %s-%s rev %s with %f GB of memory" %  (cores, model, submod, rev, GB))
