@@ -164,7 +164,8 @@ if(top.options.tunekenwood) :
     
     #if (gui.gui) :
     #    gui.run()
-   
+    pass
+
 if(port1.enabled) :
     port1.fsmThread = threading.Thread(target=port1.run)
     port1.fsmThread.daemon = True
